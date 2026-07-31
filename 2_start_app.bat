@@ -30,7 +30,7 @@ if not exist "%PYTHON%" (
     exit /b 1
 )
 
-echo Starting Hardware Test Builder...
+echo Starting Test in a Box...
 echo Keep this window open while you're using the app.
 echo Close this window to stop the app.
 echo.

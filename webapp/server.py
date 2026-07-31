@@ -1,5 +1,5 @@
 """
-Local web server for the Hardware Test Builder.
+Local web server for Test in a Box.
 
 Run with (from the project root, portable Python):
     python -m webapp.server
