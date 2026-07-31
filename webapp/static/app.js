@@ -64,6 +64,7 @@ function initWorkspace() {
     toolbox: TOOLBOX,
     trashcan: true,
     zoom: { controls: true, wheel: true },
+    media: '/static/blockly/media/',
   });
 
   const saved = localStorage.getItem('hwapp_workspace');
