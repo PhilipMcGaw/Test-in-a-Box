@@ -59,6 +59,21 @@ async function loadDevices() {
   ).join('');
 }
 
+// Some locked-down browser profiles (seen with corporate Firefox policies)
+// disable localStorage entirely, which throws instead of just no-op'ing.
+// Wrap it so a blocked storage doesn't take the whole app down with it —
+// worst case, workspace save/restore across reloads just doesn't happen.
+const safeStorage = {
+  get(key) {
+    try { return localStorage.getItem(key); }
+    catch (e) { console.warn('localStorage unavailable (get):', e); return null; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(key, value); }
+    catch (e) { console.warn('localStorage unavailable (set) — workspace will not persist across reloads:', e); }
+  },
+};
+
 function initWorkspace() {
   workspace = Blockly.inject('blocklyDiv', {
     toolbox: TOOLBOX,
@@ -67,7 +82,7 @@ function initWorkspace() {
     media: '/static/blockly/media/',
   });
 
-  const saved = localStorage.getItem('hwapp_workspace');
+  const saved = safeStorage.get('hwapp_workspace');
   if (saved) {
     try {
       Blockly.serialization.workspaces.load(JSON.parse(saved), workspace);
@@ -78,7 +93,7 @@ function initWorkspace() {
 
   workspace.addChangeListener(() => {
     const state = Blockly.serialization.workspaces.save(workspace);
-    localStorage.setItem('hwapp_workspace', JSON.stringify(state));
+    safeStorage.set('hwapp_workspace', JSON.stringify(state));
   });
 }
 
@@ -117,9 +132,9 @@ async function runScript() {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  await loadDevices();
-  initWorkspace();
-  connectConsole();
+  try { await loadDevices(); } catch (e) { console.error('loadDevices failed:', e); }
+  try { initWorkspace(); } catch (e) { console.error('initWorkspace failed:', e); }
+  try { connectConsole(); } catch (e) { console.error('connectConsole failed:', e); }
   document.getElementById('run-btn').addEventListener('click', runScript);
   document.getElementById('refresh-devices-btn').addEventListener('click', loadDevices);
 });
