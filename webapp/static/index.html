@@ -15,16 +15,16 @@
   #main { display: flex; height: calc(100% - 52px); }
   #blocklyDiv { flex: 3; height: 100%; }
   #side { flex: 2; display: flex; flex-direction: column; border-left: 1px solid #ccc; min-width: 320px; }
-  #devices-panel { padding: 10px; border-bottom: 1px solid #ccc; max-height: 25%; overflow-y: auto; }
+  #devices-panel { flex: 0 0 22%; min-height: 80px; padding: 10px; border-bottom: 1px solid #ccc; overflow-y: auto; }
   #devices-panel h2 { font-size: 13px; margin: 0 0 6px 0; color: #555; }
   #device-list { margin: 0; padding-left: 18px; font-size: 13px; }
-  #console-panel { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  #console-panel { flex: 1 1 38%; min-height: 100px; display: flex; flex-direction: column; }
   #console-panel h2 { font-size: 13px; margin: 8px 10px 4px 10px; color: #555; }
-  #console { flex: 1; background: #111; color: #0f0; font-family: Consolas, monospace; font-size: 12px;
+  #console { flex: 1; min-height: 0; background: #111; color: #0f0; font-family: Consolas, monospace; font-size: 12px;
              margin: 0 10px 10px 10px; padding: 8px; overflow-y: auto; white-space: pre-wrap; border-radius: 4px; }
-  #code-panel { border-top: 1px solid #ccc; max-height: 25%; display: flex; flex-direction: column; }
+  #code-panel { flex: 0 0 28%; min-height: 100px; border-top: 1px solid #ccc; display: flex; flex-direction: column; }
   #code-panel h2 { font-size: 13px; margin: 8px 10px 4px 10px; color: #555; }
-  #generated-code { flex: 1; margin: 0 10px 10px 10px; padding: 8px; background: #f4f4f4; font-family: Consolas, monospace;
+  #generated-code { flex: 1; min-height: 0; margin: 0 10px 10px 10px; padding: 8px; background: #f4f4f4; font-family: Consolas, monospace;
                      font-size: 12px; overflow-y: auto; white-space: pre-wrap; border-radius: 4px; }
 </style>
 </head>
