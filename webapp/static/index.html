@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hardware Test Builder</title>
+<style>
+  html, body { height: 100%; margin: 0; font-family: Segoe UI, Arial, sans-serif; }
+  #top-bar { background: #23272f; color: white; padding: 10px 16px; display: flex; align-items: center; gap: 16px; }
+  #top-bar h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  #run-btn { background: #2ecc71; color: white; border: none; padding: 8px 20px; font-size: 14px;
+             border-radius: 4px; cursor: pointer; }
+  #run-btn:disabled { background: #7f8c8d; cursor: default; }
+  #refresh-devices-btn { background: #34495e; color: white; border: none; padding: 6px 14px;
+                         border-radius: 4px; cursor: pointer; font-size: 13px; }
+  #main { display: flex; height: calc(100% - 52px); }
+  #blocklyDiv { flex: 3; height: 100%; }
+  #side { flex: 2; display: flex; flex-direction: column; border-left: 1px solid #ccc; min-width: 320px; }
+  #devices-panel { padding: 10px; border-bottom: 1px solid #ccc; max-height: 25%; overflow-y: auto; }
+  #devices-panel h2 { font-size: 13px; margin: 0 0 6px 0; color: #555; }
+  #device-list { margin: 0; padding-left: 18px; font-size: 13px; }
+  #console-panel { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  #console-panel h2 { font-size: 13px; margin: 8px 10px 4px 10px; color: #555; }
+  #console { flex: 1; background: #111; color: #0f0; font-family: Consolas, monospace; font-size: 12px;
+             margin: 0 10px 10px 10px; padding: 8px; overflow-y: auto; white-space: pre-wrap; border-radius: 4px; }
+  #code-panel { border-top: 1px solid #ccc; max-height: 25%; display: flex; flex-direction: column; }
+  #code-panel h2 { font-size: 13px; margin: 8px 10px 4px 10px; color: #555; }
+  #generated-code { flex: 1; margin: 0 10px 10px 10px; padding: 8px; background: #f4f4f4; font-family: Consolas, monospace;
+                     font-size: 12px; overflow-y: auto; white-space: pre-wrap; border-radius: 4px; }
+</style>
+</head>
+<body>
+  <div id="top-bar">
+    <h1>Hardware Test Builder</h1>
+    <button id="run-btn">▶ Run</button>
+    <button id="refresh-devices-btn">Refresh devices</button>
+  </div>
+  <div id="main">
+    <div id="blocklyDiv"></div>
+    <div id="side">
+      <div id="devices-panel">
+        <h2>Connected devices</h2>
+        <ul id="device-list"></ul>
+      </div>
+      <div id="console-panel">
+        <h2>Console</h2>
+        <div id="console"></div>
+      </div>
+      <div id="code-panel">
+        <h2>Generated Python (for reference)</h2>
+        <pre id="generated-code"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/blockly/blockly_compressed.js"></script>
+  <script src="/static/blockly/blocks_compressed.js"></script>
+  <script src="/static/blockly/msg/en.js"></script>
+  <script src="/static/blockly/python_compressed.js"></script>
+  <script src="/static/custom_blocks.js"></script>
+  <script src="/static/generators.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

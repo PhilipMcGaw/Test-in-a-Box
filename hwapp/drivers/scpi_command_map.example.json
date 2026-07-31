@@ -1,0 +1,30 @@
+{
+  "display_name": "Example bench PSU (generic SCPI)",
+  "resource": "USB0::0x0AAD::0x0197::123456::INSTR",
+  "positions": [
+    {
+      "id": "voltage",
+      "label": "Set Voltage",
+      "kind": "output_analog",
+      "unit": "V",
+      "write": "VOLT {value}",
+      "read": "VOLT?"
+    },
+    {
+      "id": "current",
+      "label": "Set Current Limit",
+      "kind": "output_analog",
+      "unit": "A",
+      "write": "CURR {value}",
+      "read": "CURR?"
+    },
+    {
+      "id": "output",
+      "label": "Output Enable",
+      "kind": "output_digital",
+      "unit": null,
+      "write": "OUTP {value}",
+      "read": "OUTP?"
+    }
+  ]
+}
