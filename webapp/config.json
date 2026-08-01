@@ -1,14 +1,49 @@
 {
   "devices": [
-    {"device_type": "mock_psu", "device_id": "psu1", "kwargs": {}},
-    {"device_type": "mock_psu", "device_id": "psu2", "kwargs": {}},
-    {"device_type": "mock_relay", "device_id": "relay1", "kwargs": {"num_channels": 8}}
+    {
+      "device_type": "mock_psu",
+      "device_id": "psu1",
+      "kwargs": {},
+      "x": 70,
+      "y": 70
+    },
+    {
+      "device_type": "mock_psu",
+      "device_id": "psu2",
+      "kwargs": {},
+      "x": 100,
+      "y": 100
+    },
+    {
+      "device_type": "mock_relay",
+      "device_id": "relay1",
+      "kwargs": {
+        "num_channels": 8
+      },
+      "x": 70,
+      "y": 70
+    }
   ],
   "mapping": [
-    {"device_id": "psu1", "position_id": "voltage", "dut_uid": "DUT-0001"},
-    {"device_id": "relay1", "position_id": "relay1", "dut_uid": "DUT-0001"},
-    {"device_id": "psu2", "position_id": "voltage", "dut_uid": "DUT-0002"},
-    {"device_id": "relay1", "position_id": "relay2", "dut_uid": "DUT-0002"}
-  ],
-  "_comment": "Replace mock_psu/mock_relay entries with real hardware once ready. For a SCPI instrument use device_type 'scpi' with kwargs {'command_map_path': 'drivers_config/my_instrument.json'}. For the Seeit relay use device_type 'seeit_relay08' with kwargs {'serial_port': 'COM5'}. For an Aim-TTi PSU use device_type 'aimtti_psu' with kwargs {'serial_port': 'COM5', 'num_channels': 1 or 2}."
+    {
+      "device_id": "psu1",
+      "position_id": "voltage",
+      "dut_uid": "DUT-0001"
+    },
+    {
+      "device_id": "relay1",
+      "position_id": "relay1",
+      "dut_uid": "DUT-0001"
+    },
+    {
+      "device_id": "psu2",
+      "position_id": "voltage",
+      "dut_uid": "DUT-0002"
+    },
+    {
+      "device_id": "relay1",
+      "position_id": "relay2",
+      "dut_uid": "DUT-0002"
+    }
+  ]
 }

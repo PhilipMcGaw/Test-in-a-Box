@@ -52,6 +52,9 @@ class MockPsuDriver(Driver):
             value = self._voltage + random.uniform(-0.02, 0.02) if self._output_on else 0.0
             self._emit(position_id, value, "V", event_type="measurement")
             return value
+        if position_id == "output":
+            self._emit(position_id, self._output_on, None, event_type="measurement")
+            return self._output_on
         raise KeyError(position_id)
 
 

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Test in a Box — Configure Devices</title>
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/icons/icon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/icons/apple-touch-icon.png">
+<style>
+  html, body { height: 100%; margin: 0; font-family: Segoe UI, Arial, sans-serif; }
+  #top-bar { background: #23272f; color: white; padding: 10px 16px; display: flex; align-items: center; gap: 16px; }
+  #top-bar h1 { font-size: 16px; margin: 0; font-weight: 600; flex: 0 0 auto; }
+  #top-bar a.nav-link { color: #9fb3c8; text-decoration: none; font-size: 13px; }
+  #top-bar a.nav-link:hover { text-decoration: underline; }
+  #spacer { flex: 1; }
+  #save-btn { background: #2ecc71; color: white; border: none; padding: 8px 18px; font-size: 14px;
+              border-radius: 4px; cursor: pointer; }
+  #save-btn:disabled { background: #7f8c8d; cursor: default; }
+  #status-msg { font-size: 13px; color: #f4f4f4; max-width: 320px; }
+
+  #main { display: flex; height: calc(100% - 52px); }
+  #sidebar { width: 220px; background: #f4f4f4; border-right: 1px solid #ccc; padding: 12px;
+             overflow-y: auto; }
+  #sidebar h2 { font-size: 12px; text-transform: uppercase; color: #777; margin: 14px 0 6px 0; }
+  #sidebar h2:first-child { margin-top: 0; }
+  .type-card { background: white; border: 1px solid #ccc; border-radius: 4px; padding: 8px 10px;
+               margin-bottom: 6px; cursor: grab; font-size: 13px; }
+  .type-card:hover { border-color: #2ecc71; }
+
+  #canvas-wrap { flex: 1; position: relative; overflow: auto; background: #e8ebee;
+                 background-image: radial-gradient(#cfd4da 1px, transparent 1px);
+                 background-size: 20px 20px; }
+  #canvas { position: relative; width: 2000px; height: 1400px; }
+
+  .device-card { position: absolute; width: 220px; background: #2b2f36; border-radius: 8px;
+                 box-shadow: 0 3px 10px rgba(0,0,0,0.3); color: #ddd; font-size: 12px;
+                 border: 1px solid #444; user-select: none; }
+  .device-card .card-header { background: #1d2025; border-radius: 8px 8px 0 0; padding: 6px 8px;
+                               display: flex; align-items: center; cursor: grab; gap: 6px; }
+  .device-card .card-header input { background: transparent; border: none; color: #fff;
+                                     font-size: 12px; font-weight: 600; width: 100px; }
+  .device-card .card-header .type-label { color: #8fa1b3; font-size: 10px; flex: 1; text-align: right; }
+  .device-card .card-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 13px; padding: 0 2px; }
+  .device-card .card-btn:hover { color: #fff; }
+  .device-card .card-body { padding: 10px; }
+
+  .readout-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .readout-label { color: #8fa1b3; font-size: 10px; text-transform: uppercase; }
+  .readout-value { font-family: Consolas, monospace; font-size: 18px; padding: 2px 8px;
+                    border-radius: 3px; background: #10120f; min-width: 60px; text-align: right; }
+  .readout-value.volts { color: #39ff88; }
+  .readout-value.amps { color: #ffbf47; }
+  .readout-value.plain { color: #7fd4ff; }
+
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .toggle-switch { width: 44px; height: 22px; border-radius: 11px; background: #444; position: relative;
+                   cursor: pointer; transition: background 0.15s; }
+  .toggle-switch.on { background: #c0392b; }
+  .toggle-switch .knob { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+                          border-radius: 50%; background: #ddd; transition: left 0.15s; }
+  .toggle-switch.on .knob { left: 24px; background: #fff; }
+
+  .relay-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .relay-cell { text-align: center; }
+  .relay-led { width: 100%; aspect-ratio: 1.6; border-radius: 3px; background: #333; cursor: pointer;
+               display: flex; align-items: center; justify-content: center; font-size: 10px; color: #666; }
+  .relay-led.on { background: #27ae60; color: #fff; }
+
+  .settings-panel { background: #1d2025; border-top: 1px solid #444; padding: 8px; border-radius: 0 0 8px 8px; }
+  .settings-panel label { display: block; font-size: 10px; color: #8fa1b3; margin-top: 6px; }
+  .settings-panel input { width: 100%; box-sizing: border-box; font-size: 12px; padding: 3px 5px;
+                           margin-top: 2px; background: #2b2f36; color: #fff; border: 1px solid #444; border-radius: 3px; }
+
+  .generic-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+  .generic-row .val { font-family: Consolas, monospace; color: #7fd4ff; }
+</style>
+</head>
+<body>
+  <div id="top-bar">
+    <img id="app-logo" src="/static/icons/icon-32.png" alt="" width="26" height="26">
+    <h1>Configure Devices</h1>
+    <a class="nav-link" href="/">◀ Back to Test Builder</a>
+    <div id="spacer"></div>
+    <div id="status-msg"></div>
+    <button id="save-btn">Save &amp; Reconnect</button>
+  </div>
+  <div id="main">
+    <div id="sidebar"><div id="type-list">Loading device types…</div></div>
+    <div id="canvas-wrap">
+      <div id="canvas"></div>
+    </div>
+  </div>
+
+  <script src="/static/devices.js"></script>
+</body>
+</html>

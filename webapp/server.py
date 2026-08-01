@@ -46,6 +46,7 @@ except Exception as exc:  # picosdk may not be installed / driver not present
     print(f"[startup] Pico drivers not fully available: {exc}")
 
 from hwapp.drivers.registry import create_driver
+from hwapp.drivers.catalog import DEVICE_CATALOG
 from hwapp.run.mapping import DutMapping
 from hwapp.run.runner import TestRunner, AssertionFailure
 from hwapp.run.control import RunControl, StopRequested
@@ -170,6 +171,11 @@ def index() -> FileResponse:
     return FileResponse(str(BASE_DIR / "static" / "index.html"))
 
 
+@app.get("/devices")
+def devices_page() -> FileResponse:
+    return FileResponse(str(BASE_DIR / "static" / "devices.html"))
+
+
 @app.get("/api/devices")
 def api_devices() -> JSONResponse:
     result = []
@@ -191,6 +197,92 @@ def api_devices() -> JSONResponse:
 def api_duts() -> JSONResponse:
     duts = sorted({entry["dut_uid"] for entry in _config.get("mapping", [])})
     return JSONResponse(duts)
+
+
+@app.get("/api/device_types")
+def api_device_types() -> JSONResponse:
+    return JSONResponse(DEVICE_CATALOG)
+
+
+@app.get("/api/config")
+def api_config_get() -> JSONResponse:
+    return JSONResponse(_config)
+
+
+class ConfigSaveRequest(BaseModel):
+    devices: list[dict]
+    mapping: list[dict] = []
+
+
+@app.post("/api/config")
+def api_config_save(req: ConfigSaveRequest) -> JSONResponse:
+    new_config = {"devices": req.devices, "mapping": req.mapping}
+    with open(CONFIG_PATH, "w") as f:
+        json.dump(new_config, f, indent=2)
+    return JSONResponse({"status": "ok"})
+
+
+@app.post("/api/reconnect")
+def api_reconnect() -> JSONResponse:
+    global _config, _devices
+    if _run_control.state != "idle" and _run_control.state not in ("finished", "stopped", "error"):
+        return JSONResponse(
+            {"detail": f"Can't reconnect devices while a run is active (state: {_run_control.state})"},
+            status_code=409,
+        )
+    for driver in _devices.values():
+        with contextlib.suppress(Exception):
+            driver.close()
+    _config = _load_config()
+    _devices = _connect_devices(_config)
+    failed = [entry["device_id"] for entry in _config.get("devices", [])
+              if entry["device_id"] not in _devices]
+    return JSONResponse({"status": "ok", "connected": list(_devices.keys()), "failed": failed})
+
+
+@app.get("/api/live_values")
+def api_live_values() -> JSONResponse:
+    """
+    Reads current values from every connected device — only safe to do
+    when no script is running, since a script talks to the same hardware
+    over the same connections. Returns busy=True and no values otherwise.
+    """
+    if _run_control.state not in ("idle", "finished", "stopped", "error"):
+        return JSONResponse({"busy": True, "values": {}})
+
+    values: dict[str, dict[str, object]] = {}
+    for device_id, driver in _devices.items():
+        device_values = {}
+        for position in driver.capabilities().positions:
+            try:
+                device_values[position.id] = driver.read(position.id)
+            except Exception:
+                pass  # not every position supports read() (e.g. write-only outputs on some drivers)
+        values[device_id] = device_values
+    return JSONResponse({"busy": False, "values": values})
+
+
+class SetPositionRequest(BaseModel):
+    device_id: str
+    position_id: str
+    value: object
+
+
+@app.post("/api/set_position")
+def api_set_position(req: SetPositionRequest) -> JSONResponse:
+    if _run_control.state not in ("idle", "finished", "stopped", "error"):
+        return JSONResponse(
+            {"detail": f"Can't change devices manually while a run is active (state: {_run_control.state})"},
+            status_code=409,
+        )
+    driver = _devices.get(req.device_id)
+    if driver is None:
+        return JSONResponse({"detail": f"no such connected device '{req.device_id}'"}, status_code=404)
+    try:
+        driver.write(req.position_id, req.value)
+    except Exception as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=500)
+    return JSONResponse({"status": "ok"})
 
 
 class RunRequest(BaseModel):
