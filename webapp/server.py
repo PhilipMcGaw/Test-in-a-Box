@@ -176,6 +176,16 @@ def devices_page() -> FileResponse:
     return FileResponse(str(BASE_DIR / "static" / "devices.html"))
 
 
+@app.get("/about")
+def about_page() -> FileResponse:
+    return FileResponse(str(BASE_DIR / "static" / "about.html"))
+
+
+@app.get("/supported-devices")
+def supported_devices_page() -> FileResponse:
+    return FileResponse(str(BASE_DIR / "static" / "supported-devices.html"))
+
+
 @app.get("/api/devices")
 def api_devices() -> JSONResponse:
     result = []

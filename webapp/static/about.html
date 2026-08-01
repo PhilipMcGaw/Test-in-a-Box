@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Test in a Box — About</title>
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/icons/icon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/icons/apple-touch-icon.png">
+<style>
+  html, body { height: 100%; margin: 0; font-family: Segoe UI, Arial, sans-serif; color: #222; }
+  #top-bar { background: #23272f; color: white; padding: 10px 16px; display: flex; align-items: center; gap: 16px; }
+  #top-bar h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  #top-bar a.nav-link { color: #9fb3c8; text-decoration: none; font-size: 13px; }
+  #top-bar a.nav-link:hover { text-decoration: underline; }
+  #content { max-width: 720px; margin: 0 auto; padding: 32px 24px 60px 24px; line-height: 1.55; }
+  #content h2 { font-size: 18px; margin-top: 32px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+  #content h2:first-of-type { margin-top: 0; }
+  #content a { color: #2980b9; }
+  #content code { background: #f2f2f2; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  .support-box { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 6px; padding: 14px 18px; margin-top: 12px; }
+  footer { text-align: center; color: #999; font-size: 12px; margin-top: 40px; }
+</style>
+</head>
+<body>
+  <div id="top-bar">
+    <img src="/static/icons/icon-32.png" alt="" width="26" height="26">
+    <h1>Test in a Box</h1>
+    <a class="nav-link" href="/">◀ Test Builder</a>
+    <a class="nav-link" href="/devices">Configure Devices</a>
+    <a class="nav-link" href="/supported-devices">Supported Devices</a>
+  </div>
+
+  <div id="content">
+    <h2>What this is</h2>
+    <p>
+      Test in a Box is a visual, Blockly-based tool for building and running
+      hardware test sequences — define your test equipment, drag blocks
+      together to write a test script without needing to write code, and get
+      live console output plus per-DUT CSV logs and reports.
+    </p>
+
+    <h2>Help</h2>
+    <p>A few quick pointers:</p>
+    <ul>
+      <li><strong>Test Builder</strong> — drag blocks from the toolbox to write a
+        sequence. Use <strong>Run</strong>, <strong>Pause</strong>, <strong>Step</strong>,
+        and <strong>Stop</strong> to control execution. Save and reload sequences
+        using the bar just below the toolbar.</li>
+      <li><strong>Configure Devices</strong> — drag device types from the sidebar
+        onto the canvas to add PSUs, relays, and other instruments. Each device
+        gets a front-panel-style display; use <strong>Save &amp; Reconnect</strong>
+        to apply changes.</li>
+      <li><strong>Supported Devices</strong> — a running list of every device type
+        this app can talk to, and how confident we are in each driver.</li>
+      <li>Full setup and troubleshooting notes live in <code>SETUP_INSTRUCTIONS.md</code>
+        and <code>README.md</code> in the project folder.</li>
+    </ul>
+
+    <h2>Copyright &amp; License</h2>
+    <p>
+      Test in a Box &copy; 2026 Philip McGaw. Licensed under
+      <strong>Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+      International (CC BY-NC-SA 4.0)</strong> — see the <code>LICENSE</code> file
+      in the project root for the full text.
+    </p>
+
+    <h2>Author &amp; Support</h2>
+    <div class="support-box">
+      <p>
+        Built by Philip McGaw — EMC and hardware test engineer.<br>
+        Website: <a href="https://philipmcgaw.com" target="_blank" rel="noopener">philipmcgaw.com</a>
+      </p>
+      <p>
+        For questions, support, or to report an issue with this tool, please
+        get in touch via the website above.
+      </p>
+    </div>
+
+    <footer>Test in a Box</footer>
+  </div>
+</body>
+</html>
