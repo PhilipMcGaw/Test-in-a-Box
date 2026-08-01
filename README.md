@@ -98,3 +98,20 @@ where `event_type` is one of `measurement`, `state` (a commanded setpoint),
   save/load, and operator-prompt blocks, served by `webapp/server.py`.
 - **Report generation**: not started — reads the CSVs in a run directory
   and produces one section per DUT.
+
+## License
+
+This project ("Test in a Box") is licensed under
+**Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+(CC BY-NC-SA 4.0)** — see the `LICENSE` file in the project root for the
+full text.
+
+In short: you're free to use, adapt, and share this project, provided
+you (a) give attribution, (b) don't use it commercially, and (c) share
+any adaptations under the same license terms.
+
+Note that CC licenses are written for creative/media works rather than
+software specifically (no patent grant, no software-specific
+distribution terms) — this is a deliberate choice for this project, just
+worth being aware of if you plan to combine it with other code under a
+different license.
