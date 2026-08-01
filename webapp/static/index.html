@@ -14,9 +14,22 @@
   #run-btn { background: #2ecc71; color: white; border: none; padding: 8px 20px; font-size: 14px;
              border-radius: 4px; cursor: pointer; }
   #run-btn:disabled { background: #7f8c8d; cursor: default; }
+  #pause-btn, #step-btn, #stop-btn { color: white; border: none; padding: 8px 16px; font-size: 14px;
+             border-radius: 4px; cursor: pointer; }
+  #pause-btn { background: #f39c12; }
+  #step-btn { background: #3498db; }
+  #stop-btn { background: #e74c3c; }
+  #pause-btn:disabled, #step-btn:disabled, #stop-btn:disabled { background: #7f8c8d; cursor: default; }
   #refresh-devices-btn { background: #34495e; color: white; border: none; padding: 6px 14px;
                          border-radius: 4px; cursor: pointer; font-size: 13px; }
-  #main { display: flex; height: calc(100% - 52px); }
+  #sequence-bar { background: #f4f4f4; border-bottom: 1px solid #ccc; padding: 8px 16px;
+                  display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  #sequence-bar label { color: #555; }
+  #sequence-bar select, #sequence-bar input { padding: 4px 6px; font-size: 13px; }
+  #sequence-bar input { width: 160px; }
+  #sequence-bar button { background: #34495e; color: white; border: none; padding: 5px 12px;
+                          border-radius: 4px; cursor: pointer; font-size: 13px; }
+  #main { display: flex; height: calc(100% - 92px); }
   #blocklyDiv { flex: 3; height: 100%; }
   #side { flex: 2; display: flex; flex-direction: column; border-left: 1px solid #ccc; min-width: 320px; }
   #devices-panel { flex: 0 0 22%; min-height: 80px; padding: 10px; border-bottom: 1px solid #ccc; overflow-y: auto; }
@@ -37,7 +50,18 @@
     <img id="app-logo" src="/static/icons/icon-32.png" alt="" width="26" height="26">
     <h1>Test in a Box</h1>
     <button id="run-btn">▶ Run</button>
+    <button id="pause-btn" disabled>⏸ Pause</button>
+    <button id="step-btn" disabled>⏭ Step</button>
+    <button id="stop-btn" disabled>⏹ Stop</button>
     <button id="refresh-devices-btn">Refresh devices</button>
+  </div>
+  <div id="sequence-bar">
+    <label for="sequence-select">Sequence:</label>
+    <select id="sequence-select"></select>
+    <button id="load-sequence-btn">Load</button>
+    <span style="width: 12px;"></span>
+    <input id="sequence-name" type="text" placeholder="name to save as...">
+    <button id="save-sequence-btn">Save As</button>
   </div>
   <div id="main">
     <div id="blocklyDiv"></div>

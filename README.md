@@ -1,7 +1,3 @@
-# Test-in-a-Box
-
-
-
 ## Running this on Windows with no admin rights
 
 See **SETUP_INSTRUCTIONS.md** for step-by-step, non-developer instructions.
@@ -11,7 +7,7 @@ your browser at `http://127.0.0.1:8765` — nothing is installed system-wide.
 
 ---
 
-# Test-in-a-Box — hardware abstraction + test-run core
+# hwapp — hardware abstraction + test-run core
 
 This is the backend skeleton for the Blockly-style hardware test app: a
 driver interface, a registry so new hardware is a drop-in, DUT-to-position
@@ -21,7 +17,7 @@ are the next layer to build on top of this.
 ## Layout
 
 ```
-Test-in-a-Box/
+hwapp/
   drivers/
     base.py            Driver ABC, CapabilityDescriptor, Position, LogEvent
     registry.py         @register_driver("type_name") registry
@@ -55,7 +51,7 @@ SETUP_INSTRUCTIONS.md        Non-developer setup guide for locked-down Windows 1
 
 ```
 pip install -r requirements.txt   # only needed for real hardware drivers
-python3 -m Test-in-a-Box.example_scripts.demo_test
+python3 -m hwapp.example_scripts.demo_test
 ```
 
 This runs a two-DUT multiplexed sweep test on mock PSUs/relays and writes:
@@ -81,7 +77,7 @@ where `event_type` is one of `measurement`, `state` (a commanded setpoint),
   `drivers/`, implement `connect`, `close`, `capabilities`, and whichever
   of `write`/`read`/`query` make sense, decorate the class with
   `@register_driver("your_type_name")`, and import the module once so the
-  decorator runs (see how `demo_test.py` imports `Test-in-a-Box.drivers.mock`).
+  decorator runs (see how `demo_test.py` imports `hwapp.drivers.mock`).
 
 ## Known gaps / next steps
 
@@ -91,14 +87,14 @@ where `event_type` is one of `measurement`, `state` (a commanded setpoint),
 - **Pico TC-08 / ADC-20/24 drivers** call the picosdk wrapper functions as
   documented, but haven't been exercised against real hardware yet in
   this skeleton — check channel/units setup against your specific unit.
-- **PSU driver**: no dedicated PSU driver class yet — either fold your
-  existing PSU control code in as its own `Driver` subclass, or if it's
-  SCPI-capable, it may need nothing but a command map like the SCPI
-  example.
-- **Blockly frontend**: not started. Once this backend is solid, the
-  natural next step is a small FastAPI service that (a) exposes
-  `capabilities()` for connected devices as JSON so the toolbox can be
-  built dynamically, and (b) accepts generated Python and runs it through
-  `TestRunner`, streaming `console` output back over WebSocket.
+- **PSU driver**: `aimtti_psu` driver added, using Aim-TTi's standard
+  remote command set (confirmed against the official CPX400 manual) over
+  serial/USB-virtual-COM — no VISA/NI-VISA needed for this one. Verified
+  against a simulated instrument that speaks the documented protocol;
+  still worth a first real-hardware smoke test (COM port, baud, exact
+  reply formatting) before relying on it for real runs.
+- **Blockly frontend**: built — a full Blockly workspace with custom
+  hardware blocks, Pause/Step/Stop, loop iteration reporting, sequence
+  save/load, and operator-prompt blocks, served by `webapp/server.py`.
 - **Report generation**: not started — reads the CSVs in a run directory
   and produces one section per DUT.

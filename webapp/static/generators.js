@@ -38,6 +38,12 @@ Blockly.Python.forBlock['hw_assert'] = function (block) {
   return `assert_that(${condition}, ${JSON.stringify(message)})\n`;
 };
 
+Blockly.Python.forBlock['hw_prompt'] = function (block) {
+  const label = block.getFieldValue('LABEL');
+  const dutUid = block.getFieldValue('DUT');
+  return `ask_operator(${JSON.stringify(label)}, ${JSON.stringify(dutUid)})\n`;
+};
+
 Blockly.Python.forBlock['hw_within_tolerance'] = function (block) {
   const measured = Blockly.Python.valueToCode(block, 'MEASURED', Blockly.Python.ORDER_NONE) || '0';
   const target = Blockly.Python.valueToCode(block, 'TARGET', Blockly.Python.ORDER_NONE) || '0';

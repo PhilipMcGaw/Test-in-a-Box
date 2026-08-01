@@ -22,6 +22,7 @@ import contextlib
 import io
 import json
 import queue
+import re
 import sys
 import threading
 import time
@@ -37,6 +38,7 @@ from pydantic import BaseModel
 import hwapp.drivers.mock          # noqa: F401
 import hwapp.drivers.scpi_generic  # noqa: F401
 import hwapp.drivers.seeit_relay   # noqa: F401
+import hwapp.drivers.aimtti_psu    # noqa: F401
 try:
     import hwapp.drivers.pico_tc08   # noqa: F401
     import hwapp.drivers.pico_adc    # noqa: F401
@@ -46,10 +48,14 @@ except Exception as exc:  # picosdk may not be installed / driver not present
 from hwapp.drivers.registry import create_driver
 from hwapp.run.mapping import DutMapping
 from hwapp.run.runner import TestRunner, AssertionFailure
+from hwapp.run.control import RunControl, StopRequested
+from hwapp.run.instrument import instrument_source
 
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "config.json"
 RUNS_DIR = BASE_DIR / "runs"
+SEQUENCES_DIR = BASE_DIR / "sequences"
+SEQUENCES_DIR.mkdir(exist_ok=True)
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
@@ -58,6 +64,13 @@ _devices: dict[str, object] = {}
 _config: dict = {}
 _console_queues: list[queue.Queue] = []
 _console_lock = threading.Lock()
+_run_control = RunControl()
+_run_control.on_change = lambda: _broadcast_console(f"__STATE__:{_run_control.state}")
+
+_prompt_lock = threading.Lock()
+_pending_prompts: dict[str, threading.Event] = {}
+_prompt_answers: dict[str, str] = {}
+_prompt_counter = 0
 
 
 def _broadcast_console(message: str) -> None:
@@ -66,9 +79,52 @@ def _broadcast_console(message: str) -> None:
             q.put(message)
 
 
+def _broadcast_state() -> None:
+    _broadcast_console(f"__STATE__:{_run_control.state}")
+
+
 def _load_config() -> dict:
     with open(CONFIG_PATH) as f:
         return json.load(f)
+
+
+def _ask_operator(label: str, dut_uid: str, runner: TestRunner) -> str:
+    """
+    Blocks the execution thread until the operator answers a prompt in the
+    browser (or Stop is pressed, in which case this raises StopRequested).
+    """
+    global _prompt_counter
+    with _prompt_lock:
+        _prompt_counter += 1
+        prompt_id = f"p{_prompt_counter}"
+        event = threading.Event()
+        _pending_prompts[prompt_id] = event
+
+    _broadcast_console(f"__PROMPT__:{prompt_id}:{label}")
+
+    while not event.wait(timeout=0.5):
+        if _run_control.state == "stop_requested":
+            with _prompt_lock:
+                _pending_prompts.pop(prompt_id, None)
+                _prompt_answers.pop(prompt_id, None)
+            raise StopRequested(f"prompt cancelled: {label}")
+
+    with _prompt_lock:
+        value = _prompt_answers.pop(prompt_id, "")
+        _pending_prompts.pop(prompt_id, None)
+
+    runner.record_metadata(dut_uid, label, value)
+    return value
+
+
+def _safe_sequence_name(name: str) -> str:
+    name = name.strip()
+    if not name or not re.fullmatch(r"[A-Za-z0-9 _\-]+", name):
+        raise ValueError(
+            "Sequence names can only contain letters, numbers, spaces, "
+            "hyphens, and underscores."
+        )
+    return name
 
 
 def _connect_devices(config: dict) -> dict[str, object]:
@@ -131,45 +187,163 @@ def api_devices() -> JSONResponse:
     return JSONResponse(result)
 
 
+@app.get("/api/duts")
+def api_duts() -> JSONResponse:
+    duts = sorted({entry["dut_uid"] for entry in _config.get("mapping", [])})
+    return JSONResponse(duts)
+
+
 class RunRequest(BaseModel):
     code: str
 
 
-@app.post("/api/run")
-def api_run(req: RunRequest) -> JSONResponse:
-    run_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    mapping = _build_mapping(_config)
+def _interruptible_wait(seconds: float) -> None:
+    """
+    Like runner.wait(), but checks pause/stop every 0.2s instead of only
+    between statements — otherwise a `wait(3600)` block would ignore Pause
+    and Stop for up to an hour.
+    """
+    _broadcast_console(f"[wait] {seconds}s")
+    remaining = float(seconds)
+    interval = 0.2
+    while remaining > 0:
+        _run_control.checkpoint(f"wait ({remaining:.1f}s remaining)")
+        step = min(interval, remaining)
+        time.sleep(step)
+        remaining -= step
 
-    def console(message: str) -> None:
-        _broadcast_console(message)
+
+def _execute_run(run_id: str, code: str) -> None:
+    mapping = _build_mapping(_config)
 
     runner = TestRunner.for_existing_devices(
         run_id=run_id, mapping=mapping, devices=_devices,
-        output_dir=str(RUNS_DIR), console=console,
+        output_dir=str(RUNS_DIR), console=_broadcast_console,
     )
 
     exec_globals = {
         "set": runner.set,
         "get": runner.get,
-        "wait": runner.wait,
+        "wait": _interruptible_wait,
         "log": runner.log,
         "assert_that": runner.assert_that,
+        "ask_operator": lambda label, dut_uid: _ask_operator(label, dut_uid, runner),
+        "_checkpoint": _run_control.checkpoint,
+        "_report_iteration": lambda label, n: _broadcast_console(f"[loop] {label} — iteration {n}"),
     }
 
-    console(f"=== run {run_id} starting ===")
+    _broadcast_console(f"=== run {run_id} starting ===")
+    final_state = "finished"
     try:
-        exec(compile(req.code, "<generated>", "exec"), exec_globals, {})
-        console(f"=== run {run_id} finished ===")
+        tree = instrument_source(code)
+        compiled = compile(tree, "<generated>", "exec")
+        exec(compiled, exec_globals, {})
+        _broadcast_console(f"=== run {run_id} finished ===")
+    except StopRequested:
+        _broadcast_console(f"=== run {run_id} stopped by user ===")
+        final_state = "stopped"
     except AssertionFailure as exc:
-        console(f"=== run {run_id} STOPPED — assertion failed: {exc} ===")
-        return JSONResponse({"status": "failed", "run_id": run_id}, status_code=200)
+        _broadcast_console(f"=== run {run_id} STOPPED — assertion failed: {exc} ===")
+        final_state = "failed"
     except Exception as exc:
-        console(f"=== run {run_id} ERROR: {exc!r} ===")
-        return JSONResponse({"detail": str(exc)}, status_code=500)
+        _broadcast_console(f"=== run {run_id} ERROR: {exc!r} ===")
+        final_state = "error"
     finally:
         runner.release_devices()
+        _run_control.finish(final_state)
 
-    return JSONResponse({"status": "ok", "run_id": run_id})
+
+@app.post("/api/run")
+def api_run(req: RunRequest) -> JSONResponse:
+    if not _run_control.start():
+        return JSONResponse(
+            {"detail": f"A run is already in progress (state: {_run_control.state})"},
+            status_code=409,
+        )
+    run_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    thread = threading.Thread(target=_execute_run, args=(run_id, req.code), daemon=True)
+    thread.start()
+    return JSONResponse({"status": "started", "run_id": run_id})
+
+
+@app.get("/api/status")
+def api_status() -> JSONResponse:
+    return JSONResponse({"state": _run_control.state})
+
+
+@app.post("/api/control/pause")
+def api_pause() -> JSONResponse:
+    _run_control.request_pause()
+    return JSONResponse({"state": _run_control.state})
+
+
+@app.post("/api/control/resume")
+def api_resume() -> JSONResponse:
+    _run_control.request_resume()
+    return JSONResponse({"state": _run_control.state})
+
+
+@app.post("/api/control/step")
+def api_step() -> JSONResponse:
+    _run_control.request_step()
+    return JSONResponse({"state": _run_control.state})
+
+
+@app.post("/api/control/stop")
+def api_stop() -> JSONResponse:
+    _run_control.request_stop()
+    return JSONResponse({"state": _run_control.state})
+
+
+class PromptResponse(BaseModel):
+    prompt_id: str
+    value: str
+
+
+@app.post("/api/control/prompt_response")
+def api_prompt_response(req: PromptResponse) -> JSONResponse:
+    with _prompt_lock:
+        event = _pending_prompts.get(req.prompt_id)
+        if event is None:
+            return JSONResponse({"detail": "no such pending prompt"}, status_code=404)
+        _prompt_answers[req.prompt_id] = req.value
+    event.set()
+    return JSONResponse({"status": "ok"})
+
+
+@app.get("/api/sequences")
+def api_sequences_list() -> JSONResponse:
+    names = sorted(p.stem for p in SEQUENCES_DIR.glob("*.json"))
+    return JSONResponse(names)
+
+
+@app.get("/api/sequences/{name}")
+def api_sequences_get(name: str) -> JSONResponse:
+    try:
+        safe_name = _safe_sequence_name(name)
+    except ValueError as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=400)
+    path = SEQUENCES_DIR / f"{safe_name}.json"
+    if not path.exists():
+        return JSONResponse({"detail": f"no sequence named '{safe_name}'"}, status_code=404)
+    with open(path) as f:
+        return JSONResponse(json.load(f))
+
+
+class SequenceSaveRequest(BaseModel):
+    workspace: dict
+
+
+@app.post("/api/sequences/{name}")
+def api_sequences_save(name: str, req: SequenceSaveRequest) -> JSONResponse:
+    try:
+        safe_name = _safe_sequence_name(name)
+    except ValueError as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=400)
+    path = SEQUENCES_DIR / f"{safe_name}.json"
+    with open(path, "w") as f:
+        json.dump(req.workspace, f, indent=2)
+    return JSONResponse({"status": "ok", "name": safe_name})
 
 
 @app.websocket("/ws/console")
@@ -178,6 +352,7 @@ async def ws_console(websocket: WebSocket) -> None:
     q: queue.Queue = queue.Queue()
     with _console_lock:
         _console_queues.append(q)
+    await websocket.send_text(f"__STATE__:{_run_control.state}")
     try:
         while True:
             try:

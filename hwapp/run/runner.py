@@ -111,6 +111,11 @@ class TestRunner:
         if not condition:
             raise AssertionFailure(message)
 
+    def record_metadata(self, dut_uid: str, label: str, value) -> None:
+        """Record an operator-entered value (serial number, ID, etc.) directly against a DUT."""
+        self._say(f"[metadata] {label} (DUT {dut_uid}) = {value}")
+        self.logger.record_direct(dut_uid, label, value)
+
     # -- teardown ----------------------------------------------------------
     def finish(self) -> None:
         for device_id, driver in self.devices.items():

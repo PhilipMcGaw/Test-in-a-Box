@@ -74,6 +74,23 @@ Blockly.Blocks['hw_assert'] = {
   }
 };
 
+// Populated by app.js after fetching /api/duts.
+window.HW_DUTS = [["(no DUTs configured)", "none"]];
+
+Blockly.Blocks['hw_prompt'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("ask operator for")
+      .appendField(new Blockly.FieldTextInput("Serial Number"), "LABEL")
+      .appendField("and record for DUT")
+      .appendField(new Blockly.FieldDropdown(() => window.HW_DUTS), "DUT");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(290);
+    this.setTooltip("Pauses the run and prompts the operator for a value (e.g. a serial number), then records it against the chosen DUT for the report.");
+  }
+};
+
 Blockly.Blocks['hw_within_tolerance'] = {
   init: function () {
     this.appendValueInput("MEASURED").setCheck(null).appendField("is");

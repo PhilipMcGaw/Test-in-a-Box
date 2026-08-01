@@ -54,6 +54,24 @@ class CsvRunLogger:
         })
         self._files[dut_uid].flush()
 
+    def record_direct(self, dut_uid: str, label: str, value) -> None:
+        """
+        Write a row straight to a specific DUT's CSV without going through
+        device/position mapping — used for operator-entered metadata
+        (serial numbers, IDs) that isn't tied to a hardware channel.
+        """
+        writer = self._writer_for(dut_uid)
+        writer.writerow({
+            "timestamp": LogEvent.now(),
+            "device_id": "operator_input",
+            "position": label,
+            "channel": None,
+            "value": value,
+            "unit": None,
+            "event_type": "metadata",
+        })
+        self._files[dut_uid].flush()
+
     def close(self) -> None:
         for f in self._files.values():
             f.close()
