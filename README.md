@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="webapp/static/icons/icon-192.png"
+  <img src="docs/images/TestinaBox.png"
        width="192"
        alt="Test in a Box logo">
 </p>
@@ -7,143 +7,367 @@
 <h1 align="center">Test in a Box</h1>
 
 <p align="center">
-An open-source engineering test automation platform for batteries, EMC,
-power electronics and laboratory instrumentation.
+An open-source engineering test automation platform for automated validation,
+laboratory instrumentation, and hardware testing.
 </p>
 
-## Author
+<p align="center">
 
-**Philip McGaw MIET**
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-purple.svg)](https://polyformproject.org/licenses/noncommercial/1.0.0)
 
-Lead EMC Test Engineer specialising in automotive battery testing,
-SCPI automation and engineering software.
-
-Website
-: https://philipmcgaw.com
-
-LinkedIn
-: https://linkedin.com/in/philipmcgaw
-
-GitHub
-: https://github.com/PhilipMcGaw
-
-Email
-: philip@mcgaw.eu
-
-If you're interested in collaborating or commercial licensing,
-please get in touch.
-
-
-[![License: PolyForm Noncommercial License 1.0.0](https://img.shields.io/badge/License-PolyForm_Noncommercial_License 1.0.0-purple.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-
-
-
-
-## Running this on Windows with no admin rights
-
-See **SETUP_INSTRUCTIONS.md** for step-by-step, non-developer instructions.
-Short version: a portable Python + double-click `.bat` files start a local
-web server (`webapp/server.py`) that serves the Blockly-based builder in
-your browser at `http://127.0.0.1:8765` — nothing is installed system-wide.
+</p>
 
 ---
 
-# hwapp — hardware abstraction + test-run core
+# What is Test in a Box?
 
-This is the backend skeleton for the Blockly-style hardware test app: a
-driver interface, a registry so new hardware is a drop-in, DUT-to-position
-mapping, and per-DUT CSV logging. The Blockly frontend and code generator
-are the next layer to build on top of this.
+**Test in a Box** is an open-source engineering test automation platform designed
+to simplify the creation and execution of repeatable validation procedures for
+**Devices Under Test (DUTs)** and **Equipment Under Test (EUTs)**.
 
-## Layout
+The project is focused initially on **research and development (R&D) testing**,
+where engineers need to repeatedly evaluate multiple devices against defined
+test procedures, collect measurements, and record pass/fail results.
+
+Test in a Box provides a flexible framework for building automated test
+sequences that can control laboratory equipment, apply defined test conditions,
+capture data, and provide consistent results across multiple test samples.
+
+The long-term vision is to provide a scalable test automation platform that can
+support the engineering lifecycle from early prototype validation through to
+more structured automated testing environments.
+
+---
+
+# Why was Test in a Box created?
+
+Engineering test systems are often built as one-off solutions, combining custom
+scripts, instrument drivers, spreadsheets, and manual procedures.
+
+While these approaches can work, they can become difficult to maintain,
+reproduce, and expand as test requirements grow.
+
+Test in a Box aims to provide a common framework for:
+
+- Creating repeatable automated test procedures.
+- Testing multiple DUTs using the same defined sequence.
+- Controlling different types of laboratory equipment.
+- Capturing measurements and test results.
+- Improving test traceability and repeatability.
+- Reducing the amount of custom software required for each test system.
+
+---
+
+# Key Features
+
+## Hardware abstraction
+
+Test in a Box separates test procedures from hardware implementation through a
+driver-based architecture.
+
+This allows different instruments and equipment to be integrated through a
+common interface rather than requiring custom code for every test setup.
+
+Supported and planned integrations include:
+
+- SCPI-controlled laboratory instruments.
+- Programmable power supplies.
+- Relay switching hardware.
+- Temperature measurement equipment.
+- Data acquisition hardware.
+- Custom engineering hardware.
+
+---
+
+## Visual test sequence development
+
+The project includes a Blockly-based interface allowing engineers to create
+test sequences visually.
+
+The aim is to allow test procedures to be created and modified without every
+change requiring software development.
+
+Current capabilities include:
+
+- Hardware control blocks.
+- Measurement acquisition.
+- Wait and timing functions.
+- Loop execution.
+- Operator prompts.
+- Logging.
+- Assertions and pass/fail checks.
+
+---
+
+# Current Architecture
 
 ```
+
+Test Sequence
+|
+v
+Blockly Interface
+|
+v
+Generated Test Procedure
+|
+v
+Test Runner
+|
++----------------+
+|                |
+v                v
+Hardware Drivers    Result Logger
+|
++----------------+
+|
+v
+Laboratory Equipment
+
+```
+
+The core components are:
+
+```
+
 hwapp/
-  drivers/
-    base.py            Driver ABC, CapabilityDescriptor, Position, LogEvent
-    registry.py         @register_driver("type_name") registry
-    scpi_generic.py     Config-driven generic SCPI driver (PyVISA)
-    scpi_command_map.example.json   Example config for a new SCPI instrument
-    seeit_relay.py      Seeit USBB-RELAY08 (serial, 8 channel)
-    pico_tc08.py        Pico TC-08 thermocouple logger
-    pico_adc.py         Pico ADC-20/24
-    mock.py             mock_psu / mock_relay — no hardware needed, for dev/testing
-  run/
-    mapping.py          DutMapping — position -> DUT UID, locked for the run
-    csv_logger.py        Routes every event to runs/<run_id>/run_<id>_DUT_<uid>.csv
-    runner.py            TestRunner — what a generated script calls into
-  example_scripts/
-    demo_test.py         Hand-written stand-in for a Blockly-generated script
+drivers/
+base.py             Driver interface and common data structures
+registry.py         Driver registration system
+scpi_generic.py     Generic SCPI instrument driver
+scpi_command_map.example.json
+seeit_relay.py      Relay controller driver
+pico_tc08.py        Pico TC-08 temperature logger
+pico_adc.py         Pico ADC-20/24 driver
+mock.py             Simulation drivers for development
+
+run/
+mapping.py          DUT position mapping
+csv_logger.py       Test result logging
+runner.py           Test execution engine
+
 webapp/
-  server.py              FastAPI app: serves the page, /api/devices, /api/run, /ws/console
-  config.json            Which devices to connect + the DUT position mapping
-  static/
-    index.html           The Blockly workspace page
-    app.js               Wires up devices, run button, live console
-    custom_blocks.js     Hardware-specific Blockly blocks (set/get/wait/log/assert)
-    generators.js        Python code generation for those blocks
-    blockly/             Blockly library files, bundled locally (works with no internet)
-1_install_dependencies.bat   Windows: install required packages (run once)
-2_start_app.bat              Windows: start the app + open the browser
-SETUP_INSTRUCTIONS.md        Non-developer setup guide for locked-down Windows 11
-```
-
-## Running the demo (no hardware required)
+server.py             FastAPI web application
+static/
+index.html          Blockly workspace
+app.js              User interface logic
+custom_blocks.js    Hardware test blocks
+generators.js       Python code generation
 
 ```
-pip install -r requirements.txt   # only needed for real hardware drivers
+
+---
+
+# Running on Windows without administrator rights
+
+Test in a Box is designed to operate in restricted engineering environments
+where users may not have permission to install software globally.
+
+See:
+
+```
+
+SETUP_INSTRUCTIONS.md
+
+```
+
+for detailed instructions.
+
+The short version:
+
+1. Install the included portable Python environment.
+2. Run the startup batch file.
+3. Open the local web application.
+
+The application runs locally:
+
+```
+
+http://127.0.0.1:8765
+
+````
+
+No system-wide installation is required.
+
+---
+
+# Running the demonstration
+
+The demonstration can be run without any physical hardware.
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+````
+
+Run:
+
+```bash
 python3 -m hwapp.example_scripts.demo_test
 ```
 
-This runs a two-DUT multiplexed sweep test on mock PSUs/relays and writes:
+The demonstration performs a simulated multi-DUT test sequence using mock
+hardware drivers and generates test result files.
+
+Example output:
 
 ```
-runs/demo_run_001/run_demo_run_001_DUT_DUT-0001.csv
-runs/demo_run_001/run_demo_run_001_DUT_DUT-0002.csv
-runs/demo_run_001/run_demo_run_001_DUT_unassigned.csv   (events with no DUT mapping)
+runs/demo_run_001/
+
+run_demo_run_001_DUT_DUT-0001.csv
+run_demo_run_001_DUT_DUT-0002.csv
+run_demo_run_001_DUT_unassigned.csv
 ```
 
-All three files share the same schema:
-`timestamp, device_id, position, channel, value, unit, event_type`
-where `event_type` is one of `measurement`, `state` (a commanded setpoint),
-`log`, or `assert`.
+The logged data uses a consistent format:
 
-## Adding new hardware
+```
+timestamp,
+device_id,
+position,
+channel,
+value,
+unit,
+event_type
+```
 
-- **SCPI instrument**: no new code — copy `scpi_command_map.example.json`,
-  fill in the VISA resource string and the SCPI strings for each
-  position, then `runner.add_device("scpi", "my_instrument",
-  command_map_path="my_instrument.json")`.
-- **Non-SCPI instrument**: subclass `Driver` in a new file under
-  `drivers/`, implement `connect`, `close`, `capabilities`, and whichever
-  of `write`/`read`/`query` make sense, decorate the class with
-  `@register_driver("your_type_name")`, and import the module once so the
-  decorator runs (see how `demo_test.py` imports `hwapp.drivers.mock`).
+Where `event_type` can represent:
 
-## Known gaps / next steps
+* Measurement results.
+* Commanded states.
+* Log messages.
+* Test assertions.
 
-- **Seeit USBB-RELAY08 protocol** is adapted from a community driver for
-  the same board family (no public vendor protocol doc) — worth
-  confirming byte-for-byte against your actual unit before relying on it.
-- **Pico TC-08 / ADC-20/24 drivers** call the picosdk wrapper functions as
-  documented, but haven't been exercised against real hardware yet in
-  this skeleton — check channel/units setup against your specific unit.
-- **PSU driver**: `aimtti_psu` driver added, using Aim-TTi's standard
-  remote command set (confirmed against the official CPX400 manual) over
-  serial/USB-virtual-COM — no VISA/NI-VISA needed for this one. Verified
-  against a simulated instrument that speaks the documented protocol;
-  still worth a first real-hardware smoke test (COM port, baud, exact
-  reply formatting) before relying on it for real runs.
-- **Blockly frontend**: built — a full Blockly workspace with custom
-  hardware blocks, Pause/Step/Stop, loop iteration reporting, sequence
-  save/load, and operator-prompt blocks, served by `webapp/server.py`.
-- **Report generation**: not started — reads the CSVs in a run directory
-  and produces one section per DUT.
+---
 
-## License
+# Adding new hardware
 
-This project ("Test in a Box") is licensed under the PolyForm Noncommercial License 1.0.0. See the LICENSE file in the project root for the full license text.
+## SCPI instruments
 
-In short: you're free to use, copy, modify, and distribute this project for non-commercial purposes, provided you comply with the terms of the license. Commercial use is prohibited without separate permission from the copyright holder.
+Many SCPI instruments can be added without writing new Python code.
 
-If you wish to use this project commercially, please contact the copyright holder to discuss licensing options.
+Create a command map:
+
+```
+scpi_command_map.example.json
+```
+
+Define:
+
+* VISA resource.
+* SCPI commands.
+* Instrument functions.
+
+Then add the device:
+
+```python
+runner.add_device(
+    "scpi",
+    "my_instrument",
+    command_map_path="my_instrument.json"
+)
+```
+
+---
+
+## Custom hardware drivers
+
+For non-SCPI equipment:
+
+1. Create a new driver under:
+
+```
+hwapp/drivers/
+```
+
+2. Subclass:
+
+```
+Driver
+```
+
+3. Implement:
+
+* connect()
+* close()
+* capabilities()
+* write()
+* read()
+* query()
+
+4. Register the driver:
+
+```python
+@register_driver("your_type_name")
+```
+
+---
+
+# Roadmap
+
+Future development areas include:
+
+* Additional instrument drivers.
+* Improved test report generation.
+* Automated PDF reporting.
+* Test limits and specification management.
+* Improved result database storage.
+* Test sequence version control.
+* Operator workflows.
+* Integration with manufacturing test environments.
+
+The long-term goal is to create a flexible engineering test platform that can
+grow from R&D validation into more structured automated test applications.
+
+---
+
+# Author
+
+**Philip McGaw MIET**
+
+Lead EMC Test Engineer specialising in:
+
+* Automotive battery testing.
+* EMC testing.
+* SCPI automation.
+* Laboratory test systems.
+* Embedded electronics.
+
+## Contact
+
+Website:
+https://philipmcgaw.com
+
+GitHub:
+https://github.com/PhilipMcGaw
+
+LinkedIn:
+https://linkedin.com/in/philipmcgaw
+
+Email:
+[philip@mcgaw.eu](mailto:philip@mcgaw.eu)
+
+Questions, collaboration enquiries, and feature suggestions are welcome.
+
+---
+
+# Commercial Licensing
+
+Test in a Box is available for non-commercial use under the
+**PolyForm Noncommercial License 1.0.0**.
+
+If you would like to use Test in a Box commercially, please contact the
+copyright holder to discuss licensing options.
+
+---
+
+# License
+
+This project ("Test in a Box") is licensed under the:
+
+**PolyForm Noncommercial License 1.0.0**
+
+Full license text:
+
+https://polyformproject.org/licenses/noncommercial/1.0.0
