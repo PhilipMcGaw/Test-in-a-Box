@@ -34,6 +34,10 @@ If you're interested in collaborating or commercial licensing,
 please get in touch.
 
 
+[![License: PolyForm Noncommercial License 1.0.0](https://img.shields.io/badge/License-PolyForm_Noncommercial_License 1.0.0-purple.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+
+
 
 ## Running this on Windows with no admin rights
 
