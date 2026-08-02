@@ -1,3 +1,7 @@
+# Test in a box
+
+[[webapp/static/icons/icon-192.png]]
+
 ## Running this on Windows with no admin rights
 
 See **SETUP_INSTRUCTIONS.md** for step-by-step, non-developer instructions.
@@ -101,17 +105,8 @@ where `event_type` is one of `measurement`, `state` (a commanded setpoint),
 
 ## License
 
-This project ("Test in a Box") is licensed under
-**Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
-(CC BY-NC-SA 4.0)** — see the `LICENSE` file in the project root for the
-full text.
+This project ("Test in a Box") is licensed under the PolyForm Noncommercial License 1.0.0. See the LICENSE file in the project root for the full license text.
 
-In short: you're free to use, adapt, and share this project, provided
-you (a) give attribution, (b) don't use it commercially, and (c) share
-any adaptations under the same license terms.
+In short: you're free to use, copy, modify, and distribute this project for non-commercial purposes, provided you comply with the terms of the license. Commercial use is prohibited without separate permission from the copyright holder.
 
-Note that CC licenses are written for creative/media works rather than
-software specifically (no patent grant, no software-specific
-distribution terms) — this is a deliberate choice for this project, just
-worth being aware of if you plan to combine it with other code under a
-different license.
+If you wish to use this project commercially, please contact the copyright holder to discuss licensing options.
