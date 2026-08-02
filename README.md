@@ -17,6 +17,12 @@ laboratory instrumentation, and hardware testing.
 
 </p>
 
+## Project Website
+
+For more information about the motivation, architecture, and future roadmap:
+
+https://philipmcgaw.com/projects/test-in-a-box/
+
 ---
 
 # What is Test in a Box?
