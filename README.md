@@ -1,6 +1,39 @@
-# Test in a box
+<p align="center">
+  <img src="webapp/static/icons/icon-192.png"
+       width="192"
+       alt="Test in a Box logo">
+</p>
 
-[[webapp/static/icons/icon-192.png]]
+<h1 align="center">Test in a Box</h1>
+
+<p align="center">
+An open-source engineering test automation platform for batteries, EMC,
+power electronics and laboratory instrumentation.
+</p>
+
+## Author
+
+**Philip McGaw MIET**
+
+Lead EMC Test Engineer specialising in automotive battery testing,
+SCPI automation and engineering software.
+
+Website
+: https://philipmcgaw.com
+
+LinkedIn
+: https://linkedin.com/in/philipmcgaw
+
+GitHub
+: https://github.com/PhilipMcGaw
+
+Email
+: philip@mcgaw.eu
+
+If you're interested in collaborating or commercial licensing,
+please get in touch.
+
+
 
 ## Running this on Windows with no admin rights
 
