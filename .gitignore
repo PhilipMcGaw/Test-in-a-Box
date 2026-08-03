@@ -1,3 +1,52 @@
-/python
-__pycache__
-/webapp/runs
+# -----------------------------------------------------------------------------
+# Test in a Box
+# Git Ignore
+# -----------------------------------------------------------------------------
+
+# Portable Python installation
+/python/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Generated test results
+/webapp/runs/
+/runs/
+
+# Saved Blockly sequences (if kept outside source control)
+/sequences/
+
+# Coverage and testing
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# IDEs
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Log files
+*.log

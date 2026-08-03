@@ -1,107 +1,306 @@
-# Setup instructions — no admin rights needed
+# Test in a Box – Windows Setup Guide (No Administrator Rights Required)
 
-This app is three things sitting in one folder: a portable copy of
-Python (like a program that doesn't need installing), the app itself,
-and a webpage you open in your normal browser. Nothing here uses a
-Windows installer, writes to Program Files, or touches the registry —
-that's what makes it work without admin rights.
+This guide explains how to run **Test in a Box** on a Windows computer where
+you do not have administrator rights.
 
-Do these steps once. After that, starting the app is one double-click.
+The application has been designed to work in engineering environments where
+software installation may be restricted. It uses a **portable Python**
+installation, allowing the application to run without modifying Windows,
+installing software system-wide, or writing to the registry.
 
-## Step 1 — Get a portable Python
+Once installed, starting Test in a Box is simply a matter of running a batch
+file and opening the local web interface in your browser.
 
-1. On any PC (or this one, in your browser), go to:
-   **https://winpython.github.io/**
-2. Download a **"Dot" build** of WinPython for **64-bit Windows**, a
-   recent Python 3.11 or 3.12 version (the "Dot" builds are smaller and
-   are all you need — you don't need the full build with extra editors).
-   It downloads as a single `.exe` file, but it's a **self-extracting
-   zip, not an installer** — double-clicking it just unpacks files to a
-   folder you choose. It does not need admin rights.
-3. When it asks where to extract, choose somewhere like:
-   `C:\Users\<you>\Documents\HardwareTestApp\pythontemp`
+---
 
-## Step 2 — Arrange the folders
+# Step 1 – Download a portable copy of Python
 
-1. Create a folder for the whole app, e.g.
-   `C:\Users\<you>\Documents\HardwareTestApp`
-2. Inside `pythontemp` from Step 1, you'll find a folder with a name
-   like `WPy64-31241`, and inside *that*, a folder like
-   `python-3.11.9.amd64`. That inner folder contains `python.exe`
-   directly — **rename that inner folder to `python`** and move it
-   into `HardwareTestApp`, so you end up with:
-   ```
-   HardwareTestApp\
-     python\
-       python.exe          <- this exact path matters
-       ...
-   ```
-   You can delete `pythontemp` afterwards.
-3. Unzip the app package (the one I gave you) into the same
-   `HardwareTestApp` folder, so you end up with:
-   ```
-   HardwareTestApp\
-     python\
-       python.exe
-     hwapp\
-     webapp\
-     requirements.txt
-     1_install_dependencies.bat
-     2_start_app.bat
-     README.md
-     SETUP_INSTRUCTIONS.md
-   ```
+Download **WinPython** from:
 
-## Step 3 — Install the extra bits Python needs
+https://winpython.github.io/
 
-Double-click **`1_install_dependencies.bat`**.
+Choose a recent **64-bit Dot release** (Python 3.11 or newer).
 
-A black window will open and download some files (this needs internet
-access — if it fails with a network/connection error, that likely means
-your work network blocks it, and you'd need to ask IT to allow access to
-`pypi.org` and `files.pythonhosted.org`, or install these files from a
-USB drive instead). When it finishes, press any key to close the window.
+The Dot releases contain everything required to run Test in a Box without the
+additional development tools included in the full WinPython distribution.
 
-You only need to do this once (and again later if I give you an updated
-`requirements.txt`).
+Although the download is an `.exe` file, it is **not** an installer. It simply
+extracts a portable copy of Python into a folder of your choosing.
 
-## Step 4 — Start the app
+Extract it somewhere temporary.
 
-Double-click **`2_start_app.bat`**.
+For example:
 
-A black window opens (this is the app running quietly — don't close it
-while you're using the app) and your browser should open automatically
-to the test builder. If the page doesn't load right away, wait a couple
-of seconds and refresh.
+```text
+C:\Users\<you>\Downloads\WinPythonTemp
+```
 
-To stop the app, close the black window.
+No administrator rights are required.
 
-## About your hardware drivers
+---
 
-- **SCPI bench instruments over USB**: you can get **NI-VISA** installed
-  via IT — do that once, up front. With NI-VISA present, any USB-TMC SCPI
-  instrument will show up as a normal VISA resource (something like
-  `USB0::0x0AAD::0x0197::123456::INSTR`) and the app's generic SCPI driver
-  talks to it directly — no extra driver work needed per instrument. To
-  find the exact resource string for a connected instrument, open
-  **NI MAX** (installed alongside NI-VISA) → Devices and Interfaces —
-  it'll be listed there.
-- **Pico TC-08 / ADC-20/24**: you mentioned PicoScope and PicoLog are
-  already installed by IT. That's a good sign, but it's worth checking
-  whether the underlying **PicoSDK** is also present — open Windows
-  Settings → Apps → Installed apps and search for "Pico". If you only
-  see PicoScope/PicoLog and not anything called "PicoSDK" or "Pico
-  Technology SDK", ask IT to add that — it's a small, official driver
-  package from Pico Technology.
-- **Seeit relay board / FTDI-based instruments**: since FTDI and serial
-  drivers are already installed, these should "just work" when plugged
-  in — Windows will assign them a COM port (check Device Manager → Ports
-  (COM & LPT) to find out which one).
+# Step 2 – Arrange the folders
 
-## Editing which hardware is connected
+Create a folder for Test in a Box.
 
-Open `webapp\config.json` in Notepad. It currently lists two mock PSUs
-and a mock relay, purely so the app has something to show you and run
-against with zero hardware attached. When you're ready to connect real
-hardware, we'll walk through replacing those entries together — no need
-to touch anything else in the app to do that.
+For example:
+
+```text
+C:\Users\<you>\Documents\Test-in-a-Box
+```
+
+Inside the extracted WinPython folder you'll find a directory similar to:
+
+```text
+WPy64-312xx\
+    python-3.xx.x.amd64\
+```
+
+Rename the **python-3.xx.x.amd64** folder to simply:
+
+```text
+python
+```
+
+and move it into your Test-in-a-Box folder.
+
+You should end up with something similar to:
+
+```text
+Test-in-a-Box\
+    python\
+        python.exe
+```
+
+The temporary WinPython download folder can then be deleted.
+
+---
+
+# Step 3 – Copy the Test in a Box files
+
+Extract the Test in a Box repository into the same folder.
+
+The resulting structure should look similar to:
+
+```text
+Test-in-a-Box\
+    python\
+        python.exe
+
+    tiab\
+    webapp\
+    docs\
+
+    requirements.txt
+
+    1_install_dependencies.bat
+    2_start_app.bat
+
+    README.md
+    SETUP_INSTRUCTIONS.md
+```
+
+---
+
+# Step 4 – Install the required Python packages
+
+Double-click:
+
+```text
+1_install_dependencies.bat
+```
+
+A command window will open and download the required Python packages.
+
+This only needs to be done:
+
+- when first installing Test in a Box;
+- or when the `requirements.txt` file changes.
+
+Internet access is required for this step.
+
+If your organisation blocks access to Python package repositories, you may need
+to ask your IT department to allow access to:
+
+- pypi.org
+- files.pythonhosted.org
+
+---
+
+# Step 5 – Start Test in a Box
+
+Double-click:
+
+```text
+2_start_app.bat
+```
+
+A command window will open.
+
+Leave this window running while using Test in a Box.
+
+Your web browser should automatically open.
+
+If it does not, browse to:
+
+```text
+http://127.0.0.1:8765
+```
+
+To stop the application simply close the command window.
+
+---
+
+# First Run
+
+The default configuration uses **mock hardware**.
+
+This allows you to:
+
+- explore the interface;
+- create Blockly test procedures;
+- run the supplied demonstration;
+- generate CSV result files;
+
+without connecting any laboratory equipment.
+
+---
+
+# Configuring your hardware
+
+Once the application is running, open the **Configure Devices** page.
+
+From there you can:
+
+- Add instruments.
+- Configure communication settings.
+- Save hardware definitions.
+- Connect and reconnect hardware.
+- Verify operation using the live mimic panel.
+
+For most users there should be no need to edit:
+
+```text
+webapp\config.json
+```
+
+directly.
+
+The configuration file remains available for troubleshooting or advanced
+configuration if required.
+
+---
+
+# Instrument Drivers
+
+## Generic SCPI Instruments
+
+Many SCPI instruments can be supported without writing new Python code.
+
+Create a command map based on:
+
+```text
+tiab/drivers/scpi_command_map.example.json
+```
+
+and specify the VISA resource together with the commands required by your
+instrument.
+
+The generic SCPI driver can then communicate with the instrument using those
+definitions.
+
+---
+
+## Aim-TTi Power Supplies
+
+Support is included for Aim-TTi programmable power supplies using their serial
+remote command protocol.
+
+These drivers communicate using USB virtual COM ports or RS232 and do not
+require NI-VISA.
+
+Driver behaviour has been validated against protocol-accurate simulators but
+should still be confirmed against your own hardware before relying on it for
+critical testing.
+
+---
+
+## Pico TC-08 and Pico ADC-20/24
+
+Support is included for:
+
+- Pico TC-08
+- Pico ADC-20
+- Pico ADC-24
+
+using the official PicoSDK.
+
+If PicoScope or PicoLog is already installed there is a good chance the
+required SDK is already present.
+
+If not, install the official PicoSDK from Pico Technology.
+
+As with all hardware drivers, confirm correct operation against your own
+hardware before relying on it for production work.
+
+---
+
+## FTDI Serial Devices
+
+Relay boards and other FTDI-based serial devices should appear as normal COM
+ports once the FTDI drivers are installed.
+
+Windows Device Manager can be used to determine the assigned COM port.
+
+---
+
+# Troubleshooting
+
+If Test in a Box does not start correctly:
+
+1. Confirm that Python dependencies installed successfully.
+2. Check that the command window has remained open.
+3. Verify that your browser can reach:
+
+```text
+http://127.0.0.1:8765
+```
+
+4. Try the supplied mock hardware configuration before connecting real
+   laboratory equipment.
+5. Check the Configure Devices page to confirm your instruments have connected.
+
+For SCPI instruments it is often useful to verify that the instrument responds
+correctly to:
+
+```text
+*IDN?
+```
+
+before attempting to automate it.
+
+---
+
+# Need Help?
+
+If you encounter a problem, please include as much of the following information
+as possible:
+
+- Windows version.
+- Python version.
+- Instrument make and model.
+- Driver being used.
+- Error messages.
+- Screenshots where appropriate.
+
+Project website:
+
+https://philipmcgaw.com/projects/test-in-a-box/
+
+GitHub repository:
+
+https://github.com/PhilipMcGaw/Test-in-a-Box
+
+Email:
+
+philip@mcgaw.eu

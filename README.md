@@ -7,373 +7,413 @@
 <h1 align="center">Test in a Box</h1>
 
 <p align="center">
-An open-source engineering test automation platform for automated validation,
-laboratory instrumentation, and hardware testing.
+A visual engineering test automation platform for electrical and environmental
+R&amp;D validation.
 </p>
 
 <p align="center">
-
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-purple.svg)](https://polyformproject.org/licenses/noncommercial/1.0.0)
-
+  <a href="https://polyformproject.org/licenses/noncommercial/1.0.0">
+    <img
+      src="https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-purple.svg"
+      alt="License: PolyForm Noncommercial 1.0.0">
+  </a>
 </p>
 
-## Project Website
+> **Development status:** Test in a Box is in early v0.1 development.
+> The mock test workflow is usable, but several v0.1 capabilities described
+> in the documentation are still planned or require validation on physical
+> hardware.
 
-For more information about the motivation, architecture, and future roadmap:
+## What is Test in a Box?
 
-https://philipmcgaw.com/projects/test-in-a-box/
+**Test in a Box** is an engineering test automation platform intended to make
+one-off and evolving electrical and environmental validation tests quicker to
+configure, automate and repeat.
 
----
-
-# What is Test in a Box?
-
-**Test in a Box** is an open-source engineering test automation platform designed
-to simplify the creation and execution of repeatable validation procedures for
+It is aimed initially at research and development work involving
 **Devices Under Test (DUTs)** and **Equipment Under Test (EUTs)**.
 
-The project is focused initially on **research and development (R&D) testing**,
-where engineers need to repeatedly evaluate multiple devices against defined
-test procedures, collect measurements, and record pass/fail results.
+Test in a Box separates the engineering test procedure from the details of the
+connected instruments. A test should request an action such as:
 
-Test in a Box provides a flexible framework for building automated test
-sequences that can control laboratory equipment, apply defined test conditions,
-capture data, and provide consistent results across multiple test samples.
+- set a voltage;
+- change a chamber temperature;
+- operate a relay;
+- read a measurement;
+- wait for a defined period;
+- record a result.
 
-The long-term vision is to provide a scalable test automation platform that can
-support the engineering lifecycle from early prototype validation through to
-more structured automated testing environments.
+The selected hardware driver is responsible for translating that request into
+the command or protocol required by the physical equipment.
 
----
+Not every R&D test has a pass/fail criterion. Test in a Box is therefore
+intended to support both:
 
-# Why was Test in a Box created?
+- informational and characterisation measurements; and
+- measurements evaluated against defined acceptance criteria.
 
-Engineering test systems are often built as one-off solutions, combining custom
-scripts, instrument drivers, spreadsheets, and manual procedures.
+The initial focus is R&D electrical and environmental validation. More
+structured production and end-of-line testing may be explored later.
 
-While these approaches can work, they can become difficult to maintain,
-reproduce, and expand as test requirements grow.
+## Why was Test in a Box created?
+
+Engineering test systems are frequently built as one-off solutions using a
+combination of:
+
+- instrument-control scripts;
+- spreadsheets;
+- manual procedures;
+- vendor software;
+- custom drivers;
+- project-specific logging tools.
+
+These systems can work well for an individual test, but they can become
+difficult to maintain, adapt and reuse.
 
 Test in a Box aims to provide a common framework for:
 
-- Creating repeatable automated test procedures.
-- Testing multiple DUTs using the same defined sequence.
-- Controlling different types of laboratory equipment.
-- Capturing measurements and test results.
-- Improving test traceability and repeatability.
-- Reducing the amount of custom software required for each test system.
+- creating repeatable automated test procedures;
+- testing multiple DUTs using the same sequence;
+- controlling different types of laboratory equipment;
+- collecting engineering measurements;
+- recording results against individual DUTs;
+- reducing the amount of bespoke software required for each test programme;
+- allowing test procedures to be changed without rewriting instrument-control
+  code.
 
----
+## Current capabilities
 
-# Key Features
+The repository currently includes:
 
-## Hardware abstraction
+- a locally hosted FastAPI web application;
+- a Blockly test-procedure editor;
+- hardware set and read blocks;
+- wait and logging blocks;
+- operator prompts;
+- assertions and tolerance checks;
+- Blockly loops, logic, maths and variables;
+- run, pause, step, resume and stop controls;
+- test-sequence save and load;
+- GUI-based device configuration;
+- live mimic-style instrument controls and readouts;
+- DUT-to-position mapping;
+- per-DUT CSV logging;
+- mock PSU and relay drivers for development without physical hardware.
 
-Test in a Box separates test procedures from hardware implementation through a
-driver-based architecture.
+Hardware drivers currently included in the repository cover:
 
-This allows different instruments and equipment to be integrated through a
-common interface rather than requiring custom code for every test setup.
+- generic SCPI instruments;
+- Aim-TTi programmable power supplies;
+- Seeit USB relay hardware;
+- Pico TC-08 temperature loggers;
+- Pico ADC-20/24 data loggers;
+- mock instruments for development and demonstrations.
 
-Supported and planned integrations include:
+Some hardware drivers have not yet been validated against physical equipment.
+Their current status should be checked in the application's
+**Supported Devices** page before relying on them for a test.
 
-- SCPI-controlled laboratory instruments.
-- Programmable power supplies.
-- Relay switching hardware.
-- Temperature measurement equipment.
-- Data acquisition hardware.
-- Custom engineering hardware.
+## v0.1 direction
 
----
+The agreed v0.1 scope also includes:
 
-## Visual test sequence development
+- test parameters defined in one place;
+- explicit engineering units for parameters and measurements;
+- logical hardware roles that can be mapped to available instruments;
+- reusable hardware definitions;
+- progress percentage and a progress bar;
+- estimated finish time;
+- current DUT and current test step;
+- automatic recording of `*IDN?` or an equivalent identity response;
+- CSV result files;
+- a Markdown run summary;
+- defined safe shutdown behaviour;
+- an end-to-end electrical or environmental validation test.
 
-The project includes a Blockly-based interface allowing engineers to create
-test sequences visually.
+These are v0.1 goals and are not all implemented yet.
 
-The aim is to allow test procedures to be created and modified without every
-change requiring software development.
+See [`docs/MVP-v0.1.md`](docs/MVP-v0.1.md) for the agreed scope boundary.
 
-Current capabilities include:
+## Architecture
 
-- Hardware control blocks.
-- Measurement acquisition.
-- Wait and timing functions.
-- Loop execution.
-- Operator prompts.
-- Logging.
-- Assertions and pass/fail checks.
+<p align="center">
+  <img
+    src="docs/images/architecture-drawing.jpg"
+    alt="Test in a Box Architecture"
+    width="900">
+</p>
 
----
+The test procedure describes what should happen.
 
-# Current Architecture
+The driver layer determines how to communicate with the selected hardware.
 
-```
+The principal source layout is:
 
-Test Sequence
-|
-v
-Blockly Interface
-|
-v
-Generated Test Procedure
-|
-v
-Test Runner
-|
-+----------------+
-|                |
-v                v
-Hardware Drivers    Result Logger
-|
-+----------------+
-|
-v
-Laboratory Equipment
-
-```
-
-The core components are:
-
-```
-
+```text
 tiab/
-drivers/
-base.py             Driver interface and common data structures
-registry.py         Driver registration system
-scpi_generic.py     Generic SCPI instrument driver
-scpi_command_map.example.json
-seeit_relay.py      Relay controller driver
-pico_tc08.py        Pico TC-08 temperature logger
-pico_adc.py         Pico ADC-20/24 driver
-mock.py             Simulation drivers for development
+  drivers/
+    base.py
+    catalog.py
+    registry.py
+    mock.py
+    aimtti_psu.py
+    scpi_generic.py
+    seeit_relay.py
+    pico_tc08.py
+    pico_adc.py
+    scpi_command_map.example.json
 
-run/
-mapping.py          DUT position mapping
-csv_logger.py       Test result logging
-runner.py           Test execution engine
+  run/
+    control.py
+    csv_logger.py
+    instrument.py
+    mapping.py
+    runner.py
+
+  example_scripts/
+    demo_test.py
 
 webapp/
-server.py             FastAPI web application
-static/
-index.html          Blockly workspace
-app.js              User interface logic
-custom_blocks.js    Hardware test blocks
-generators.js       Python code generation
+  server.py
+  config.json
 
+  static/
+    index.html
+    app.js
+    custom_blocks.js
+    generators.js
+    devices.html
+    devices.js
+    supported-devices.html
 ```
 
----
+## Documentation
 
-# Running on Windows without administrator rights
+The documentation index is available at:
 
-Test in a Box is designed to operate in restricted engineering environments
-where users may not have permission to install software globally.
+[`docs/README.md`](docs/README.md)
+
+Recommended starting points:
+
+- [Vision](docs/VISION.md)
+- [MVP v0.1](docs/MVP-v0.1.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Engineering philosophy](docs/ENGINEERING-PHILOSOPHY.md)
+- [User workflow](docs/USER-WORKFLOW.md)
+- [Hardware library](docs/HARDWARE-LIBRARY.md)
+- [Results and traceability](docs/RESULTS-AND-TRACEABILITY.md)
+- [Hello World examples](docs/HELLO-WORLD.md)
+
+The project website contains further background, motivation and development
+updates:
+
+https://philipmcgaw.com/projects/test-in-a-box/
+
+## Running on Windows without administrator rights
+
+Test in a Box is designed to run in restricted engineering environments where
+users may not have permission to install software system-wide.
 
 See:
 
+[`SETUP_INSTRUCTIONS.md`](SETUP_INSTRUCTIONS.md)
+
+for the complete setup process.
+
+Once the portable Python environment and dependencies are ready, start the
+application using:
+
+```text
+2_start_app.bat
 ```
 
-SETUP_INSTRUCTIONS.md
+The application is served locally at:
 
-```
-
-for detailed instructions.
-
-The short version:
-
-1. Install the included portable Python environment.
-2. Run the startup batch file.
-3. Open the local web application.
-
-The application runs locally:
-
-```
-
+```text
 http://127.0.0.1:8765
+```
 
-````
+No system-wide application installation is required.
 
-No system-wide installation is required.
+## Running the no-hardware demonstration
 
----
+The command-line demonstration uses mock instruments and does not require any
+laboratory hardware.
 
-# Running the demonstration
-
-The demonstration can be run without any physical hardware.
-
-Install dependencies:
+Install the Python dependencies:
 
 ```bash
 pip install -r requirements.txt
-````
-
-Run:
-
-```bash
-python3 -m tiab.example_scripts.demo_test
 ```
 
-The demonstration performs a simulated multi-DUT test sequence using mock
-hardware drivers and generates test result files.
+Run the demonstration from the repository root:
+
+```bash
+python -m tiab.example_scripts.demo_test
+```
+
+The demonstration performs a simulated multi-DUT test and writes separate CSV
+files for the configured DUTs.
 
 Example output:
 
-```
+```text
 runs/demo_run_001/
-
-run_demo_run_001_DUT_DUT-0001.csv
-run_demo_run_001_DUT_DUT-0002.csv
-run_demo_run_001_DUT_unassigned.csv
+  run_demo_run_001_DUT_DUT-0001.csv
+  run_demo_run_001_DUT_DUT-0002.csv
+  run_demo_run_001_DUT_unassigned.csv
 ```
 
-The logged data uses a consistent format:
+The current event schema is:
 
-```
-timestamp,
-device_id,
-position,
-channel,
-value,
-unit,
-event_type
+```text
+timestamp,device_id,position,channel,value,unit,event_type
 ```
 
-Where `event_type` can represent:
+An event may represent:
 
-* Measurement results.
-* Commanded states.
-* Log messages.
-* Test assertions.
+- a measurement;
+- a commanded state;
+- a log entry;
+- a test assertion.
 
----
+## Adding hardware
 
-# Adding new hardware
+### Generic SCPI instruments
 
-## SCPI instruments
+Many SCPI instruments can be added using a command-map file rather than a new
+Python driver.
 
-Many SCPI instruments can be added without writing new Python code.
+Start with:
 
-Create a command map:
-
-```
-scpi_command_map.example.json
-```
-
-Define:
-
-* VISA resource.
-* SCPI commands.
-* Instrument functions.
-
-Then add the device:
-
-```python
-runner.add_device(
-    "scpi",
-    "my_instrument",
-    command_map_path="my_instrument.json"
-)
+```text
+tiab/drivers/scpi_command_map.example.json
 ```
 
----
+The command map describes the instrument resource, available positions and the
+commands used to access them.
 
-## Custom hardware drivers
+A device can then be added using the generic SCPI driver and the path to its
+command-map file.
 
-For non-SCPI equipment:
+### Custom hardware drivers
 
-1. Create a new driver under:
+For non-SCPI hardware:
 
-```
-tiab/drivers/
-```
+1. Create a driver module under:
 
-2. Subclass:
+   ```text
+   tiab/drivers/
+   ```
 
-```
-Driver
-```
+2. Subclass the base `Driver`.
 
-3. Implement:
+3. Implement the operations appropriate to the device, such as:
 
-* connect()
-* close()
-* capabilities()
-* write()
-* read()
-* query()
+   - `connect()`
+   - `close()`
+   - `capabilities()`
+   - `write()`
+   - `read()`
+   - `query()`
 
 4. Register the driver:
 
-```python
-@register_driver("your_type_name")
+   ```python
+   @register_driver("your_type_name")
+   ```
+
+5. Add a mock implementation for any capability used by examples or automated
+   tests.
+
+## Project naming
+
+Test in a Box uses engineering-oriented project terminology.
+
+A typical test may be identified using separate fields such as:
+
+```text
+Project:    TO-1800
+DUT:        C
+Test case:  TC2
+Test name:  Pickup and Hold Voltage
 ```
 
----
+A combined display name may therefore be:
 
-# Roadmap
+```text
+TO-1800.C — TC2 Pickup and Hold Voltage
+```
 
-Future development areas include:
+## Roadmap
 
-* Additional instrument drivers.
-* Improved test report generation.
-* Automated PDF reporting.
-* Test limits and specification management.
-* Improved result database storage.
-* Test sequence version control.
-* Operator workflows.
-* Integration with manufacturing test environments.
+The immediate priority is completing the v0.1 workflow:
 
-The long-term goal is to create a flexible engineering test platform that can
-grow from R&D validation into more structured automated test applications.
+1. configure the available hardware;
+2. create a test procedure in Blockly;
+3. run the procedure;
+4. monitor progress;
+5. record results against the correct DUT;
+6. generate CSV data and a Markdown summary.
 
----
+Later development may include:
 
-# Author
+- richer pass, warning and fail evaluation;
+- improved graphs and reports;
+- result databases;
+- calibration information;
+- test-sequence versioning;
+- improved recovery after interruptions;
+- operator workflows;
+- barcode support;
+- multi-rig monitoring;
+- production and end-of-line testing features.
+
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) and
+[`docs/FUTURE-IDEAS.md`](docs/FUTURE-IDEAS.md) for more detail.
+
+## Author
 
 **Philip McGaw MIET**
 
 Lead EMC Test Engineer specialising in:
 
-* Automotive battery testing.
-* EMC testing.
-* SCPI automation.
-* Laboratory test systems.
-* Embedded electronics.
+- automotive battery testing;
+- electrical and environmental validation;
+- SCPI automation;
+- laboratory test systems;
+- embedded electronics.
 
-## Contact
+### Contact
 
-Website:
-https://philipmcgaw.com
+- Website: https://philipmcgaw.com
+- GitHub: https://github.com/PhilipMcGaw
+- LinkedIn: https://www.linkedin.com/in/philipmcgaw/
+- Email: [philip@mcgaw.eu](mailto:philip@mcgaw.eu)
 
-GitHub:
-https://github.com/PhilipMcGaw
+Development is being kept under the author's control until version 1.
 
-LinkedIn:
-https://linkedin.com/in/philipmcgaw
+Bug reports and practical feedback are welcome.
 
-Email:
-[philip@mcgaw.eu](mailto:philip@mcgaw.eu)
-
-Questions, collaboration enquiries, and feature suggestions are welcome.
-
----
-
-# Commercial Licensing
+## Commercial licensing
 
 Test in a Box is available for non-commercial use under the
 **PolyForm Noncommercial License 1.0.0**.
 
-If you would like to use Test in a Box commercially, please contact the
-copyright holder to discuss licensing options.
+Commercial use requires separate permission from the copyright holder.
 
----
+For commercial licensing enquiries, contact:
 
-# License
+[philip@mcgaw.eu](mailto:philip@mcgaw.eu)
 
-This project ("Test in a Box") is licensed under the:
+## License
+
+This project is licensed under the:
 
 **PolyForm Noncommercial License 1.0.0**
 
-Full license text:
+See the [`LICENSE`](LICENSE) file for the complete licence text.
+
+Official licence page:
 
 https://polyformproject.org/licenses/noncommercial/1.0.0
