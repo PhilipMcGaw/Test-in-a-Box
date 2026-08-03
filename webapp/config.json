@@ -4,15 +4,15 @@
       "device_type": "mock_psu",
       "device_id": "psu1",
       "kwargs": {},
-      "x": 70,
-      "y": 70
+      "x": 70.0,
+      "y": 70.0
     },
     {
       "device_type": "mock_psu",
       "device_id": "psu2",
       "kwargs": {},
-      "x": 100,
-      "y": 100
+      "x": 100.0,
+      "y": 100.0
     },
     {
       "device_type": "mock_relay",
@@ -20,8 +20,18 @@
       "kwargs": {
         "num_channels": 8
       },
-      "x": 70,
-      "y": 70
+      "x": 70.0,
+      "y": 70.0
+    },
+    {
+      "device_type": "aimtti_psu",
+      "device_id": "aimtti_psu_1",
+      "kwargs": {
+        "serial_port": "COM17",
+        "num_channels": 1
+      },
+      "x": 110.0,
+      "y": 442.0
     }
   ],
   "mapping": [
