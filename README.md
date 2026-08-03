@@ -136,7 +136,7 @@ The core components are:
 
 ```
 
-hwapp/
+tiab/
 drivers/
 base.py             Driver interface and common data structures
 registry.py         Driver registration system
@@ -210,7 +210,7 @@ pip install -r requirements.txt
 Run:
 
 ```bash
-python3 -m hwapp.example_scripts.demo_test
+python3 -m tiab.example_scripts.demo_test
 ```
 
 The demonstration performs a simulated multi-DUT test sequence using mock
@@ -284,7 +284,7 @@ For non-SCPI equipment:
 1. Create a new driver under:
 
 ```
-hwapp/drivers/
+tiab/drivers/
 ```
 
 2. Subclass:
