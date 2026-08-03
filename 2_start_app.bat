@@ -35,8 +35,7 @@ echo Keep this window open while you're using the app.
 echo Close this window to stop the app.
 echo.
 
-start "" http://127.0.0.1:8765
-
 "%PYTHON%" -m webapp.server
 
+start "" http://127.0.0.1:8765
 pause
