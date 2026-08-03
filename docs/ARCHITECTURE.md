@@ -132,33 +132,12 @@ test system.
 
 A typical execution flow is:
 
-```text
-Configure Hardware
-
-↓
-
-Author Test Procedure
-
-↓
-
-Generate Python
-
-↓
-
-Execute Procedure
-
-↓
-
-Collect Measurements
-
-↓
-
-Write Results
-
-↓
-
-Return Hardware to Safe State
-```
+<p align="center">
+  <img
+    src="images/test-execution-flow.png"
+    alt="Test execution flow"
+    width="900">
+</p>
 
 ---
 

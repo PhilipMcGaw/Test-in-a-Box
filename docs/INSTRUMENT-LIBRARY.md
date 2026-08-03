@@ -17,7 +17,7 @@ For example, a procedure should request:
 
 rather than referencing a particular COM port or manufacturer.
 
-The Hardware Library maps those logical requirements to the instruments
+The Instrument Library maps those logical requirements to the instruments
 currently available in the laboratory.
 
 ---

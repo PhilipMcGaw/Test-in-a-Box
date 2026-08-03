@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/TestinaBox.png"
+	<img src="docs/images/test-in-a-box.png"
        width="192"
        alt="Test in a Box logo">
 </p>
@@ -201,7 +201,7 @@ Recommended starting points:
 - [Engineering philosophy](docs/ENGINEERING-PHILOSOPHY.md)
 - [User workflow](docs/USER-WORKFLOW.md)
 - [Instrument Library](docs/INSTRUMENT-LIBRARY.md)
-- [Engineering Results](ENGINEERING-RESULTS.md)
+- [Engineering Results](docs/ENGINEERING-RESULTS.md)
 - [Hello World examples](docs/HELLO-WORLD.md)
 
 The project website contains further background, motivation and development
