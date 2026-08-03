@@ -1,10 +1,14 @@
 """
-Base classes every hardware driver implements.
+Base classes implemented by every Test in a Box hardware driver.
 
-The whole point of this layer: a new instrument = a new subclass of Driver
-plus a CapabilityDescriptor. The Blockly toolbox (added later) will read
-CapabilityDescriptor.positions to auto-generate blocks, and the runner will
-call the same handful of methods regardless of what's actually plugged in.
+A new instrument normally consists of:
+
+- a Driver subclass;
+- a CapabilityDescriptor;
+- one or more Position definitions.
+
+The rest of the application interacts with the same small driver interface
+regardless of the physical instrument or communication protocol.
 """
 
 from __future__ import annotations
@@ -17,110 +21,192 @@ from typing import Any, Callable, Optional
 
 
 class PositionKind(str, Enum):
-    """What kind of thing a position on a device represents."""
-    OUTPUT_ANALOG = "output_analog"      # e.g. PSU channel voltage/current setpoint
-    OUTPUT_DIGITAL = "output_digital"    # e.g. relay channel on/off
-    INPUT_ANALOG = "input_analog"        # e.g. TC-08/ADC channel reading
-    INPUT_DIGITAL = "input_digital"      # e.g. relay readback, digital sense line
+    """The type of engineering value represented by a device position."""
+
+    OUTPUT_ANALOG = "output_analog"
+    OUTPUT_DIGITAL = "output_digital"
+    INPUT_ANALOG = "input_analog"
+    INPUT_DIGITAL = "input_digital"
 
 
-@dataclass
+@dataclass(frozen=True)
 class Position:
-    """A single addressable point on a device (a channel, relay, etc.)."""
-    id: str                      # e.g. "ch1" — unique within the device
-    label: str                   # human-readable, e.g. "Channel 1"
+    """A single addressable point on an instrument."""
+
+    id: str
+    label: str
     kind: PositionKind
-    unit: Optional[str] = None   # e.g. "V", "A", "degC", None for digital
+    unit: Optional[str] = None
 
 
 @dataclass
 class CapabilityDescriptor:
     """
-    Describes what a connected device instance can do. The registry and
-    (later) the Blockly toolbox generator read this to know what blocks/
-    fields to offer for a given device_id.
+    Describe the operations and positions exposed by a connected instrument.
+
+    The web application and Blockly editor use this information to determine
+    which controls and fields should be available for a given device instance.
     """
-    device_type: str             # e.g. "psu", "seeit_relay08", "pico_tc08", "scpi"
-    device_id: str               # unique instance id, e.g. "psu1"
+
+    device_type: str
+    device_id: str
     display_name: str
     positions: list[Position] = field(default_factory=list)
 
     def position(self, position_id: str) -> Position:
-        for p in self.positions:
-            if p.id == position_id:
-                return p
-        raise KeyError(f"{self.device_id}: no such position '{position_id}'")
+        """Return a position by ID, or raise KeyError when it does not exist."""
+        for position in self.positions:
+            if position.id == position_id:
+                return position
+
+        raise KeyError(
+            f"{self.device_id}: no such position {position_id!r}"
+        )
 
 
 @dataclass
 class LogEvent:
-    """One row of data — a measurement or a script-level log/assert event."""
+    """One timestamped engineering event recorded during a test run."""
+
     timestamp: str
     device_id: str
     position: Optional[str]
     channel: Optional[str]
     value: Any
     unit: Optional[str]
-    event_type: str               # "measurement" | "log" | "assert" | "state"
+    event_type: str
 
     @staticmethod
     def now() -> str:
+        """Return the current UTC time in ISO 8601 format."""
         return datetime.now(timezone.utc).isoformat()
 
 
 class Driver(ABC):
     """
-    Common interface for every piece of test equipment.
+    Common interface for every item of test equipment.
 
-    Concrete drivers implement connect/close and the read/write primitives
-    that make sense for that device. `capabilities()` is what the rest of
-    the app introspects — everything else is driver-specific detail hidden
-    behind write()/read()/query().
+    Concrete drivers implement connection handling, capability reporting and
+    whichever read, write or query operations are appropriate to the
+    instrument.
+
+    Instrument-specific communication details remain inside the driver.
     """
 
-    def __init__(self, device_id: str, on_event: Optional[Callable[[LogEvent], None]] = None):
+    def __init__(
+        self,
+        device_id: str,
+        on_event: Optional[Callable[[LogEvent], None]] = None,
+    ) -> None:
         self.device_id = device_id
         self._on_event = on_event
         self._connected = False
 
-    # -- lifecycle -----------------------------------------------------
+    # ------------------------------------------------------------------
+    # Lifecycle
+    # ------------------------------------------------------------------
+
     @abstractmethod
     def connect(self) -> None:
-        ...
+        """Connect to the physical or simulated instrument."""
 
     @abstractmethod
     def close(self) -> None:
-        ...
+        """Close the instrument connection and release associated resources."""
 
     @property
     def connected(self) -> bool:
+        """Return True when the driver considers itself connected."""
         return self._connected
 
-    def set_event_sink(self, on_event: Optional[Callable[["LogEvent"], None]]) -> None:
-        """Point this driver's logging at a new run's logger without reconnecting."""
+    def safe_state(self) -> None:
+        """
+        Return the instrument to its defined safe condition.
+
+        The default implementation does nothing because not every instrument
+        controls an output. Drivers for power supplies, relay controllers,
+        chambers and similar equipment should override this method.
+
+        Safe-state implementations should be best-effort and should avoid
+        raising merely because one individual output could not be changed.
+        """
+
+    def set_event_sink(
+        self,
+        on_event: Optional[Callable[[LogEvent], None]],
+    ) -> None:
+        """
+        Redirect driver events to the logger for the current run.
+
+        This allows devices to remain connected while successive test runs use
+        different CSV loggers.
+        """
         self._on_event = on_event
 
-    # -- introspection ---------------------------------------------------
+    # ------------------------------------------------------------------
+    # Identification and capabilities
+    # ------------------------------------------------------------------
+
+    def identify(self) -> dict[str, str]:
+        """
+        Return identifying information for the connected instrument.
+
+        Drivers should provide as much information as the hardware supports.
+        Common keys are:
+
+        - manufacturer
+        - model
+        - serial
+        - firmware
+        - idn
+
+        The default implementation returns an empty dictionary for instruments
+        that do not provide identification information.
+        """
+        return {}
+
     @abstractmethod
     def capabilities(self) -> CapabilityDescriptor:
-        ...
+        """Return the positions and operations exposed by this instrument."""
 
-    # -- generic read/write (drivers override what's relevant) -----------
+    # ------------------------------------------------------------------
+    # Generic read, write and query operations
+    # ------------------------------------------------------------------
+
     def write(self, position_id: str, value: Any) -> None:
-        raise NotImplementedError(f"{self.device_id}: write() not supported")
+        """Write a value to an instrument position."""
+        raise NotImplementedError(
+            f"{self.device_id}: write() not supported"
+        )
 
     def read(self, position_id: str) -> Any:
-        raise NotImplementedError(f"{self.device_id}: read() not supported")
+        """Read the current value from an instrument position."""
+        raise NotImplementedError(
+            f"{self.device_id}: read() not supported"
+        )
 
     def query(self, raw_command: str) -> str:
-        raise NotImplementedError(f"{self.device_id}: query() not supported")
+        """Send a raw query when the driver explicitly supports it."""
+        raise NotImplementedError(
+            f"{self.device_id}: query() not supported"
+        )
 
-    # -- event emission (used by write/read to feed the CSV logger) ------
-    def _emit(self, position_id: Optional[str], value: Any, unit: Optional[str],
-               event_type: str = "measurement") -> None:
+    # ------------------------------------------------------------------
+    # Event emission
+    # ------------------------------------------------------------------
+
+    def _emit(
+        self,
+        position_id: Optional[str],
+        value: Any,
+        unit: Optional[str],
+        event_type: str = "measurement",
+    ) -> None:
+        """Emit a timestamped event to the currently attached run logger."""
         if self._on_event is None:
             return
-        evt = LogEvent(
+
+        event = LogEvent(
             timestamp=LogEvent.now(),
             device_id=self.device_id,
             position=position_id,
@@ -129,11 +215,15 @@ class Driver(ABC):
             unit=unit,
             event_type=event_type,
         )
-        self._on_event(evt)
+        self._on_event(event)
 
-    def __enter__(self):
+    # ------------------------------------------------------------------
+    # Context manager support
+    # ------------------------------------------------------------------
+
+    def __enter__(self) -> "Driver":
         self.connect()
         return self
 
-    def __exit__(self, exc_type, exc, tb):
+    def __exit__(self, exc_type, exc, traceback) -> None:
         self.close()
