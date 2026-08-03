@@ -97,7 +97,7 @@ function initWorkspace() {
     media: '/static/blockly/media/',
   });
 
-  const saved = safeStorage.get('hwapp_workspace');
+  const saved = safeStorage.get('tiab_workspace');
   if (saved) {
     try {
       Blockly.serialization.workspaces.load(JSON.parse(saved), workspace);
@@ -108,7 +108,7 @@ function initWorkspace() {
 
   workspace.addChangeListener(() => {
     const state = Blockly.serialization.workspaces.save(workspace);
-    safeStorage.set('hwapp_workspace', JSON.stringify(state));
+    safeStorage.set('tiab_workspace', JSON.stringify(state));
   });
 }
 

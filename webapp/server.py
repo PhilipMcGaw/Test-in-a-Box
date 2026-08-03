@@ -35,22 +35,22 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 # make sure every driver module registers itself
-import hwapp.drivers.mock          # noqa: F401
-import hwapp.drivers.scpi_generic  # noqa: F401
-import hwapp.drivers.seeit_relay   # noqa: F401
-import hwapp.drivers.aimtti_psu    # noqa: F401
+import tiab.drivers.mock          # noqa: F401
+import tiab.drivers.scpi_generic  # noqa: F401
+import tiab.drivers.seeit_relay   # noqa: F401
+import tiab.drivers.aimtti_psu    # noqa: F401
 try:
-    import hwapp.drivers.pico_tc08   # noqa: F401
-    import hwapp.drivers.pico_adc    # noqa: F401
+    import tiab.drivers.pico_tc08   # noqa: F401
+    import tiab.drivers.pico_adc    # noqa: F401
 except Exception as exc:  # picosdk may not be installed / driver not present
     print(f"[startup] Pico drivers not fully available: {exc}")
 
-from hwapp.drivers.registry import create_driver
-from hwapp.drivers.catalog import DEVICE_CATALOG
-from hwapp.run.mapping import DutMapping
-from hwapp.run.runner import TestRunner, AssertionFailure
-from hwapp.run.control import RunControl, StopRequested
-from hwapp.run.instrument import instrument_source
+from tiab.drivers.registry import create_driver
+from tiab.drivers.catalog import DEVICE_CATALOG
+from tiab.run.mapping import DutMapping
+from tiab.run.runner import TestRunner, AssertionFailure
+from tiab.run.control import RunControl, StopRequested
+from tiab.run.instrument import instrument_source
 
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "config.json"

@@ -1,6 +1,6 @@
 """
 Hand-written stand-in for what a Blockly-generated script will look like.
-Run with:  python -m hwapp.example_scripts.demo_test
+Run with:  python -m tiab.example_scripts.demo_test
 
 Scenario: two DUTs multiplexed in one run.
   - psu1 powers DUT-0001, psu2 powers DUT-0002
@@ -8,11 +8,11 @@ Scenario: two DUTs multiplexed in one run.
 Loop steps through a voltage sweep on both DUTs, logging + asserting each step.
 """
 
-from hwapp.run.mapping import DutMapping
-from hwapp.run.runner import TestRunner
+from tiab.run.mapping import DutMapping
+from tiab.run.runner import TestRunner
 
 # ensure mock drivers get registered
-import hwapp.drivers.mock  # noqa: F401
+import tiab.drivers.mock  # noqa: F401
 
 
 def main():
