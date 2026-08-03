@@ -13,8 +13,8 @@ This folder explains the purpose, scope and design of **Test in a Box**.
 ## Design and implementation
 
 - [Why Blockly](BLOCKLY.md)
-- [Hardware library](HARDWARE-LIBRARY.md)
-- [Results and traceability](RESULTS-AND-TRACEABILITY.md)
+- [Instrument Library](docs/INSTRUMENT-LIBRARY.md)
+- [Engineering Results](ENGINEERING-RESULTS.md)
 - [Hello World examples](HELLO-WORLD.md)
 
 ## Direction

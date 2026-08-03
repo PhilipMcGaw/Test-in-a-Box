@@ -200,8 +200,8 @@ Recommended starting points:
 - [Architecture](docs/ARCHITECTURE.md)
 - [Engineering philosophy](docs/ENGINEERING-PHILOSOPHY.md)
 - [User workflow](docs/USER-WORKFLOW.md)
-- [Hardware library](docs/HARDWARE-LIBRARY.md)
-- [Results and traceability](docs/RESULTS-AND-TRACEABILITY.md)
+- [Instrument Library](docs/INSTRUMENT-LIBRARY.md)
+- [Engineering Results](ENGINEERING-RESULTS.md)
 - [Hello World examples](docs/HELLO-WORLD.md)
 
 The project website contains further background, motivation and development
