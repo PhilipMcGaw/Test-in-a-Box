@@ -1,45 +1,225 @@
 # Engineering Philosophy
 
-## Automate good engineering
+## Introduction
 
-The normal workflow remains:
+Test in a Box is not simply a collection of hardware drivers or a visual
+programming environment.
+
+It is an engineering tool intended to reduce the amount of bespoke software
+required to automate electrical and environmental validation tests.
+
+Every design decision should support that goal.
+
+---
+
+# Engineering Before Software
+
+The software should support the engineer.
+
+It should not require the engineer to think like a software developer.
+
+A typical engineering workflow is:
 
 1. Read the specification.
-2. Ask for missing information.
-3. Clarify data requirements, including resolution.
-4. Suggest changes that may provide more useful answers.
-5. Select instruments.
-6. Draw the wiring diagram outside Test in a Box.
-7. Write the procedure.
-8. Automate its execution.
+2. Clarify the objectives.
+3. Select suitable instrumentation.
+4. Design the physical test setup.
+5. Write the engineering procedure.
+6. Automate the procedure.
 
-Test in a Box does not replace the first seven steps.
+Test in a Box begins at the final step.
 
-## Express intent, not protocol
+---
 
-A procedure should say set the chamber to 40 °C, wait for DUT soak, apply 9 V
-to the coil and log contact resistance. It should not expose SCPI or vendor APIs
-outside diagnostics.
+# Engineering Intent
 
-## Units first
+Test procedures should describe **what** the engineer wants to happen.
 
-Parameters and measurements carry explicit units: `40 °C`, `3600 s`,
-`0.2 V/s`, `0.373 mΩ`. Units reduce ambiguity and allow invalid combinations to
-be rejected.
+They should not describe how an individual instrument performs that action.
 
-## Preserve intent, not bench wiring
+Good:
 
-Reproducibility means preserving the procedure, parameters, logical hardware
-requirements, DUT metadata and result interpretation. The physical equipment is
-mapped again when the test is run.
+```text
+Set chamber temperature to 40 °C
 
-## Capture evidence
+Apply 12 V to the coil
 
-Some R&D tests are for information or characterisation. They must not be forced
-into artificial pass/fail outcomes.
+Measure current
 
-## Keep the operator informed
+Wait 5 seconds
+```
 
-The execution screen should answer: Is it running? How far through is it? Which
-DUT and step are active? When is it likely to finish? Is intervention required?
-Protocol details belong in diagnostics.
+Not:
+
+```text
+Send SCPI command
+
+Open COM7
+
+Write VOLT 12
+
+Read serial response
+```
+
+Hardware communication belongs in the driver.
+
+Engineering intent belongs in the procedure.
+
+---
+
+# Hardware Independence
+
+A test procedure should not depend on:
+
+- COM port numbers;
+- VISA resource strings;
+- USB addresses;
+- manufacturer-specific commands.
+
+Instead it should depend on logical engineering concepts such as:
+
+- Power Supply
+- Environmental Chamber
+- Relay Controller
+- Data Acquisition
+- Temperature Logger
+
+Changing laboratory equipment should not require the test procedure to be
+rewritten.
+
+---
+
+# Parameters
+
+Values that are likely to change should be defined once.
+
+Examples include:
+
+- Chamber temperature.
+- Soak time.
+- Supply voltage.
+- Current limit.
+- Ramp rate.
+
+The procedure should reference the parameter rather than repeating literal
+values throughout the sequence.
+
+---
+
+# Engineering Units
+
+Every parameter and measurement should have an explicit engineering unit.
+
+Examples include:
+
+- 40 °C
+- 3600 s
+- 9 V
+- 0.2 V/s
+- 0.373 mΩ
+
+Units improve readability and reduce the likelihood of engineering mistakes.
+
+---
+
+# Characterisation and Validation
+
+Not every engineering test has pass/fail criteria.
+
+Many R&D activities simply characterise the behaviour of a DUT.
+
+Examples include:
+
+- Contact resistance.
+- Holding voltage.
+- Pickup voltage.
+- Temperature rise.
+- Current consumption.
+
+The absence of acceptance criteria is a valid engineering workflow.
+
+Test in a Box should support both:
+
+- informational measurements;
+- evaluated measurements.
+
+Neither should be treated as a second-class feature.
+
+---
+
+# Mock-First Development
+
+Where practical, every capability used by demonstrations should have a mock
+implementation.
+
+Mock drivers allow:
+
+- development without laboratory hardware;
+- automated testing;
+- demonstration of the framework;
+- contribution by engineers without access to specialist equipment.
+
+---
+
+# Honest Driver Status
+
+Drivers should always state their current validation status.
+
+Suitable descriptions include:
+
+- Demo
+- Simulated
+- Bench Tested
+- Production Proven
+
+The documentation should never imply that hardware has been validated when it
+has not.
+
+---
+
+# Reproducibility
+
+The objective is to preserve the engineering procedure rather than the physical
+bench configuration.
+
+A saved test should retain:
+
+- procedure;
+- parameters;
+- engineering units;
+- logical hardware roles;
+- DUT information.
+
+It should not permanently depend upon:
+
+- COM port assignments;
+- USB addresses;
+- temporary laboratory configurations.
+
+---
+
+# Simplicity
+
+Version 0.1 should remain focused on replacing real engineering workflows.
+
+Features that do not directly contribute towards that objective should normally
+be deferred until a later release.
+
+---
+
+# Design Decisions
+
+Whenever a new feature is proposed, ask:
+
+> Does this help an engineer automate a real validation test more effectively?
+
+If the answer is **no**, the feature should normally be deferred.
+
+---
+
+# Guiding Principle
+
+The purpose of Test in a Box is not to replace engineering judgement.
+
+Its purpose is to allow engineers to spend more time understanding their test
+results and less time writing bespoke automation software.

@@ -1,65 +1,165 @@
 # MVP v0.1
 
-## Goal
+## Purpose
 
-Version 0.1 proves that a real electrical or environmental validation test can
-be configured, authored, run and logged without writing another bespoke Python
-program.
+Version 0.1 exists to prove that Test in a Box can automate a real electrical
+or environmental validation test without requiring bespoke control software.
 
-## In scope
+The goal of Version 0.1 is not to provide every planned feature.
 
-### Hardware setup
+The goal is to prove the overall architecture.
 
-- Configure communication settings in the GUI.
-- Connect and disconnect instruments.
-- Save reusable hardware definitions in a hardware library.
-- Add unknown hardware through a capability and command-map workflow.
-- Provide simple manual controls or a mimic panel for commissioning.
-- Capture `*IDN?` or the closest available equivalent.
+---
 
-### Test authoring
+# Success Criteria
 
-- Blockly-based visual procedures.
-- Variables or test parameters defined in one place.
-- Explicit engineering units.
-- Loops, waits, simple set/read operations, logging and assertions.
-- Logical instrument roles rather than fixed COM ports or model names.
+Version 0.1 is considered successful when an engineer can:
 
-### Execution
+1. Configure the available laboratory hardware.
+2. Create a test procedure using Blockly.
+3. Execute that procedure.
+4. Monitor progress while the test is running.
+5. Record useful engineering data.
+6. Repeat the same procedure on multiple DUTs.
 
-- Run, pause, step and stop.
-- Progress percentage and progress bar.
+without writing a custom Python application.
+
+---
+
+# Included in Version 0.1
+
+## Hardware
+
+- Device configuration through the GUI.
+- Saved hardware definitions.
+- Generic SCPI support.
+- Native drivers for supported hardware.
+- Mock drivers for development.
+- Manual controls for commissioning.
+- Instrument identification (`*IDN?` where available).
+
+---
+
+## Test Authoring
+
+- Blockly editor.
+- Variables / test parameters.
+- Engineering units.
+- Loops.
+- Waits.
+- Hardware read/write blocks.
+- Logging.
+- Assertions.
+
+---
+
+## Execution
+
+- Run.
+- Pause.
+- Resume.
+- Step.
+- Stop.
+- Current test step.
+- Current DUT.
+- Progress indicator.
 - Estimated finish time.
-- Current DUT and current step.
-- Safe output shutdown when a run is stopped or fails.
 
-### Results
+---
 
-- CSV output.
-- Markdown text summary.
-- Per-DUT files where appropriate.
-- Run metadata including instrument identity.
-- Informational measurements that do not require pass/fail limits.
+## Results
 
-### Development
+- CSV logging.
+- One result file per DUT.
+- Run metadata.
+- Instrument identity.
+- Markdown summary.
 
-- Mock support for each driver or capability used by examples.
-- A no-hardware demonstration.
+---
 
-## Out of scope
+# Explicitly Out of Scope
 
-- PDF reports and result databases.
-- Standards, requirements and calibration management.
-- Approval workflows and electronic signatures.
-- Production operator, barcode or MES integration.
-- Andon tower lights.
-- Advanced statistics and event detection.
-- Automatic recovery after a PC restart.
-- Wiring-diagram creation.
-- A plugin marketplace.
+The following are deliberately **not** part of Version 0.1.
 
-## Completion criterion
+## Reporting
 
-Version 0.1 is complete when a real validation test can be configured, built in
-Blockly, run against one or more DUTs, monitored in the GUI, logged to CSV,
-summarised in Markdown, and repeated without rewriting the framework.
+- PDF reports.
+- Graph generation.
+- Statistical analysis.
+
+---
+
+## Management
+
+- Standards management.
+- Requirements management.
+- Calibration tracking.
+- Approval workflows.
+- Electronic signatures.
+
+---
+
+## Production
+
+- Barcode readers.
+- Operator login.
+- MES integration.
+- End-of-line testing.
+- Multi-rig supervision.
+
+---
+
+## Notifications
+
+- Teams.
+- Email.
+- MQTT.
+- Tower lights.
+
+---
+
+# Current Focus
+
+The immediate objective is to automate real engineering validation work.
+
+The first milestone is successfully replacing manual or bespoke software for a
+complete electrical or environmental validation test.
+
+Future work should only be considered once this milestone has been achieved.
+
+---
+
+# Design Principles
+
+Version 0.1 follows the principles defined in:
+
+- VISION.md
+- ENGINEERING-PHILOSOPHY.md
+
+In particular:
+
+- Tests express engineering intent.
+- Drivers implement hardware communication.
+- Parameters use explicit engineering units.
+- Hardware is configured separately from the test procedure.
+- The software supports both informational and evaluated measurements.
+
+---
+
+# Release Checklist
+
+Before Version 0.1 can be released, the following must be demonstrated:
+
+- [ ] Mock demonstration completed.
+- [ ] PSU-only demonstration completed.
+- [ ] At least two different instrument classes successfully used.
+- [ ] At least one complete real engineering validation test automated.
+- [ ] Hardware configuration through the GUI.
+- [ ] Blockly-based test authoring.
+- [ ] Test execution controls (Run, Pause, Resume, Step and Stop).
+- [ ] Progress display with estimated finish time.
+- [ ] CSV result logging.
+- [ ] Markdown run summary.
+- [ ] Documentation reviewed and updated.
+
+Once all items have been completed, Version 0.1 may be tagged and released.
