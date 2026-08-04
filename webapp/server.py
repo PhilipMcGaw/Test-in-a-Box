@@ -804,51 +804,60 @@ def _execute_run(run_id: str, code: str) -> None:
 
     final_state = "finished"
     runner: TestRunner | None = None
+    devices_snapshot: dict[str, Any] = {}
 
     try:
+        # Hold the device lock only long enough to take stable snapshots and
+        # attach this run's event logger. The generated procedure may run for
+        # hours, so it must execute outside the lock; otherwise read-only API
+        # requests such as /api/devices, /api/duts and /api/config would block
+        # until the entire test completed.
         with _device_lock:
-            mapping = _build_mapping(_config)
+            config_snapshot = json.loads(json.dumps(_config))
+            devices_snapshot = dict(_devices)
+
+            mapping = _build_mapping(config_snapshot)
 
             runner = TestRunner.for_existing_devices(
                 run_id=run_id,
                 mapping=mapping,
-                devices=_devices,
+                devices=devices_snapshot,
                 output_dir=str(RUNS_DIR),
                 console=_broadcast_console,
             )
 
-            exec_globals = {
-                "__builtins__": {},
-                "set": runner.set,
-                "get": runner.get,
-                "wait": _interruptible_wait,
-                "log": runner.log,
-                "assert_that": runner.assert_that,
-                "ask_operator": (
-                    lambda label, dut_uid: _ask_operator(
-                        label,
-                        dut_uid,
-                        runner,
-                    )
-                ),
-                "range": range,
-                "abs": abs,
-                "_checkpoint": _run_control.checkpoint,
-                "_report_iteration": (
-                    lambda label, number: _broadcast_console(
-                        f"[loop] {label} — iteration {number}"
-                    )
-                ),
-            }
+        exec_globals = {
+            "__builtins__": {},
+            "set": runner.set,
+            "get": runner.get,
+            "wait": _interruptible_wait,
+            "log": runner.log,
+            "assert_that": runner.assert_that,
+            "ask_operator": (
+                lambda label, dut_uid: _ask_operator(
+                    label,
+                    dut_uid,
+                    runner,
+                )
+            ),
+            "range": range,
+            "abs": abs,
+            "_checkpoint": _run_control.checkpoint,
+            "_report_iteration": (
+                lambda label, number: _broadcast_console(
+                    f"[loop] {label} — iteration {number}"
+                )
+            ),
+        }
 
-            _broadcast_console(f"=== run {run_id} starting ===")
+        _broadcast_console(f"=== run {run_id} starting ===")
 
-            tree = instrument_source(code)
-            _validate_generated_code(tree)
-            compiled = compile(tree, "<generated>", "exec")
-            exec(compiled, exec_globals, {})
+        tree = instrument_source(code)
+        _validate_generated_code(tree)
+        compiled = compile(tree, "<generated>", "exec")
+        exec(compiled, exec_globals, {})
 
-            _broadcast_console(f"=== run {run_id} finished ===")
+        _broadcast_console(f"=== run {run_id} finished ===")
 
     except StopRequested:
         _broadcast_console(
@@ -870,8 +879,10 @@ def _execute_run(run_id: str, code: str) -> None:
         final_state = "error"
 
     finally:
+        # Clean up the same device instances that were bound to this run.
+        # Reacquire the lock only for the short lifecycle operation.
         with _device_lock:
-            _return_devices_to_safe_state(_devices)
+            _return_devices_to_safe_state(devices_snapshot)
 
             if runner is not None:
                 try:
