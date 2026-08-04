@@ -16,6 +16,7 @@ This folder explains the purpose, scope and design of **Test in a Box**.
 - [Instrument Library](INSTRUMENT-LIBRARY.md)
 - [Engineering Results](ENGINEERING-RESULTS.md)
 - [Hello World examples](HELLO-WORLD.md)
+- [Engineering examples](../examples/README.md)
 
 ## Direction
 

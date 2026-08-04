@@ -3,7 +3,7 @@
 This document describes the current development state of **Test in a Box** and
 explains how to interpret the documentation.
 
-The project is under active development and should currently be considered an
+The project is under active development and should currently be considered a
 **v0.1.0-alpha**.
 
 The overall architecture has been defined, but not every planned capability has
@@ -38,9 +38,13 @@ The repository already contains:
 - CSV logging.
 - DUT mapping.
 - Sequence save and load.
+- Engineering examples under `examples/`.
+- Bench-tested Blockly control of a physical Thurlby Thandar QL355P.
+- QL355P identification, voltage setpoint, current-limit setpoint and output
+  control.
 
-Several hardware drivers have been written but are still awaiting confirmation
-against physical equipment.
+Several other hardware drivers have been written but are still awaiting
+confirmation against physical equipment.
 
 ---
 
@@ -62,6 +66,23 @@ docs/MVP-v0.1.md
 ---
 
 # Driver Status
+
+## Confirmed physical hardware
+
+The Aim-TTi driver has been bench tested on a physical Thurlby Thandar QL355P.
+
+Confirmed operations:
+
+- `*IDN?` response;
+- voltage setpoint;
+- current-limit setpoint;
+- output enable;
+- output disable;
+- Blockly-generated timed sequence.
+
+Automatic inclusion of the identity response in run result metadata remains
+planned Version 0.1 work.
+
 
 Hardware drivers should always be honest about their validation state.
 

@@ -66,7 +66,7 @@ Units should never rely upon external documentation or assumptions.
 
 # Current Output
 
-Version 0.1 records measurement data using CSV.
+The current alpha records measurement and event data using CSV.
 
 Each measurement currently contains information including:
 
@@ -178,7 +178,7 @@ This makes it easier to:
 
 # Markdown Summary
 
-In addition to CSV data, Version 0.1 aims to generate a simple Markdown summary
+In addition to CSV data, Version 0.1 is intended to generate a simple Markdown summary
 containing:
 
 - Project.

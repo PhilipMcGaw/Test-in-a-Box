@@ -32,3 +32,16 @@ Turn output off
 
 This exercises a real connection, identity capture, commands, logging and safe
 shutdown.
+
+---
+
+## Bench-tested QL355P example
+
+A bench-tested Blockly workspace for a physical Thurlby Thandar QL355P is
+available here:
+
+[QL355P Basic Output](../examples/01-QL355P-Basic-Output/)
+
+The wider examples index is available at:
+
+[Engineering examples](../examples/README.md)

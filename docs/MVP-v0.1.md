@@ -11,6 +11,16 @@ The goal is to prove the overall architecture.
 
 ---
 
+## Current implementation note
+
+This document defines the Version 0.1 target, not a claim that every listed
+capability is already complete.
+
+The current alpha has demonstrated Blockly control of a physical Thurlby
+Thandar QL355P and records CSV results. Automatic identity recording, Markdown
+run summaries, progress estimation and a complete multi-instrument validation
+procedure remain Version 0.1 work.
+
 # Success Criteria
 
 Version 0.1 is considered successful when an engineer can:
@@ -151,14 +161,14 @@ In particular:
 Before Version 0.1 can be released, the following must be demonstrated:
 
 - [ ] Mock demonstration completed.
-- [ ] PSU-only demonstration completed.
+- [x] PSU-only demonstration completed.
 - [ ] At least two different instrument classes successfully used.
 - [ ] At least one complete real engineering validation test automated.
-- [ ] Hardware configuration through the GUI.
-- [ ] Blockly-based test authoring.
-- [ ] Test execution controls (Run, Pause, Resume, Step and Stop).
+- [x] Hardware configuration through the GUI.
+- [x] Blockly-based test authoring.
+- [x] Test execution controls (Run, Pause, Resume, Step and Stop).
 - [ ] Progress display with estimated finish time.
-- [ ] CSV result logging.
+- [x] CSV result logging.
 - [ ] Markdown run summary.
 - [ ] Documentation reviewed and updated.
 

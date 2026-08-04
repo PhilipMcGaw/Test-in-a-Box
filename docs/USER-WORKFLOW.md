@@ -78,7 +78,7 @@ This stage remains outside the scope of Test in a Box.
 
 ---
 
-# 4. Configure the Hardware
+# 4. Configure the Instruments
 
 Once the laboratory equipment has been connected, configure it using the
 **Configure Devices** page.
@@ -88,11 +88,12 @@ For each instrument:
 - Select the driver.
 - Enter communication settings.
 - Verify communication.
-- Save the hardware definition.
+- Save the instrument definition.
 - Confirm operation using the mimic controls.
 
-Where possible, the framework records instrument identity information such as
-`*IDN?` automatically.
+Where available, drivers may use identity queries such as `*IDN?` to verify
+communication. Automatic recording of instrument identity in run results is a
+planned Version 0.1 capability.
 
 ---
 
@@ -163,12 +164,16 @@ requests the required input.
 
 # 8. Review the Results
 
-Version 0.1 records:
+The current alpha records:
 
-- CSV measurement data.
-- Run metadata.
-- Instrument identity.
-- Markdown summaries.
+- CSV measurement and event data;
+- separate result files per mapped DUT where practical.
+
+Version 0.1 is intended to add:
+
+- structured run metadata;
+- automatic instrument identity recording;
+- a human-readable Markdown run summary.
 
 Some tests simply record engineering information.
 

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Hardware Library provides the connection between an engineering test
+The Instrument Library provides the connection between an engineering test
 procedure and the physical laboratory equipment used to perform it.
 
 A test procedure should describe **what** hardware is required rather than
@@ -46,7 +46,7 @@ rewritten.
 
 A new instrument should normally only need to be configured once.
 
-After it has been added to the Hardware Library it can be reused by future
+After it has been added to the Instrument Library it can be reused by future
 projects.
 
 This allows engineering procedures to remain independent of the physical test
@@ -71,13 +71,13 @@ instrument.
 
 ---
 
-# Adding New Hardware
+# Adding New Instruments
 
 There are two common workflows.
 
-## Existing Hardware Definition
+## Existing Instrument Definition
 
-If the instrument already exists in the Hardware Library:
+If the instrument already exists in the Instrument Library:
 
 1. Select the required instrument.
 2. Configure the current communication settings.
@@ -89,16 +89,16 @@ No additional driver development should normally be required.
 
 ---
 
-## New Hardware
+## New Instrument
 
 If the instrument has not previously been used:
 
-1. Create a new hardware definition.
+1. Create a new instrument definition.
 2. Select the instrument type.
 3. Configure the communication method.
 4. Enter the required driver or command-map information.
 5. Verify operation using the mimic panel.
-6. Save the hardware definition.
+6. Save the instrument definition.
 
 Future projects can then reuse the saved definition.
 
@@ -151,7 +151,7 @@ procedure itself.
 
 # Driver Status
 
-Every hardware definition should clearly indicate its validation status.
+Every instrument definition should clearly indicate its validation status.
 
 Suggested status values are:
 
@@ -181,7 +181,7 @@ Mock hardware allows:
 
 ---
 
-# Current Hardware
+# Current Instruments
 
 The repository currently includes support for:
 
@@ -193,6 +193,25 @@ The repository currently includes support for:
 - Mock hardware.
 
 Additional drivers will be added as real engineering projects require them.
+
+---
+
+
+## QL355P bench validation
+
+The Aim-TTi driver has been confirmed on a physical Thurlby Thandar QL355P.
+
+Bench-tested operations currently include:
+
+- `*IDN?` identification;
+- voltage setpoint;
+- current-limit setpoint;
+- output enable;
+- output disable;
+- Blockly-generated timed execution.
+
+The identity response is used by the driver during connection. Automatic
+recording of that identity in run results remains planned Version 0.1 work.
 
 ---
 

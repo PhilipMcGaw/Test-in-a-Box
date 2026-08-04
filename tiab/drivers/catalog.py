@@ -71,10 +71,11 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
             "command set. Intended for CPX, QL, PL, MX and related models over "
             "USB virtual COM port or RS232, without requiring NI-VISA."
         ),
-        "status": "simulated",
+        "status": "bench_tested",
         "status_description": (
-            "Tested against a protocol-accurate simulator; not yet confirmed "
-            "on physical hardware."
+            "Confirmed on a physical Thurlby Thandar QL355P for identification, "
+            "voltage and current setpoints, output enable, output disable and "
+            "Blockly-generated timed execution."
         ),
     },
     "scpi": {
