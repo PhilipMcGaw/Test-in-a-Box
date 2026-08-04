@@ -45,10 +45,19 @@ usb_relay_device.dll
 
 It does not use a COM port.
 
+The recommended no-admin installation is:
+
+```text
+Test-in-a-Box/
+  vendor/
+    seeit/
+      usb_relay_device.dll
+```
+
 Configure:
 
-- **Vendor DLL Path** — the absolute path to `usb_relay_device.dll`, or a path
-  relative to the Test in a Box working directory.
+- **Vendor DLL Path** — normally leave this as `usb_relay_device.dll` when the
+  DLL is in `vendor/seeit/`. An absolute path can also be used.
 - **Device Serial Number** — required when more than one compatible relay board
   is attached.
 - **Safe State** — `open_all` or `close_all`.

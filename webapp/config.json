@@ -9,6 +9,17 @@
       },
       "x": 64.0,
       "y": 102.0
+    },
+    {
+      "device_type": "seeit_usbb_native",
+      "device_id": "seeit_usbb_native_1",
+      "kwargs": {
+        "dll_path": "usb_relay_device.dll",
+        "serial_number": "",
+        "safe_state": "close_all"
+      },
+      "x": 338.0,
+      "y": 199.0
     }
   ],
   "mapping": []

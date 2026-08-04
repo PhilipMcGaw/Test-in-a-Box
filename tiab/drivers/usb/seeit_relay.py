@@ -57,11 +57,19 @@ def _resolve_dll_path(dll_path: str | os.PathLike[str]) -> Path:
     if environment_path:
         search_paths.append(Path(environment_path).expanduser())
 
+    project_root = Path(__file__).resolve().parents[3]
+
     if candidate.is_absolute():
         search_paths.append(candidate)
     else:
         search_paths.extend([
+            # Preferred no-admin location inside the Test in a Box folder.
+            project_root / "vendor" / "seeit" / candidate,
+
+            # Current working directory, useful for portable deployments.
             Path.cwd() / candidate,
+
+            # Driver directory, retained as a final local fallback.
             Path(__file__).resolve().parent / candidate,
         ])
 
@@ -70,8 +78,9 @@ def _resolve_dll_path(dll_path: str | os.PathLike[str]) -> Path:
             return path.resolve()
 
     raise FileNotFoundError(
-        "usb_relay_device.dll was not found. Set an absolute 'dll_path' "
-        "in the Instrument Library or define TIAB_USB_RELAY_DLL."
+        "usb_relay_device.dll was not found. Place it in "
+        "'vendor/seeit/' inside the Test in a Box folder, set an absolute "
+        "'dll_path' in the Instrument Library, or define TIAB_USB_RELAY_DLL."
     )
 
 
