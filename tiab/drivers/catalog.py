@@ -145,10 +145,12 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
                 "default": "usb_relay_device.dll",
             },
             {
-                "name": "serial_number",
-                "label": "Device Serial Number",
-                "type": "text",
+                "name": "device_path",
+                "label": "Physical Relay Board",
+                "type": "discovery",
                 "default": "",
+                "discovery_driver": "seeit_usbb_native",
+                "empty_label": "Scan for connected relay boards",
             },
             {
                 "name": "safe_state",
@@ -163,9 +165,9 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
             "variant does not use a COM port."
         ),
         "setup_note": (
-            "Provide the vendor DLL path. Python and the DLL must use matching "
-            "32-bit or 64-bit architectures. Confirm open/close behaviour on "
-            "the physical board before relying on the configured safe state."
+            "Place the vendor DLL in vendor/seeit, then use Scan for Devices "
+            "to select the physical relay board by its unique Windows device "
+            "path. Python and the DLL must use matching architectures."
         ),
         "status": "unverified",
         "status_description": VALIDATION_STATUSES["unverified"],

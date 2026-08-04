@@ -583,6 +583,40 @@ function renderSettings(card, typeInfo) {
         ? card.kwargs[field.name]
         : field.default;
 
+    if (field.type === 'discovery') {
+      const currentValue = String(value ?? '');
+      const currentLabel = currentValue
+        ? currentValue
+        : (field.empty_label || 'No instrument selected');
+
+      html += `
+        <label>
+          ${escapeHtml(field.label)}
+          <select
+            data-kwarg="${escapeHtml(field.name)}"
+            data-discovery-select="${escapeHtml(field.name)}">
+            <option value="${escapeHtml(currentValue)}" selected>
+              ${escapeHtml(currentLabel)}
+            </option>
+          </select>
+        </label>
+        <button
+          type="button"
+          class="discover-btn"
+          data-discover-field="${escapeHtml(field.name)}"
+          data-discovery-driver="${escapeHtml(
+            field.discovery_driver || card.device_type
+          )}">
+          Scan for Devices
+        </button>
+        <div
+          class="discovery-status"
+          data-discovery-status="${escapeHtml(field.name)}">
+        </div>
+      `;
+      continue;
+    }
+
     html += `
       <label>
         ${escapeHtml(field.label)}
@@ -619,7 +653,6 @@ function renderSettings(card, typeInfo) {
     '</div>'
   );
 }
-
 
 function getLive(deviceId, positionId) {
   const device = liveValues[deviceId];
@@ -684,13 +717,98 @@ function wireCardEvents(element, card) {
   });
 
   settingsPanel
-    .querySelectorAll('input[data-kwarg]')
-    .forEach(input => {
-      input.addEventListener('change', () => {
-        card.kwargs[input.dataset.kwarg] =
-          input.type === 'number'
-            ? Number(input.value)
-            : input.value;
+    .querySelectorAll('[data-kwarg]')
+    .forEach(control => {
+      control.addEventListener('change', () => {
+        card.kwargs[control.dataset.kwarg] =
+          control.type === 'number'
+            ? Number(control.value)
+            : control.value;
+      });
+
+      control.addEventListener('mousedown', event => {
+        event.stopPropagation();
+      });
+    });
+
+  settingsPanel
+    .querySelectorAll('[data-discover-field]')
+    .forEach(button => {
+      button.addEventListener('click', async () => {
+        const fieldName = button.dataset.discoverField;
+        const driverType = button.dataset.discoveryDriver;
+        const select = settingsPanel.querySelector(
+          `[data-discovery-select="${fieldName}"]`
+        );
+        const status = settingsPanel.querySelector(
+          `[data-discovery-status="${fieldName}"]`
+        );
+
+        button.disabled = true;
+        status.textContent = 'Scanning…';
+
+        try {
+          const response = await fetch(
+            `/api/discover/${encodeURIComponent(driverType)}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                kwargs: card.kwargs,
+              }),
+            }
+          );
+
+          const data = await readJsonSafely(response);
+
+          if (!response.ok) {
+            throw new Error(
+              formatApiError(data, `HTTP ${response.status}`)
+            );
+          }
+
+          select.innerHTML = '';
+
+          if (!Array.isArray(data) || data.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No compatible instruments found';
+            select.appendChild(option);
+            card.kwargs[fieldName] = '';
+            status.textContent = 'No compatible instruments found.';
+            return;
+          }
+
+          for (const item of data) {
+            const option = document.createElement('option');
+            option.value = item.selector;
+            option.textContent = item.display_name;
+            select.appendChild(option);
+          }
+
+          const currentValue = card.kwargs[fieldName] || '';
+          const matchingOption = Array.from(select.options).find(
+            option => option.value === currentValue
+          );
+
+          if (matchingOption) {
+            select.value = currentValue;
+          } else {
+            select.selectedIndex = 0;
+            card.kwargs[fieldName] = select.value;
+          }
+
+          status.textContent =
+            `Found ${data.length} compatible instrument` +
+            `${data.length === 1 ? '' : 's'}.`;
+        } catch (error) {
+          status.textContent =
+            `Scan failed: ${error.message || error}`;
+        } finally {
+          button.disabled = false;
+        }
       });
     });
 

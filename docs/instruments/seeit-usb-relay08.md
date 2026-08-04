@@ -69,6 +69,23 @@ The DLL is vendor software and is not included in the Test in a Box repository.
 Obtain it from the hardware supplier and confirm that its licence permits your
 intended use and redistribution arrangements.
 
+## Discovering more than one native USB relay
+
+The factory serial number is not guaranteed to be unique. When more than one
+board is connected:
+
+1. Open the instrument's cog menu.
+2. Select **Scan for Devices**.
+3. Choose the required board from the discovered list.
+4. Give the instrument a meaningful Test in a Box name, such as
+   `Relay bank 1`.
+5. Toggle one channel manually to confirm the physical identity, then label the
+   enclosure.
+
+Test in a Box stores the unique Windows HID device path rather than relying on
+the duplicate factory serial number. Moving the board to another USB port may
+change that path, in which case scan and select it again.
+
 ## Relay positions
 
 Both drivers expose channels as:

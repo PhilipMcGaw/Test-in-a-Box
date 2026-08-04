@@ -64,6 +64,35 @@ class CapabilityDescriptor:
         )
 
 
+@dataclass(frozen=True)
+class DiscoveredInstrument:
+    """One physical instrument found by a driver's discovery mechanism."""
+
+    driver_type: str
+    selector: str
+    display_name: str
+    manufacturer: str = ""
+    model: str = ""
+    serial: str = ""
+    transport: str = ""
+    connection: str = ""
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return a JSON-serialisable representation for the web API."""
+        return {
+            "driver_type": self.driver_type,
+            "selector": self.selector,
+            "display_name": self.display_name,
+            "manufacturer": self.manufacturer,
+            "model": self.model,
+            "serial": self.serial,
+            "transport": self.transport,
+            "connection": self.connection,
+            "metadata": dict(self.metadata),
+        }
+
+
 @dataclass
 class LogEvent:
     """One timestamped engineering event recorded during a test run."""
@@ -164,6 +193,16 @@ class Driver(ABC):
         that do not provide identification information.
         """
         return {}
+
+    @classmethod
+    def discover(cls, **kwargs: Any) -> list[DiscoveredInstrument]:
+        """
+        Discover physical instruments supported by this driver.
+
+        Drivers that cannot enumerate hardware return an empty list. Discovery
+        must not permanently open the instrument or change its outputs.
+        """
+        return []
 
     @abstractmethod
     def capabilities(self) -> CapabilityDescriptor:

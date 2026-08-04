@@ -18,7 +18,7 @@ from __future__ import annotations
 from threading import RLock
 from typing import Callable, Final, Type
 
-from .base import Driver
+from .base import DiscoveredInstrument, Driver
 
 _REGISTRY: Final[dict[str, Type[Driver]]] = {}
 _LOCK = RLock()
@@ -97,3 +97,18 @@ def create_driver(
         raise TypeError(
             f"Failed to construct driver {device_type!r}: {exc}"
         ) from exc
+
+
+
+def discover_instruments(
+    device_type: str,
+    **kwargs,
+) -> list[DiscoveredInstrument]:
+    """
+    Run the discovery mechanism supplied by a registered driver type.
+
+    Configuration values that are not required for discovery should be ignored
+    by the driver implementation.
+    """
+    cls = get_driver_class(device_type)
+    return cls.discover(**kwargs)

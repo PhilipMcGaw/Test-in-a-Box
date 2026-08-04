@@ -50,7 +50,7 @@ except Exception as exc:
     print(f"[startup] Pico drivers not fully available: {exc}")
 
 from tiab.drivers.catalog import DEVICE_CATALOG
-from tiab.drivers.registry import create_driver
+from tiab.drivers.registry import create_driver, discover_instruments, discover_instruments
 from tiab.run.control import RunControl, StopRequested
 from tiab.run.instrument import instrument_source
 from tiab.run.mapping import DutMapping
@@ -178,6 +178,12 @@ class ConfigSaveRequest(BaseModel):
             )
 
         return self
+
+
+class DiscoveryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    kwargs: dict[str, Any] = Field(default_factory=dict)
 
 
 class SetPositionRequest(BaseModel):
@@ -623,6 +629,47 @@ def api_duts() -> JSONResponse:
 @app.get("/api/device_types")
 def api_device_types() -> JSONResponse:
     return JSONResponse(DEVICE_CATALOG)
+
+
+@app.post("/api/discover/{device_type}")
+def api_discover(
+    device_type: str,
+    req: DiscoveryRequest,
+) -> JSONResponse:
+    """Discover instruments supported by one registered driver type."""
+    if _run_is_active():
+        return JSONResponse(
+            {
+                "detail": (
+                    "Can't scan for instruments while a run is active "
+                    f"(state: {_run_control.state})"
+                )
+            },
+            status_code=409,
+        )
+
+    if device_type not in DEVICE_CATALOG:
+        return JSONResponse(
+            {"detail": f"unknown instrument type {device_type!r}"},
+            status_code=404,
+        )
+
+    try:
+        with _device_lock:
+            items = discover_instruments(
+                device_type,
+                **req.kwargs,
+            )
+    except Exception as exc:
+        return JSONResponse(
+            {"detail": str(exc)},
+            status_code=500,
+        )
+
+    return JSONResponse([
+        item.as_dict()
+        for item in items
+    ])
 
 
 @app.get("/api/config")
