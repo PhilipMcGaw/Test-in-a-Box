@@ -807,6 +807,15 @@ async function saveAndReconnect() {
     y: card.y,
   }));
 
+  // Remove DUT mappings that refer to instruments deleted from this page.
+  const activeDeviceIds = new Set(
+    devices.map(device => device.device_id)
+  );
+
+  const validMapping = existingMapping.filter(entry =>
+    activeDeviceIds.has(entry.device_id)
+  );
+
   try {
     const saveResponse = await fetch('/api/config', {
       method: 'POST',
@@ -815,7 +824,7 @@ async function saveAndReconnect() {
       },
       body: JSON.stringify({
         devices,
-        mapping: existingMapping,
+        mapping: validMapping,
       }),
     });
 

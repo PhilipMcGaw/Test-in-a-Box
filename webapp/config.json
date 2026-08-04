@@ -1,31 +1,8 @@
 {
   "devices": [
     {
-      "device_type": "mock_psu",
-      "device_id": "psu1",
-      "kwargs": {},
-      "x": 70.0,
-      "y": 70.0
-    },
-    {
-      "device_type": "mock_psu",
-      "device_id": "psu2",
-      "kwargs": {},
-      "x": 100.0,
-      "y": 100.0
-    },
-    {
-      "device_type": "mock_relay",
-      "device_id": "relay1",
-      "kwargs": {
-        "num_channels": 8
-      },
-      "x": 70.0,
-      "y": 70.0
-    },
-    {
       "device_type": "aimtti_psu",
-      "device_id": "aimtti_psu_1",
+      "device_id": "Com 17",
       "kwargs": {
         "serial_port": "COM17",
         "num_channels": 1
@@ -34,26 +11,5 @@
       "y": 442.0
     }
   ],
-  "mapping": [
-    {
-      "device_id": "psu1",
-      "position_id": "voltage",
-      "dut_uid": "DUT-0001"
-    },
-    {
-      "device_id": "relay1",
-      "position_id": "relay1",
-      "dut_uid": "DUT-0001"
-    },
-    {
-      "device_id": "psu2",
-      "position_id": "voltage",
-      "dut_uid": "DUT-0002"
-    },
-    {
-      "device_id": "relay1",
-      "position_id": "relay2",
-      "dut_uid": "DUT-0002"
-    }
-  ]
+  "mapping": []
 }

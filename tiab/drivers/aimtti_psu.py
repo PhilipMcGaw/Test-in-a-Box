@@ -94,6 +94,7 @@ class AimTtiPsuDriver(Driver):
 
             self._identity = _parse_idn(identity)
             self._connected = True
+
         except Exception:
             with contextlib.suppress(Exception):
                 port.close()
@@ -202,6 +203,12 @@ class AimTtiPsuDriver(Driver):
     # Low-level serial helpers
     # ------------------------------------------------------------------
 
+    def _require_port_open(self) -> None:
+        if self._port is None:
+            raise RuntimeError(
+                f"{self.device_id}: serial port is not open"
+            )
+
     def _require_connected(self) -> None:
         if not self.connected or self._port is None:
             raise RuntimeError(
@@ -209,11 +216,11 @@ class AimTtiPsuDriver(Driver):
             )
 
     def _write_raw(self, command: str) -> None:
-        self._require_connected()
+        self._require_port_open()
         self._port.write((command + "\n").encode("ascii"))
 
     def _query_raw(self, command: str) -> str:
-        self._require_connected()
+        self._require_port_open()
 
         self._port.reset_input_buffer()
         self._write_raw(command)
@@ -328,6 +335,7 @@ class AimTtiPsuDriver(Driver):
 
     def query(self, raw_command: str) -> str:
         """Send a raw instrument query."""
+        self._require_connected()
         return self._query_raw(raw_command)
 
     def _parse_channel(self, position_id: str, prefix: str) -> int:
