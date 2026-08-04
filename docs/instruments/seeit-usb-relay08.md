@@ -91,13 +91,16 @@ vendor DLL.
 
 The serial implementation uses logical **ON** and **OFF** states.
 
-The native DLL uses the vendor terms **open** and **close**, and reports one bit
-per relay where `1` means open and `0` means closed. Test in a Box currently
-maps a truthy write value to the vendor's `open` operation.
+The current native DLL SDK uses the vendor terms **open** and **close**:
 
-Confirm what those states mean electrically for the relay coil, NO/NC contacts,
-external wiring and intended safe condition before relying on automated
-shutdown.
+- `open` means relay ON;
+- `close` means relay OFF;
+- a status bit of `1` means ON;
+- a status bit of `0` means OFF.
+
+Test in a Box maps a truthy write value to relay ON and a false value to relay
+OFF. Confirm the resulting NO/NC contact behaviour, external wiring and intended
+safe condition before relying on automated shutdown.
 
 ## Enclosure and breakout recommendation
 

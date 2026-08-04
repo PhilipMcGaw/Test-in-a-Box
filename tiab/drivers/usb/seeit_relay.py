@@ -17,7 +17,7 @@ from __future__ import annotations
 import ctypes
 import os
 import threading
-from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_uint
+from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_ssize_t, c_uint
 from pathlib import Path
 from typing import Any
 
@@ -38,7 +38,7 @@ _UsbRelayDeviceInfoPointer = POINTER(_UsbRelayDeviceInfo)
 _UsbRelayDeviceInfo._fields_ = [
     ("serial_number", c_char_p),
     ("device_path", c_char_p),
-    ("type", c_int),
+    ("type", c_ssize_t),
     ("next", _UsbRelayDeviceInfoPointer),
 ]
 
@@ -126,31 +126,31 @@ class _UsbRelayLibrary:
             c_char_p,
             c_uint,
         ]
-        dll.usb_relay_device_open_with_serial_number.restype = c_int
+        dll.usb_relay_device_open_with_serial_number.restype = c_ssize_t
 
-        dll.usb_relay_device_close.argtypes = [c_int]
+        dll.usb_relay_device_close.argtypes = [c_ssize_t]
         dll.usb_relay_device_close.restype = None
 
         dll.usb_relay_device_open_one_relay_channel.argtypes = [
-            c_int,
+            c_ssize_t,
             c_int,
         ]
         dll.usb_relay_device_open_one_relay_channel.restype = c_int
 
-        dll.usb_relay_device_open_all_relay_channel.argtypes = [c_int]
+        dll.usb_relay_device_open_all_relay_channel.argtypes = [c_ssize_t]
         dll.usb_relay_device_open_all_relay_channel.restype = c_int
 
         dll.usb_relay_device_close_one_relay_channel.argtypes = [
-            c_int,
+            c_ssize_t,
             c_int,
         ]
         dll.usb_relay_device_close_one_relay_channel.restype = c_int
 
-        dll.usb_relay_device_close_all_relay_channel.argtypes = [c_int]
+        dll.usb_relay_device_close_all_relay_channel.argtypes = [c_ssize_t]
         dll.usb_relay_device_close_all_relay_channel.restype = c_int
 
         dll.usb_relay_device_get_status.argtypes = [
-            c_int,
+            c_ssize_t,
             POINTER(c_uint),
         ]
         dll.usb_relay_device_get_status.restype = c_int
@@ -370,9 +370,9 @@ class SeeitUsbbNativeDriver(Driver):
         """
         Apply the configured all-channel state.
 
-        Confirm the electrical meaning of the vendor's open/close terminology
-        on the physical board and in the external circuit before relying on
-        this as a safety function.
+        The current vendor SDK documents ``open`` as relay ON and ``close`` as
+        relay OFF. Confirm the resulting NO/NC contact behaviour in the
+        external circuit before relying on this as a safety function.
         """
         if self._safe_state_name == "open_all":
             self.open_all()
@@ -421,8 +421,8 @@ class SeeitUsbbNativeDriver(Driver):
         """
         Set one vendor relay state.
 
-        A truthy value maps to the vendor's ``open`` command and a false value
-        maps to the vendor's ``close`` command.
+        A truthy value maps to the vendor's ``open`` command (relay ON) and a
+        false value maps to the vendor's ``close`` command (relay OFF).
         """
         with self._io_lock:
             self._require_connected()
