@@ -1,4 +1,4 @@
-# Hardware Library
+# Instrument Library
 
 ## Introduction
 
@@ -24,7 +24,7 @@ currently available in the laboratory.
 
 # Design Principles
 
-The Hardware Library is based on several simple principles.
+The Instrument Library is based on several simple principles.
 
 ## Hardware Independence
 
