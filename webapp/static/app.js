@@ -1,41 +1,83 @@
 const TOOLBOX = {
   kind: "categoryToolbox",
   contents: [
-    { kind: "category", name: "Hardware", colour: "210",
+    {
+      kind: "category",
+      name: "Power Supplies",
+      colour: "210",
+      contents: [
+        { kind: "block", type: "hw_psu_set_voltage" },
+        { kind: "block", type: "hw_psu_set_current" },
+        { kind: "block", type: "hw_psu_output" },
+        { kind: "block", type: "hw_psu_read_voltage" },
+        { kind: "block", type: "hw_psu_read_current" },
+        { kind: "block", type: "hw_psu_ramp_voltage" },
+      ],
+    },
+    {
+      kind: "category",
+      name: "Generic Instruments",
+      colour: "210",
       contents: [
         { kind: "block", type: "hw_set" },
         { kind: "block", type: "hw_get" },
-      ] },
-    { kind: "category", name: "Operator Input", colour: "290",
+      ],
+    },
+    {
+      kind: "category",
+      name: "Operator Input",
+      colour: "290",
       contents: [
         { kind: "block", type: "hw_prompt" },
-      ] },
-    { kind: "category", name: "Logic & Checks", colour: "0",
+      ],
+    },
+    {
+      kind: "category",
+      name: "Logic & Checks",
+      colour: "0",
       contents: [
         { kind: "block", type: "hw_assert" },
         { kind: "block", type: "hw_within_tolerance" },
         { kind: "block", type: "logic_compare" },
         { kind: "block", type: "logic_operation" },
         { kind: "block", type: "logic_boolean" },
-      ] },
-    { kind: "category", name: "Loops", colour: "120",
+      ],
+    },
+    {
+      kind: "category",
+      name: "Loops",
+      colour: "120",
       contents: [
         { kind: "block", type: "controls_repeat_ext" },
         { kind: "block", type: "controls_whileUntil" },
         { kind: "block", type: "controls_for" },
-      ] },
-    { kind: "category", name: "Timing & Results", colour: "65",
+      ],
+    },
+    {
+      kind: "category",
+      name: "Timing & Results",
+      colour: "65",
       contents: [
         { kind: "block", type: "hw_wait" },
         { kind: "block", type: "hw_log" },
-      ] },
-    { kind: "category", name: "Math", colour: "230",
+      ],
+    },
+    {
+      kind: "category",
+      name: "Math",
+      colour: "230",
       contents: [
         { kind: "block", type: "math_number" },
         { kind: "block", type: "math_arithmetic" },
-      ] },
-    { kind: "category", name: "Variables", colour: "330", custom: "VARIABLE" },
-  ]
+      ],
+    },
+    {
+      kind: "category",
+      name: "Variables",
+      colour: "330",
+      custom: "VARIABLE",
+    },
+  ],
 };
 
 let workspace;
@@ -46,20 +88,181 @@ async function loadDevices() {
 
   const outputs = [];
   const inputs = [];
+
+  const psuVoltageOutputs = [];
+  const psuCurrentOutputs = [];
+  const psuOutputSwitches = [];
+  const psuVoltageInputs = [];
+  const psuCurrentInputs = [];
+
+  function channelNumber(positionId) {
+    const match = String(positionId).match(/(\d+)/);
+    return match ? Number(match[1]) : 1;
+  }
+
+  function positionValue(deviceId, positionId) {
+    return `${deviceId}|${positionId}`;
+  }
+
+  function psuLabel(deviceId, positionId, description, channelCount) {
+    if (channelCount <= 1) {
+      return `${deviceId}: ${description}`;
+    }
+
+    return (
+      `${deviceId}: Channel ${channelNumber(positionId)} ${description}`
+    );
+  }
+
   for (const dev of devices) {
-    for (const pos of dev.positions) {
+    const positions = dev.positions || [];
+
+    for (const pos of positions) {
       const label = `${dev.device_id}: ${pos.label}`;
-      const value = `${dev.device_id}|${pos.id}`;
-      if (pos.kind.startsWith('output')) outputs.push([label, value]);
-      else inputs.push([label, value]);
+      const value = positionValue(dev.device_id, pos.id);
+
+      if (pos.kind.startsWith('output')) {
+        outputs.push([label, value]);
+      } else {
+        inputs.push([label, value]);
+      }
+    }
+
+    // Identify PSU positions by engineering meaning rather than by driver
+    // name, so the blocks work with mock, Aim-TTi and future PSU drivers.
+    const voltageOutputs = positions.filter(pos =>
+      pos.kind === 'output_analog' &&
+      pos.unit === 'V' &&
+      !String(pos.id).endsWith('_meas')
+    );
+
+    const currentOutputs = positions.filter(pos =>
+      pos.kind === 'output_analog' &&
+      pos.unit === 'A' &&
+      !String(pos.id).endsWith('_meas')
+    );
+
+    const outputSwitches = positions.filter(pos =>
+      pos.kind === 'output_digital' &&
+      (
+        String(pos.id).toLowerCase().startsWith('output') ||
+        String(pos.label).toLowerCase().includes('output')
+      )
+    );
+
+    const voltageInputs = positions.filter(pos =>
+      pos.kind === 'input_analog' &&
+      pos.unit === 'V'
+    );
+
+    const currentInputs = positions.filter(pos =>
+      pos.kind === 'input_analog' &&
+      pos.unit === 'A'
+    );
+
+    const channelCount = Math.max(
+      voltageOutputs.length,
+      currentOutputs.length,
+      outputSwitches.length,
+      voltageInputs.length,
+      currentInputs.length,
+      1
+    );
+
+    for (const pos of voltageOutputs) {
+      psuVoltageOutputs.push([
+        psuLabel(
+          dev.device_id,
+          pos.id,
+          'Voltage',
+          channelCount
+        ),
+        positionValue(dev.device_id, pos.id),
+      ]);
+    }
+
+    for (const pos of currentOutputs) {
+      psuCurrentOutputs.push([
+        psuLabel(
+          dev.device_id,
+          pos.id,
+          'Current Limit',
+          channelCount
+        ),
+        positionValue(dev.device_id, pos.id),
+      ]);
+    }
+
+    for (const pos of outputSwitches) {
+      psuOutputSwitches.push([
+        psuLabel(
+          dev.device_id,
+          pos.id,
+          'Output',
+          channelCount
+        ),
+        positionValue(dev.device_id, pos.id),
+      ]);
+    }
+
+    for (const pos of voltageInputs) {
+      psuVoltageInputs.push([
+        psuLabel(
+          dev.device_id,
+          pos.id,
+          'Measured Voltage',
+          channelCount
+        ),
+        positionValue(dev.device_id, pos.id),
+      ]);
+    }
+
+    for (const pos of currentInputs) {
+      psuCurrentInputs.push([
+        psuLabel(
+          dev.device_id,
+          pos.id,
+          'Measured Current',
+          channelCount
+        ),
+        positionValue(dev.device_id, pos.id),
+      ]);
     }
   }
-  window.HW_OUTPUT_POSITIONS = outputs.length ? outputs : [["(no output devices)", "none|none"]];
-  window.HW_INPUT_POSITIONS = inputs.length ? inputs : [["(no input devices)", "none|none"]];
+
+  window.HW_OUTPUT_POSITIONS = outputs.length
+    ? outputs
+    : [["(no output instruments)", "none|none"]];
+
+  window.HW_INPUT_POSITIONS = inputs.length
+    ? inputs
+    : [["(no input instruments)", "none|none"]];
+
+  window.HW_PSU_VOLTAGE_OUTPUTS = psuVoltageOutputs.length
+    ? psuVoltageOutputs
+    : [["(no PSU voltage outputs)", "none|none"]];
+
+  window.HW_PSU_CURRENT_OUTPUTS = psuCurrentOutputs.length
+    ? psuCurrentOutputs
+    : [["(no PSU current outputs)", "none|none"]];
+
+  window.HW_PSU_OUTPUT_SWITCHES = psuOutputSwitches.length
+    ? psuOutputSwitches
+    : [["(no PSU outputs)", "none|none"]];
+
+  window.HW_PSU_VOLTAGE_INPUTS = psuVoltageInputs.length
+    ? psuVoltageInputs
+    : [["(no PSU voltage measurements)", "none|none"]];
+
+  window.HW_PSU_CURRENT_INPUTS = psuCurrentInputs.length
+    ? psuCurrentInputs
+    : [["(no PSU current measurements)", "none|none"]];
 
   const list = document.getElementById('device-list');
-  list.innerHTML = devices.map(d =>
-    `<li><strong>${d.device_id}</strong> (${d.device_type}) — ${d.positions.length} position(s)</li>`
+  list.innerHTML = devices.map(device =>
+    `<li><strong>${device.device_id}</strong> ` +
+    `(${device.device_type}) — ` +
+    `${device.positions.length} position(s)</li>`
   ).join('');
 }
 
