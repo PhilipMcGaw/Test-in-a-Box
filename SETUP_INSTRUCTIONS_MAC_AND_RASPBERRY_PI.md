@@ -24,8 +24,8 @@ below).
 python3 --version
 ```
 
-If that fails or shows a very old version (3.9+ is fine, 3.11/3.12
-recommended), install a current one from [python.org](https://www.python.org/downloads/macos/)
+If that fails or shows an older version (Python 3.10 or newer is required;
+3.11/3.12 recommended), install a current one from [python.org](https://www.python.org/downloads/macos/)
 or with Homebrew if you have it: `brew install python@3.12`.
 
 **Raspberry Pi OS:** Python 3 is included by default. Confirm with:
@@ -112,7 +112,7 @@ pressing `Ctrl+C`) stops the app.
 
 ## USB-serial permissions (Linux/Raspberry Pi)
 
-The Aim-TTi PSU and Seeit relay drivers talk over a USB-serial connection
+The Aim-TTi PSU and Seeit USB-RELAY08 serial driver talk over a USB-serial connection
 (a virtual COM port, appearing as `/dev/ttyUSB0`, `/dev/ttyACM0`, etc. on
 Linux). On Raspberry Pi OS and most Linux distributions, access to those
 device files is restricted to users in the **`dialout`** group.
@@ -171,6 +171,20 @@ device on the **Configure Devices** page (or directly in
 `webapp/config.json`) — no drive-letter concept applies here.
 
 ---
+
+
+## Platform-specific driver limitation
+
+The **Seeit USBB Native USB** driver is not supported on macOS, Linux or
+Raspberry Pi OS. It depends on the vendor's Windows-only
+`usb_relay_device.dll`.
+
+This limitation does not apply to the separate **Seeit USB-RELAY08 (Serial)**
+driver, which uses a virtual serial port and is expected to work when the
+relevant USB-to-serial device is supported by the operating system.
+
+See [`docs/PLATFORM-SUPPORT.md`](docs/PLATFORM-SUPPORT.md) for the current
+support matrix and validation status.
 
 ## Driver-specific notes for macOS/Pi
 

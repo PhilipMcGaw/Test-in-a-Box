@@ -36,6 +36,9 @@ The repository already contains:
 - Mock hardware for development.
 - Run, pause, resume, step and stop execution.
 - CSV logging.
+- Run metadata containing hostname, logged-in user, OS details, Python version and instrument identity.
+- Instrument discovery support for compatible drivers.
+- Native Windows Seeit USBB relay control through the vendor DLL.
 - DUT mapping.
 - Sequence save and load.
 - Engineering examples under `examples/`.
@@ -80,9 +83,13 @@ Confirmed operations:
 - output disable;
 - Blockly-generated timed sequence.
 
-Automatic inclusion of the identity response in run result metadata remains
-planned Version 0.1 work.
+Instrument identity is now written to the run metadata CSV where the driver
+provides it.
 
+
+The Seeit USBB native USB driver has operated physical relay hardware on
+Windows. Duplicate-serial multi-board selection uses vendor enumeration
+indices and still requires final validation in the main application.
 
 Hardware drivers should always be honest about their validation state.
 

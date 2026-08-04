@@ -12,8 +12,9 @@ Read and log mock voltage
 Turn mock output off
 ```
 
-It proves that Blockly generates a runnable procedure, the runner executes it,
-progress is shown, and CSV plus Markdown output is written.
+It proves that Blockly generates a runnable procedure, the runner executes it
+and CSV output is written. The planned progress display and Markdown summary
+are not yet complete.
 
 ## PSU-only real-hardware example
 

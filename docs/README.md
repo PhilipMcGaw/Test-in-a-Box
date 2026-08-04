@@ -1,27 +1,13 @@
-# Test in a Box Documentation
+# Instrument Setup Guides
 
-This folder explains the purpose, scope and design of **Test in a Box**.
+These guides contain practical setup and connection notes for physical
+instruments supported by Test in a Box.
 
-## Start here
+- [Seeit USB and USBB relay controllers](seeit-usb-relay08.md)
 
-- [Vision](VISION.md)
-- [MVP v0.1](MVP-v0.1.md)
-- [Architecture](ARCHITECTURE.md)
-- [Engineering philosophy](ENGINEERING-PHILOSOPHY.md)
-- [User workflow](USER-WORKFLOW.md)
+Instrument photographs are optional. For day-to-day engineering work, clear
+connection names, driver requirements, logical channel numbering and enclosure
+wiring documentation are usually more useful than a photograph of the bare
+board.
 
-## Design and implementation
-
-- [Why Blockly](BLOCKLY.md)
-- [Instrument Library](INSTRUMENT-LIBRARY.md)
-- [Instrument setup guides](instruments/README.md)
-- [Engineering Results](ENGINEERING-RESULTS.md)
-- [Hello World examples](HELLO-WORLD.md)
-- [Engineering examples](../examples/README.md)
-
-## Direction
-
-- [Roadmap](ROADMAP.md)
-- [Future ideas](FUTURE-IDEAS.md)
-- [What Test in a Box is not](WHAT-TEST-IN-A-BOX-IS-NOT.md)
-- [Architecture decisions](decisions/README.md)
+See [Platform Support](../PLATFORM-SUPPORT.md) for operating-system limitations.

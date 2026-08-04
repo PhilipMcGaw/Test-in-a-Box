@@ -17,7 +17,8 @@ This document defines the Version 0.1 target, not a claim that every listed
 capability is already complete.
 
 The current alpha has demonstrated Blockly control of a physical Thurlby
-Thandar QL355P and records CSV results. Automatic identity recording, Markdown
+Thandar QL355P, controls physical Seeit USBB relay hardware, records per-DUT
+CSV results and writes run metadata including instrument identity. Markdown
 run summaries, progress estimation and a complete multi-instrument validation
 procedure remain Version 0.1 work.
 

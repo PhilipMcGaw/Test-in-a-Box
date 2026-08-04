@@ -84,20 +84,20 @@ CSV remains the primary machine-readable output format.
 
 ---
 
-# Planned Run Metadata
+# Current Run Metadata
 
-In addition to measurement data, each test run should record information such
-as:
+In addition to measurement data, the current alpha creates a separate
+`run_<run_id>_metadata.csv` file containing:
 
-- Run identifier.
-- Project.
-- DUT identifier.
-- Test case.
-- Test name.
-- Start time.
-- End time.
-- Duration.
-- Software version.
+- Run identifier and UTC start time.
+- Computer hostname.
+- Logged-in operating-system user.
+- Operating-system name, release, version, build and machine architecture.
+- Python version.
+- Instrument identity returned by each connected driver, where available.
+
+Project, test-case, DUT, end-time, duration and software-version fields remain
+areas for further result-summary work.
 
 This information should describe the test rather than the individual
 measurements.
@@ -106,7 +106,8 @@ measurements.
 
 # Instrument Traceability
 
-Where practical, Test in a Box should automatically record instrument identity.
+Where practical, Test in a Box automatically records instrument identity at
+the start of each run.
 
 For SCPI instruments this normally includes:
 

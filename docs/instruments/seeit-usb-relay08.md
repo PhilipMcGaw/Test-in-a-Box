@@ -5,8 +5,11 @@ the same logical relay positions but use different transports.
 
 ## Driver status
 
-Both implementations remain unverified against the physical boards until bench
-testing is complete.
+The native Windows USBB implementation has switched physical relay hardware
+successfully. Selection of two duplicate-serial boards has been proven with
+the vendor enumeration nodes; final confirmation through the main application
+remains part of the current alpha validation. The serial implementation has
+not yet been bench tested.
 
 ## USB-RELAY08 using a virtual COM port
 
@@ -43,7 +46,8 @@ This version uses the vendor-supplied:
 usb_relay_device.dll
 ```
 
-It does not use a COM port.
+It does not use a COM port. This driver is Windows-only; the vendor DLL
+does not run on Linux or macOS.
 
 The recommended no-admin installation is:
 
@@ -58,8 +62,8 @@ Configure:
 
 - **Vendor DLL Path** — normally leave this as `usb_relay_device.dll` when the
   DLL is in `vendor/seeit/`. An absolute path can also be used.
-- **Device Serial Number** — required when more than one compatible relay board
-  is attached.
+- **Physical Relay Board** — use **Scan for Devices** and select the required
+  enumerated board.
 - **Safe State** — `open_all` or `close_all`.
 
 Python and the DLL must have matching architectures. A 64-bit Python
@@ -82,9 +86,9 @@ board is connected:
 5. Toggle one channel manually to confirm the physical identity, then label the
    enclosure.
 
-Test in a Box stores the unique Windows HID device path rather than relying on
-the duplicate factory serial number. Moving the board to another USB port may
-change that path, in which case scan and select it again.
+Test in a Box uses the best identifier exposed by the vendor DLL. Where the
+DLL supplies no unique path, it stores an enumeration selector such as
+`index:1` or `index:2`.
 
 ### Duplicate DLL identifiers
 

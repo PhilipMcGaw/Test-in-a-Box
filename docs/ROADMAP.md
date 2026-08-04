@@ -14,7 +14,10 @@ The current alpha includes:
 - DUT-to-position mapping;
 - per-DUT CSV result logging;
 - engineering examples;
-- bench-tested control of a physical Thurlby Thandar QL355P.
+- bench-tested control of a physical Thurlby Thandar QL355P;
+- native Windows control of physical Seeit USBB relay hardware;
+- driver-level instrument discovery;
+- run metadata containing host, user, OS, Python and instrument identity.
 
 ## Remaining Version 0.1 work
 
@@ -26,9 +29,9 @@ Version 0.1 is intended to add or complete:
 - logical hardware roles;
 - progress percentage and estimated finish time;
 - current DUT and current test step;
-- automatic recording of instrument identity;
 - a Markdown run summary;
 - validated safe-state behaviour across applicable drivers;
+- final validation of multiple identical native USBB relay boards in the main application;
 - a complete real electrical or environmental validation procedure;
 - at least two different physical instrument classes used together.
 

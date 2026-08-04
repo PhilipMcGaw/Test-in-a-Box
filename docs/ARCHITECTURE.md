@@ -19,7 +19,7 @@ instruments by changing hardware configuration rather than rewriting the test.
 
 <p align="center">
   <img
-    src="images/architecture-drawing.jpg"
+    src="images/architecture-drawing.png"
     alt="Test in a Box Architecture"
     width="900">
 </p>

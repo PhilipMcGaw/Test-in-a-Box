@@ -122,6 +122,28 @@ running the test.
 
 ---
 
+# Instrument Discovery
+
+Drivers that can enumerate connected hardware may expose a **Scan for Devices**
+action in the Configure Devices cog menu.
+
+The discovery result can include:
+
+- manufacturer;
+- model;
+- serial number;
+- transport;
+- connection selector;
+- driver-specific metadata.
+
+Discovery does not replace engineering verification. After assigning two
+identical devices, use the mimic controls to confirm which physical instrument
+is associated with each logical name.
+
+The native Seeit USBB driver is the first implementation of this framework.
+
+---
+
 # Instrument Identity
 
 Where practical, the framework should automatically record instrument identity.
@@ -237,3 +259,13 @@ Potential future improvements include:
 - Additional communication methods.
 
 These items are intentionally outside the core Version 0.1 milestone.
+---
+
+# Platform availability
+
+The Instrument Library may show drivers that are not available on every
+operating system.
+
+In particular, the Seeit USBB native USB driver requires the vendor's Windows
+DLL and cannot be used on Linux or macOS. See
+[Platform Support](PLATFORM-SUPPORT.md).

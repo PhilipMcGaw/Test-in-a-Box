@@ -1,5 +1,11 @@
 # Test in a Box – Windows Setup Guide (No Administrator Rights Required)
 
+
+> This guide is for Windows. For Linux, Raspberry Pi OS and macOS, use
+> [`SETUP_INSTRUCTIONS_MAC_AND_RASPBERRY_PI.md`](SETUP_INSTRUCTIONS_MAC_AND_RASPBERRY_PI.md).
+> Driver availability differs by platform; see
+> [`docs/PLATFORM-SUPPORT.md`](docs/PLATFORM-SUPPORT.md).
+
 This guide explains how to run **Test in a Box** on a Windows computer where
 you do not have administrator rights.
 
@@ -317,3 +323,39 @@ https://github.com/PhilipMcGaw/Test-in-a-Box
 Email:
 
 philip@mcgaw.eu
+---
+
+
+# Seeit USBB Native USB Relay
+
+The native USBB relay driver is Windows-only because it uses the vendor DLL:
+
+```text
+usb_relay_device.dll
+```
+
+Place the matching Win64 or Win32 DLL in:
+
+```text
+Test-in-a-Box\
+    vendor\
+        seeit\
+            usb_relay_device.dll
+```
+
+No administrator rights are required. The DLL architecture must match the
+portable Python architecture.
+
+The DLL is not currently included with Test in a Box while redistribution
+permission is being confirmed with Seeit.
+
+For more than one identical board, use **Scan for Devices** in the instrument
+cog menu. Some boards have duplicate factory serial numbers and no useful DLL
+device path, so the current driver may save enumeration selectors such as
+`index:1` and `index:2`. Re-scan and verify the boards after changing USB ports,
+hubs or connected-board count.
+
+See:
+
+[`docs/instruments/seeit-usb-relay08.md`](docs/instruments/seeit-usb-relay08.md)
+
