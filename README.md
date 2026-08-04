@@ -7,8 +7,7 @@
 <h1 align="center">Test in a Box</h1>
 
 <p align="center">
-A visual engineering test automation platform for electrical and environmental
-R&amp;D validation.
+A visual engineering test automation platform for electrical and environmental R&amp;D validation.
 </p>
 
 <p align="center">
@@ -19,24 +18,15 @@ R&amp;D validation.
   </a>
 </p>
 
-> **Development status:** Test in a Box is currently **v0.1.0-alpha**.
-> Blockly-generated procedures have successfully controlled a physical
-> Thurlby Thandar QL355P, and the native Windows Seeit USBB relay driver has
-> been bench tested on physical hardware. Version 0.1 work remains, including
-> Markdown summaries, progress estimation and a complete multi-instrument
-> validation procedure.
+> **Development status:** Test in a Box is currently **v0.1.0-alpha**. Blockly-generated procedures have successfully controlled a physical Thurlby Thandar QL355P, and the native Windows Seeit USBB relay driver has been bench tested on physical hardware. Version 0.1 work remains, including Markdown summaries, progress estimation and a complete multi-instrument validation procedure.
 
 ## What is Test in a Box?
 
-**Test in a Box** is an engineering test automation platform intended to make
-one-off and evolving electrical and environmental validation tests quicker to
-configure, automate and repeat.
+**Test in a Box** is an engineering test automation platform intended to make one-off and evolving electrical and environmental validation tests quicker to configure, automate and repeat.
 
-It is aimed initially at research and development work involving
-**Devices Under Test (DUTs)** and **Equipment Under Test (EUTs)**.
+It is aimed initially at research and development work involving **Devices Under Test (DUTs)** and **Equipment Under Test (EUTs)**.
 
-Test in a Box separates the engineering test procedure from the details of the
-connected instruments. A test should request an action such as:
+Test in a Box separates the engineering test procedure from the details of the connected instruments. A test should request an action such as:
 
 - set a voltage;
 - change a chamber temperature;
@@ -45,22 +35,18 @@ connected instruments. A test should request an action such as:
 - wait for a defined period;
 - record a result.
 
-The selected hardware driver is responsible for translating that request into
-the command or protocol required by the physical equipment.
+The selected hardware driver is responsible for translating that request into the command or protocol required by the physical equipment.
 
-Not every R&D test has a pass/fail criterion. Test in a Box is therefore
-intended to support both:
+Not every R&D test has a pass/fail criterion. Test in a Box is therefore intended to support both:
 
 - informational and characterisation measurements; and
 - measurements evaluated against defined acceptance criteria.
 
-The initial focus is R&D electrical and environmental validation. More
-structured production and end-of-line testing may be explored later.
+The initial focus is R&D electrical and environmental validation. More structured production and end-of-line testing may be explored later.
 
 ## Why was Test in a Box created?
 
-Engineering test systems are frequently built as one-off solutions using a
-combination of:
+Engineering test systems are frequently built as one-off solutions using a combination of:
 
 - instrument-control scripts;
 - spreadsheets;
@@ -69,8 +55,7 @@ combination of:
 - custom drivers;
 - project-specific logging tools.
 
-These systems can work well for an individual test, but they can become
-difficult to maintain, adapt and reuse.
+These systems can work well for an individual test, but they can become difficult to maintain, adapt and reuse.
 
 Test in a Box aims to provide a common framework for:
 
@@ -114,12 +99,7 @@ Hardware drivers currently included in the repository cover:
 - Pico ADC-20/24 data loggers;
 - mock instruments for development and demonstrations.
 
-The Aim-TTi driver has been bench tested on a physical Thurlby Thandar QL355P.
-The Seeit USBB native USB driver has also switched physical relay hardware
-successfully on Windows. Multi-board selection is supported by vendor DLL
-enumeration index, but that index may change when USB topology changes.
-Other drivers may still be simulated or unverified; check the application's
-**Supported Devices** page before relying on them for a test.
+The Aim-TTi driver has been bench tested on a physical Thurlby Thandar QL355P. The Seeit USBB native USB driver has also switched physical relay hardware successfully on Windows. Multi-board selection is supported by vendor DLL enumeration index, but that index may change when USB topology changes. Other drivers may still be simulated or unverified; check the application's **Supported Devices** page before relying on them for a test.
 
 ## v0.1 direction
 
@@ -218,16 +198,14 @@ Recommended starting points:
 - [Engineering Results](docs/ENGINEERING-RESULTS.md)
 - [Hello World examples](docs/HELLO-WORLD.md)
 
-The project website contains further background, motivation and development
-updates:
+The project website contains further background, motivation and development updates:
 
 https://philipmcgaw.com/projects/test-in-a-box/
 
 
 ## Platform support
 
-The core web application, Blockly editor, mock drivers and many serial or
-network instruments are intended to run on Windows, Linux and macOS.
+The core web application, Blockly editor, mock drivers and many serial or network instruments are intended to run on Windows, Linux and macOS.
 
 Driver support depends on the vendor transport:
 
@@ -241,16 +219,13 @@ Driver support depends on the vendor transport:
 | Seeit USBB native USB DLL driver | Yes | No | No |
 | Pico drivers | SDK-dependent | SDK-dependent | SDK-dependent |
 
-The Seeit USBB native USB driver depends on the vendor's Windows DLL and is
-therefore Windows-only. The DLL is not currently distributed with Test in a Box
-while redistribution permission is being confirmed.
+The Seeit USBB native USB driver depends on the vendor's Windows DLL and is therefore Windows-only. The DLL is not currently distributed with Test in a Box while redistribution permission is being confirmed.
 
 See [Platform support](docs/PLATFORM-SUPPORT.md) for current limitations.
 
 ## Running on Windows without administrator rights
 
-Test in a Box is designed to run in restricted engineering environments where
-users may not have permission to install software system-wide.
+Test in a Box is designed to run in restricted engineering environments where users may not have permission to install software system-wide.
 
 See:
 
@@ -258,8 +233,7 @@ See:
 
 for the complete setup process.
 
-Once the portable Python environment and dependencies are ready, start the
-application using:
+Once the portable Python environment and dependencies are ready, start the application using:
 
 ```text
 2_start_app.bat
@@ -275,8 +249,7 @@ No system-wide application installation is required.
 
 ## Running the no-hardware demonstration
 
-The command-line demonstration uses mock instruments and does not require any
-laboratory hardware.
+The command-line demonstration uses mock instruments and does not require any laboratory hardware.
 
 Install the Python dependencies:
 
@@ -290,8 +263,7 @@ Run the demonstration from the repository root:
 python -m tiab.example_scripts.demo_test
 ```
 
-The demonstration performs a simulated multi-DUT test and writes separate CSV
-files for the configured DUTs.
+The demonstration performs a simulated multi-DUT test and writes separate CSV files for the configured DUTs.
 
 Example output:
 
@@ -320,8 +292,7 @@ An event may represent:
 
 ### Generic SCPI instruments
 
-Many SCPI instruments can be added using a command-map file rather than a new
-Python driver.
+Many SCPI instruments can be added using a command-map file rather than a new Python driver.
 
 Start with:
 
@@ -329,11 +300,9 @@ Start with:
 tiab/drivers/scpi_command_map.example.json
 ```
 
-The command map describes the instrument resource, available positions and the
-commands used to access them.
+The command map describes the instrument resource, available positions and the commands used to access them.
 
-A device can then be added using the generic SCPI driver and the path to its
-command-map file.
+A device can then be added using the generic SCPI driver and the path to its command-map file.
 
 ### Custom hardware drivers
 
