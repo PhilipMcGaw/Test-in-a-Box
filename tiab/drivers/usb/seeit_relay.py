@@ -10,6 +10,17 @@ eight-channel devices.
 
 The Python process and DLL must use matching architectures: 64-bit Python with
 a 64-bit DLL, or 32-bit Python with a 32-bit DLL.
+
+Important vendor-library behaviour
+----------------------------------
+
+The vendor DLL can distinguish multiple identical relay boards by the actual
+node pointer returned from ``usb_relay_device_enumerate()``. Some boards report
+duplicate factory serial numbers and return ``NOTHING`` for ``device_path``.
+
+For that reason, this driver keeps the enumeration linked list alive for the
+entire lifetime of the open device handle. The list is only freed after the
+device handle has been closed.
 """
 
 from __future__ import annotations
@@ -17,7 +28,15 @@ from __future__ import annotations
 import ctypes
 import os
 import threading
-from ctypes import POINTER, Structure, byref, c_char_p, c_int, c_ssize_t, c_uint
+from ctypes import (
+    POINTER,
+    Structure,
+    byref,
+    c_char_p,
+    c_int,
+    c_ssize_t,
+    c_uint,
+)
 from pathlib import Path
 from typing import Any
 
@@ -59,6 +78,7 @@ def _resolve_dll_path(dll_path: str | os.PathLike[str]) -> Path:
     candidate = Path(dll_path).expanduser()
 
     search_paths: list[Path] = []
+
     environment_path = os.environ.get("TIAB_USB_RELAY_DLL")
     if environment_path:
         search_paths.append(Path(environment_path).expanduser())
@@ -69,13 +89,8 @@ def _resolve_dll_path(dll_path: str | os.PathLike[str]) -> Path:
         search_paths.append(candidate)
     else:
         search_paths.extend([
-            # Preferred no-admin location inside the Test in a Box folder.
             project_root / "vendor" / "seeit" / candidate,
-
-            # Current working directory, useful for portable deployments.
             Path.cwd() / candidate,
-
-            # Driver directory, retained as a final local fallback.
             Path(__file__).resolve().parent / candidate,
         ])
 
@@ -248,35 +263,49 @@ def _enumerate_devices(
     return devices
 
 
-def _open_enumerated_device(
+def _select_live_enumeration_node(
     library: _UsbRelayLibrary,
     *,
-    device_path: str | None,
+    selector: str | None,
     serial_number: str | None,
-) -> tuple[int, dict[str, Any]]:
+) -> tuple[
+    _UsbRelayDeviceInfoPointer,
+    _UsbRelayDeviceInfoPointer,
+    dict[str, Any],
+]:
     """
-    Select and open one live node from the vendor enumeration list.
+    Enumerate devices and return:
 
-    Opening by the enumeration node allows duplicate factory serial numbers to
-    be distinguished using the unique Windows HID device path.
+    - the linked-list head;
+    - the selected live node pointer;
+    - a copied metadata record.
+
+    The caller owns the linked list and must keep it alive until the opened
+    device handle has been closed.
     """
     head = library.dll.usb_relay_device_enumerate()
     if not head:
         raise UsbRelayError("No Seeit USBB relay devices were found")
 
-    records: list[dict[str, Any]] = []
-    selected_pointer: _UsbRelayDeviceInfoPointer | None = None
-    selected_record: dict[str, Any] | None = None
-
     selected_index: int | None = None
-    if device_path and device_path.startswith("index:"):
-        try:
-            selected_index = int(device_path.split(":", 1)[1])
-        except ValueError as exc:
-            raise UsbRelayError(
-                f"Invalid relay selector {device_path!r}"
-            ) from exc
-        device_path = None
+    selected_path: str | None = None
+
+    if selector:
+        selector = selector.strip()
+        if selector.startswith("index:"):
+            try:
+                selected_index = int(selector.split(":", 1)[1])
+            except ValueError as exc:
+                library.dll.usb_relay_device_free_enumerate(head)
+                raise UsbRelayError(
+                    f"Invalid relay selector {selector!r}"
+                ) from exc
+        else:
+            selected_path = selector
+
+    records: list[dict[str, Any]] = []
+    selected_node: _UsbRelayDeviceInfoPointer | None = None
+    selected_record: dict[str, Any] | None = None
 
     try:
         current = head
@@ -301,40 +330,37 @@ def _open_enumerated_device(
             }
             records.append(record)
 
-            index_matches = (
-                selected_index is not None
-                and record["index"] == selected_index
-            )
-            path_matches = (
-                selected_index is None
-                and device_path is not None
-                and record["device_path"] == device_path
-            )
-            serial_matches = (
-                selected_index is None
-                and device_path is None
-                and serial_number is not None
-                and record["serial_number"] == serial_number
-            )
+            matches = False
 
-            if index_matches or path_matches or serial_matches:
-                if selected_pointer is not None:
+            if selected_index is not None:
+                matches = index == selected_index
+            elif selected_path is not None:
+                matches = record["device_path"] == selected_path
+            elif serial_number is not None:
+                matches = record["serial_number"] == serial_number
+
+            if matches:
+                if selected_node is not None:
                     raise UsbRelayError(
                         "The configured selector matches more than one relay. "
-                        "Use the unique device path returned by discovery."
+                        "Use an 'index:n' selector returned by discovery."
                     )
-                selected_pointer = current
+                selected_node = current
                 selected_record = record
 
             current = info.next
 
-        if device_path is None and serial_number is None:
+        if (
+            selected_index is None
+            and selected_path is None
+            and serial_number is None
+        ):
             if len(records) == 1:
-                # Re-walk to get the live pointer for the single record.
-                selected_pointer = head
+                selected_node = head
                 selected_record = records[0]
             else:
                 summary = ", ".join(
+                    f"index:{item['index']} "
                     f"{item['serial_number'] or '<blank>'} "
                     f"[{item['device_path']}]"
                     for item in records
@@ -345,8 +371,9 @@ def _open_enumerated_device(
                     f"{summary}"
                 )
 
-        if selected_pointer is None or selected_record is None:
+        if selected_node is None or selected_record is None:
             summary = ", ".join(
+                f"index:{item['index']} "
                 f"{item['serial_number'] or '<blank>'} "
                 f"[{item['device_path']}]"
                 for item in records
@@ -356,15 +383,11 @@ def _open_enumerated_device(
                 f"{summary}"
             )
 
-        handle = library.dll.usb_relay_device_open(selected_pointer)
-        if handle == 0:
-            raise UsbRelayError(
-                "The selected relay was found but could not be opened"
-            )
+        return head, selected_node, selected_record
 
-        return int(handle), selected_record
-    finally:
+    except Exception:
         library.dll.usb_relay_device_free_enumerate(head)
+        raise
 
 
 @register_driver("seeit_usbb_native")
@@ -391,15 +414,22 @@ class SeeitUsbbNativeDriver(Driver):
             )
 
         self._configured_dll_path = dll_path
-        self._configured_device_path = device_path.strip() or None
+        self._configured_selector = device_path.strip() or None
         self._serial_number = serial_number.strip() or None
         self._safe_state_name = safe_state
 
         self._dll_path: Path | None = None
         self._library: _UsbRelayLibrary | None = None
         self._handle = 0
+
+        # The vendor DLL may retain references to the selected enumeration
+        # node. Keep the entire list alive until after the handle is closed.
+        self._enumeration_head: _UsbRelayDeviceInfoPointer | None = None
+        self._selected_node: _UsbRelayDeviceInfoPointer | None = None
+
         self._num_channels = 0
-        self._device_path = ""
+        self._reported_device_path = ""
+        self._selected_index = 0
         self._io_lock = threading.RLock()
 
     @classmethod
@@ -473,16 +503,30 @@ class SeeitUsbbNativeDriver(Driver):
 
             dll_path = _resolve_dll_path(self._configured_dll_path)
             library = _acquire_library(dll_path)
+
+            enumeration_head: _UsbRelayDeviceInfoPointer | None = None
+            selected_node: _UsbRelayDeviceInfoPointer | None = None
             handle = 0
 
             try:
-                handle, selected = _open_enumerated_device(
+                (
+                    enumeration_head,
+                    selected_node,
+                    selected,
+                ) = _select_live_enumeration_node(
                     library,
-                    device_path=self._configured_device_path,
+                    selector=self._configured_selector,
                     serial_number=self._serial_number,
                 )
 
-                self._serial_number = str(selected["serial_number"])
+                handle = int(
+                    library.dll.usb_relay_device_open(selected_node)
+                )
+                if handle == 0:
+                    raise UsbRelayError(
+                        "The selected relay was found but could not be opened"
+                    )
+
                 num_channels = int(selected["num_channels"])
                 if num_channels not in {1, 2, 4, 8}:
                     raise UsbRelayError(
@@ -492,31 +536,69 @@ class SeeitUsbbNativeDriver(Driver):
                 self._dll_path = dll_path
                 self._library = library
                 self._handle = handle
+                self._enumeration_head = enumeration_head
+                self._selected_node = selected_node
+
+                self._serial_number = str(selected["serial_number"])
                 self._num_channels = num_channels
-                self._device_path = str(selected["device_path"])
-                self._configured_device_path = self._device_path
+                self._reported_device_path = str(selected["device_path"])
+                self._selected_index = int(selected["index"])
                 self._connected = True
 
             except Exception:
                 if handle:
                     library.dll.usb_relay_device_close(handle)
+
+                if enumeration_head:
+                    library.dll.usb_relay_device_free_enumerate(
+                        enumeration_head
+                    )
+
                 _release_library(dll_path)
                 raise
 
     def close(self) -> None:
         with self._io_lock:
-            if self._handle and self._library is not None:
-                self._library.dll.usb_relay_device_close(self._handle)
-
-            self._handle = 0
-            self._connected = False
-
+            library = self._library
+            handle = self._handle
+            enumeration_head = self._enumeration_head
             dll_path = self._dll_path
+
+            # Clear Python-side state first so repeated close() calls are safe.
+            self._handle = 0
+            self._enumeration_head = None
+            self._selected_node = None
+            self._connected = False
             self._library = None
             self._dll_path = None
 
+            close_error: Exception | None = None
+
+            if handle and library is not None:
+                try:
+                    library.dll.usb_relay_device_close(handle)
+                except Exception as exc:
+                    close_error = exc
+
+            # The enumeration list must remain alive until after handle close.
+            if enumeration_head and library is not None:
+                try:
+                    library.dll.usb_relay_device_free_enumerate(
+                        enumeration_head
+                    )
+                except Exception as exc:
+                    if close_error is None:
+                        close_error = exc
+
             if dll_path is not None:
-                _release_library(dll_path)
+                try:
+                    _release_library(dll_path)
+                except Exception as exc:
+                    if close_error is None:
+                        close_error = exc
+
+            if close_error is not None:
+                raise close_error
 
     def safe_state(self) -> None:
         """
@@ -546,7 +628,9 @@ class SeeitUsbbNativeDriver(Driver):
             "firmware": "",
             "idn": f"SEEIT,{model},{serial},USB-DLL",
             "transport": "native_usb",
-            "device_path": self._device_path,
+            "selector": self._configured_selector or "",
+            "enumeration_index": str(self._selected_index or ""),
+            "device_path": self._reported_device_path,
             "driver": "seeit_usbb_native",
         }
 
@@ -658,6 +742,8 @@ class SeeitUsbbNativeDriver(Driver):
             not self._connected
             or self._library is None
             or self._handle == 0
+            or self._enumeration_head is None
+            or self._selected_node is None
         ):
             raise RuntimeError(
                 f"{self.device_id}: native USB relay is not connected"
