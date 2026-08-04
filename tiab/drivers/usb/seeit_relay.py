@@ -268,6 +268,16 @@ def _open_enumerated_device(
     selected_pointer: _UsbRelayDeviceInfoPointer | None = None
     selected_record: dict[str, Any] | None = None
 
+    selected_index: int | None = None
+    if device_path and device_path.startswith("index:"):
+        try:
+            selected_index = int(device_path.split(":", 1)[1])
+        except ValueError as exc:
+            raise UsbRelayError(
+                f"Invalid relay selector {device_path!r}"
+            ) from exc
+        device_path = None
+
     try:
         current = head
         visited: set[int] = set()
@@ -291,17 +301,23 @@ def _open_enumerated_device(
             }
             records.append(record)
 
+            index_matches = (
+                selected_index is not None
+                and record["index"] == selected_index
+            )
             path_matches = (
-                device_path is not None
+                selected_index is None
+                and device_path is not None
                 and record["device_path"] == device_path
             )
             serial_matches = (
-                device_path is None
+                selected_index is None
+                and device_path is None
                 and serial_number is not None
                 and record["serial_number"] == serial_number
             )
 
-            if path_matches or serial_matches:
+            if index_matches or path_matches or serial_matches:
                 if selected_pointer is not None:
                     raise UsbRelayError(
                         "The configured selector matches more than one relay. "
@@ -402,21 +418,33 @@ class SeeitUsbbNativeDriver(Driver):
             _release_library(resolved_path)
 
         discovered: list[DiscoveredInstrument] = []
+        path_counts: dict[str, int] = {}
+
+        for record in records:
+            path = str(record["device_path"])
+            path_counts[path] = path_counts.get(path, 0) + 1
 
         for record in records:
             channels = int(record["num_channels"])
             serial = str(record["serial_number"])
             device_path = str(record["device_path"])
+            index = int(record["index"])
             model = f"USBB-RELAY{channels:02d}"
-            path_tail = device_path[-24:] if device_path else "unknown path"
+
+            if device_path and path_counts.get(device_path, 0) == 1:
+                selector = device_path
+                identity_text = device_path[-24:]
+            else:
+                selector = f"index:{index}"
+                identity_text = f"enumerated device {index}"
 
             discovered.append(
                 DiscoveredInstrument(
                     driver_type="seeit_usbb_native",
-                    selector=device_path,
+                    selector=selector,
                     display_name=(
                         f"Seeit {model} — {serial or 'no serial'} — "
-                        f"{path_tail}"
+                        f"{identity_text}"
                     ),
                     manufacturer="Seeit",
                     model=model,
@@ -425,7 +453,13 @@ class SeeitUsbbNativeDriver(Driver):
                     connection=device_path,
                     metadata={
                         "num_channels": channels,
-                        "index": int(record["index"]),
+                        "index": index,
+                        "device_path": device_path,
+                        "selector_mode": (
+                            "device_path"
+                            if selector == device_path
+                            else "enumeration_index"
+                        ),
                     },
                 )
             )

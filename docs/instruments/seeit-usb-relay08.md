@@ -86,6 +86,26 @@ Test in a Box stores the unique Windows HID device path rather than relying on
 the duplicate factory serial number. Moving the board to another USB port may
 change that path, in which case scan and select it again.
 
+### Duplicate DLL identifiers
+
+Some boards report the same factory serial number and the same device-path
+value through the vendor DLL. When that happens, Test in a Box automatically
+uses the board's enumeration index for selection.
+
+The discovered list will show entries such as:
+
+```text
+enumerated device 1
+enumerated device 2
+```
+
+Assign one to each Instrument Library entry, save and reconnect, then toggle a
+relay to identify and label the physical boards.
+
+Enumeration order may change after reconnecting hardware or rebooting Windows.
+If a saved selection later controls the wrong board, scan and assign the boards
+again.
+
 ## Relay positions
 
 Both drivers expose channels as:
