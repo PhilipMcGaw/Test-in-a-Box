@@ -1,22 +1,17 @@
 """
 Run context that generated test scripts execute against.
 
-A Blockly-generated script (or, for now, a hand-written Python script like
-example_scripts/demo_test.py) gets one of these and calls its methods
-instead of touching drivers directly. That's the seam where the future
-Blockly Python code-generator plugs in — every block just needs to emit a
-call to one of these methods.
-
-Handles:
-  - resolving device_id -> driver instance
-  - routing every read/write through the CSV logger (via the driver's
-    on_event callback) so nothing needs to log manually
-  - a live console (stdout for now; swap for a WebSocket emit later)
-  - simple assertions for pass/fail reporting
+A Blockly-generated script calls this class instead of touching drivers
+directly. The runner resolves device IDs, routes driver events to the CSV
+logger, records run metadata, reports progress to the live console and provides
+simple assertion support.
 """
 
 from __future__ import annotations
 
+import getpass
+import platform
+import socket
 import sys
 import time
 from datetime import datetime, timezone
@@ -28,65 +23,185 @@ from .csv_logger import CsvRunLogger
 from .mapping import DutMapping
 
 
-_MISSING = object()
-
-
 class AssertionFailure(Exception):
-    pass
+    """Raised when an evaluated test condition fails."""
 
 
 class TestRunner:
-    def __init__(self, run_id: str, mapping: DutMapping, output_dir: str = "./runs",
-                 console: Optional[Callable[[str], None]] = None):
+    def __init__(
+        self,
+        run_id: str,
+        mapping: DutMapping,
+        output_dir: str = "./runs",
+        console: Optional[Callable[[str], None]] = None,
+    ) -> None:
         self.run_id = run_id
         self.mapping = mapping
         self.logger = CsvRunLogger(run_id, mapping, output_dir)
-        self.console = console or (lambda msg: print(msg, file=sys.stdout, flush=True))
+        self.console = console or (
+            lambda message: print(
+                message,
+                file=sys.stdout,
+                flush=True,
+            )
+        )
         self.devices: dict[str, Driver] = {}
 
-    # -- device setup ----------------------------------------------------
-    def add_device(self, device_type: str, device_id: str, **kwargs) -> Driver:
-        driver = create_driver(device_type, device_id, on_event=self.logger.handle_event, **kwargs)
+        self._record_host_metadata()
+
+    def _record_host_metadata(self) -> None:
+        """
+        Record traceability information about the computer and user account.
+
+        If a value cannot be obtained, an explanatory placeholder is recorded
+        rather than failing the test run.
+        """
+        def safe_value(getter: Callable[[], str]) -> str:
+            try:
+                value = getter()
+                return value or "unknown"
+            except Exception as exc:
+                return f"unavailable: {exc}"
+
+        uname = platform.uname()
+
+        metadata = {
+            "run_id": self.run_id,
+            "run_start_utc": datetime.now(timezone.utc).isoformat(),
+            "hostname": safe_value(socket.gethostname),
+            "logged_in_user": safe_value(getpass.getuser),
+            "operating_system": safe_value(platform.system),
+            "os_release": safe_value(platform.release),
+            "os_version": safe_value(platform.version),
+            "os_build": uname.version or "unknown",
+            "os_machine": uname.machine or "unknown",
+            "os_platform_string": safe_value(platform.platform),
+            "python_version": safe_value(platform.python_version),
+        }
+
+        self.logger.record_run_metadata_many(metadata)
+
+    # ------------------------------------------------------------------
+    # Device setup
+    # ------------------------------------------------------------------
+
+    def add_device(
+        self,
+        device_type: str,
+        device_id: str,
+        **kwargs: Any,
+    ) -> Driver:
+        if device_id in self.devices:
+            raise ValueError(
+                f"device_id {device_id!r} is already registered"
+            )
+
+        driver = create_driver(
+            device_type,
+            device_id,
+            on_event=self.logger.handle_event,
+            **kwargs,
+        )
         driver.connect()
         self.devices[device_id] = driver
-        self._say(f"[connect] {device_id} ({device_type}) connected")
+
+        self._say(
+            f"[connect] {device_id} ({device_type}) connected"
+        )
         return driver
 
     @classmethod
-    def for_existing_devices(cls, run_id: str, mapping: DutMapping,
-                              devices: dict[str, Driver], output_dir: str = "./runs",
-                              console: Optional[Callable[[str], None]] = None) -> "TestRunner":
+    def for_existing_devices(
+        cls,
+        run_id: str,
+        mapping: DutMapping,
+        devices: dict[str, Driver],
+        output_dir: str = "./runs",
+        console: Optional[Callable[[str], None]] = None,
+    ) -> "TestRunner":
         """
-        Build a runner around devices that are already connected (typical for
-        the web app, where devices stay connected across many runs rather
-        than being reconnected each time). Rebinds each driver's event sink
-        to this run's CSV logger.
+        Build a runner around devices that are already connected.
+
+        This is the normal web-application workflow, where instruments stay
+        connected across several test runs.
         """
-        instance = cls(run_id, mapping, output_dir, console)
+        instance = cls(
+            run_id,
+            mapping,
+            output_dir,
+            console,
+        )
         instance.devices = devices
+
         for driver in devices.values():
             driver.set_event_sink(instance.logger.handle_event)
+
+        instance._record_instrument_identities()
         return instance
 
+    def _record_instrument_identities(self) -> None:
+        """Record identity information for every connected instrument."""
+        for device_id, driver in self.devices.items():
+            try:
+                identity = driver.identify()
+            except Exception as exc:
+                self.logger.record_run_metadata(
+                    f"instrument.{device_id}.identity_error",
+                    str(exc),
+                )
+                continue
+
+            if not identity:
+                self.logger.record_run_metadata(
+                    f"instrument.{device_id}.identity",
+                    "not available",
+                )
+                continue
+
+            for key, value in identity.items():
+                self.logger.record_run_metadata(
+                    f"instrument.{device_id}.{key}",
+                    value,
+                )
+
     def release_devices(self) -> None:
-        """Detach from shared devices without closing them (they outlive this run)."""
+        """Detach from shared devices without closing them."""
         for driver in self.devices.values():
             driver.set_event_sink(None)
+
         self.devices = {}
         self.logger.close()
 
     def lock_mapping(self) -> None:
         self.mapping.lock()
-        self._say(f"[setup] DUT mapping locked: {self.mapping.as_dict()}")
+        self._say(
+            f"[setup] DUT mapping locked: {self.mapping.as_dict()}"
+        )
 
-    # -- the methods a generated script calls ------------------------------
-    def set(self, device_id: str, position_id: str, value: Any) -> None:
+    # ------------------------------------------------------------------
+    # Methods called by generated scripts
+    # ------------------------------------------------------------------
+
+    def set(
+        self,
+        device_id: str,
+        position_id: str,
+        value: Any,
+    ) -> None:
         self.devices[device_id].write(position_id, value)
-        self._say(f"[set] {device_id}.{position_id} = {value}")
+        self._say(
+            f"[set] {device_id}.{position_id} = {value}"
+        )
 
-    def get(self, device_id: str, position_id: str) -> Any:
+    def get(
+        self,
+        device_id: str,
+        position_id: str,
+    ) -> Any:
         value = self.devices[device_id].read(position_id)
-        self._say(f"[get] {device_id}.{position_id} -> {value}")
+        self._say(
+            f"[get] {device_id}.{position_id} -> {value}"
+        )
         return value
 
     def wait(self, seconds: float) -> None:
@@ -95,72 +210,88 @@ class TestRunner:
 
     def log(
         self,
-        label: str,
-        value: Any = _MISSING,
-        unit: Optional[str] = None,
+        message: str,
         device_id: Optional[str] = None,
         position_id: Optional[str] = None,
     ) -> None:
-        """
-        Record a script-level note or a labelled engineering value.
+        self._say(f"[log] {message}")
+        self.logger.handle_event(
+            LogEvent(
+                timestamp=LogEvent.now(),
+                device_id=device_id or "script",
+                position=position_id,
+                channel=position_id,
+                value=message,
+                unit=None,
+                event_type="log",
+            )
+        )
 
-        ``log("note")`` preserves the original message-only behaviour.
-
-        ``log("Measured voltage", measured_voltage)`` records the label in the
-        position/channel columns and the measurement in the value column.
-        """
-        if value is _MISSING:
-            self._say(f"[log] {label}")
-            event_position = position_id
-            event_value = label
-        else:
-            suffix = f" {unit}" if unit else ""
-            self._say(f"[log] {label} = {value}{suffix}")
-            event_position = position_id or label
-            event_value = value
-
-        self.logger.handle_event(LogEvent(
-            timestamp=LogEvent.now(),
-            device_id=device_id or "script",
-            position=event_position,
-            channel=event_position,
-            value=event_value,
-            unit=unit,
-            event_type="log",
-        ))
-
-    def assert_that(self, condition: bool, message: str,
-                     device_id: Optional[str] = None, position_id: Optional[str] = None) -> None:
+    def assert_that(
+        self,
+        condition: bool,
+        message: str,
+        device_id: Optional[str] = None,
+        position_id: Optional[str] = None,
+    ) -> None:
         status = "PASS" if condition else "FAIL"
         self._say(f"[assert:{status}] {message}")
-        self.logger.handle_event(LogEvent(
-            timestamp=LogEvent.now(), device_id=device_id or "script",
-            position=position_id, channel=position_id,
-            value=f"{status}: {message}", unit=None, event_type="assert",
-        ))
+
+        self.logger.handle_event(
+            LogEvent(
+                timestamp=LogEvent.now(),
+                device_id=device_id or "script",
+                position=position_id,
+                channel=position_id,
+                value=f"{status}: {message}",
+                unit=None,
+                event_type="assert",
+            )
+        )
+
         if not condition:
             raise AssertionFailure(message)
 
-    def record_metadata(self, dut_uid: str, label: str, value) -> None:
-        """Record an operator-entered value (serial number, ID, etc.) directly against a DUT."""
-        self._say(f"[metadata] {label} (DUT {dut_uid}) = {value}")
-        self.logger.record_metadata(dut_uid, label, value)
+    def record_metadata(
+        self,
+        dut_uid: str,
+        label: str,
+        value: Any,
+    ) -> None:
+        """Record an operator-entered value against a DUT."""
+        self._say(
+            f"[metadata] {label} (DUT {dut_uid}) = {value}"
+        )
+        self.logger.record_metadata(
+            dut_uid,
+            label,
+            value,
+        )
 
-    # -- teardown ----------------------------------------------------------
+    # ------------------------------------------------------------------
+    # Teardown
+    # ------------------------------------------------------------------
+
     def finish(self) -> None:
         for device_id, driver in self.devices.items():
             try:
                 driver.close()
-            except Exception as exc:  # noqa: BLE001 - best-effort teardown
-                self._say(f"[warn] error closing {device_id}: {exc}")
+            except Exception as exc:
+                self._say(
+                    f"[warn] error closing {device_id}: {exc}"
+                )
+
         self.logger.close()
-        self._say(f"[done] run {self.run_id} finished at {datetime.now(timezone.utc).isoformat()}")
+        self._say(
+            f"[done] run {self.run_id} finished at "
+            f"{datetime.now(timezone.utc).isoformat()}"
+        )
 
     def _say(self, message: str) -> None:
         self.console(message)
 
-    def __enter__(self):
+    def __enter__(self) -> "TestRunner":
         return self
 
-    def __exit__(self, exc_type, exc, tb):
+    def __exit__(self, exc_type, exc, traceback) -> None:
         self.finish()

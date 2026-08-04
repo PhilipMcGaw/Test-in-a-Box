@@ -10,6 +10,10 @@ them consistently.
 
 Equipment-level events with no DUT mapping fall through to an ``unassigned``
 file rather than being dropped, so no engineering event silently disappears.
+
+Run-level metadata is stored separately in:
+
+    run_<run_id>_metadata.csv
 """
 
 from __future__ import annotations
@@ -32,6 +36,12 @@ FIELDNAMES = [
     "event_type",
 ]
 
+METADATA_FIELDNAMES = [
+    "timestamp",
+    "key",
+    "value",
+]
+
 
 class CsvRunLogger:
     """Thread-safe CSV logger that routes events to one file per DUT."""
@@ -49,6 +59,9 @@ class CsvRunLogger:
 
         self._writers: dict[str, csv.DictWriter] = {}
         self._files: dict[str, TextIO] = {}
+        self._metadata_file: TextIO | None = None
+        self._metadata_writer: csv.DictWriter | None = None
+
         self._lock = threading.RLock()
         self._closed = False
 
@@ -81,6 +94,38 @@ class CsvRunLogger:
 
         return self._writers[dut_uid]
 
+    def _run_metadata_writer(self) -> csv.DictWriter:
+        """
+        Return the run-metadata writer, creating the file if required.
+
+        The caller must hold ``self._lock``.
+        """
+        if self._closed:
+            raise RuntimeError("CSV logger is closed")
+
+        if self._metadata_writer is None:
+            path = self.output_dir / f"run_{self.run_id}_metadata.csv"
+            is_new = not path.exists()
+
+            handle = path.open(
+                "a",
+                newline="",
+                encoding="utf-8",
+            )
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=METADATA_FIELDNAMES,
+            )
+
+            if is_new:
+                writer.writeheader()
+                handle.flush()
+
+            self._metadata_file = handle
+            self._metadata_writer = writer
+
+        return self._metadata_writer
+
     def handle_event(self, event: LogEvent) -> None:
         """Route one driver or script event to the appropriate DUT CSV."""
         dut_uid = (
@@ -107,12 +152,7 @@ class CsvRunLogger:
         label: str,
         value: Any,
     ) -> None:
-        """
-        Record operator-entered metadata directly against a specific DUT.
-
-        This is used for values such as serial numbers or identifiers that are
-        not associated with a hardware channel.
-        """
+        """Record operator-entered metadata against a specific DUT."""
         with self._lock:
             writer = self._writer_for(dut_uid)
             writer.writerow({
@@ -126,22 +166,42 @@ class CsvRunLogger:
             })
             self._files[dut_uid].flush()
 
+    def record_run_metadata(
+        self,
+        key: str,
+        value: Any,
+    ) -> None:
+        """Record one metadata item that applies to the whole run."""
+        with self._lock:
+            writer = self._run_metadata_writer()
+            writer.writerow({
+                "timestamp": LogEvent.now(),
+                "key": key,
+                "value": value,
+            })
+
+            assert self._metadata_file is not None
+            self._metadata_file.flush()
+
+    def record_run_metadata_many(
+        self,
+        metadata: dict[str, Any],
+    ) -> None:
+        """Record several run-level metadata values."""
+        for key, value in metadata.items():
+            self.record_run_metadata(key, value)
+
     def record_direct(
         self,
         dut_uid: str,
         label: str,
         value: Any,
     ) -> None:
-        """
-        Backwards-compatible alias for :meth:`record_metadata`.
-
-        Existing runner code can continue calling ``record_direct`` while the
-        clearer method name is adopted elsewhere.
-        """
+        """Backwards-compatible alias for :meth:`record_metadata`."""
         self.record_metadata(dut_uid, label, value)
 
     def close(self) -> None:
-        """Flush and close all open files. Safe to call more than once."""
+        """Flush and close all files. Safe to call more than once."""
         with self._lock:
             if self._closed:
                 return
@@ -152,8 +212,16 @@ class CsvRunLogger:
                 finally:
                     handle.close()
 
+            if self._metadata_file is not None:
+                try:
+                    self._metadata_file.flush()
+                finally:
+                    self._metadata_file.close()
+
             self._writers.clear()
             self._files.clear()
+            self._metadata_writer = None
+            self._metadata_file = None
             self._closed = True
 
     def __enter__(self) -> "CsvRunLogger":
