@@ -53,6 +53,19 @@
   .readout-value.amps { color: #ffbf47; }
   .readout-value.plain { color: #7fd4ff; }
 
+
+  .psu-section-label { color: #66798b; font-size: 9px; font-weight: 700;
+                       letter-spacing: 0.08em; margin: 9px 0 5px; }
+  .psu-section-label:first-child { margin-top: 0; }
+  .readout-value.setpoint { font-size: 15px; background: #16191d; }
+  .range-row { display: flex; align-items: center; justify-content: space-between;
+               gap: 8px; margin-top: 7px; }
+  .range-select { flex: 1; background: #16191d; color: #fff; border: 1px solid #4b5560;
+                  border-radius: 3px; padding: 4px 5px; font-size: 11px; cursor: pointer; }
+  .range-select:disabled { opacity: 0.55; cursor: default; }
+  .range-warning { color: #d6a84a; font-size: 9px; line-height: 1.3;
+                   margin: 4px 0 8px; }
+
   .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
   .toggle-switch { width: 44px; height: 22px; border-radius: 11px; background: #444; position: relative;
                    cursor: pointer; transition: background 0.15s; }
@@ -74,6 +87,28 @@
 
   .generic-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
   .generic-row .val { font-family: Consolas, monospace; color: #7fd4ff; }
+
+  .instrument-setup-note {
+    margin-top: 12px;
+    padding: 10px;
+    border: 1px solid #61758a;
+    border-radius: 5px;
+    background: #182432;
+    color: #dbe7f2;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+  .instrument-setup-note strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #fff;
+    font-size: 12px;
+  }
+  .instrument-setup-note p { margin: 0 0 8px; }
+  .instrument-setup-note a {
+    color: #83c7ff;
+    text-decoration: underline;
+  }
 </style>
 </head>
 <body>

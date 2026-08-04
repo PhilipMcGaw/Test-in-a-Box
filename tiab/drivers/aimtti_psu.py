@@ -94,6 +94,8 @@ class AimTtiPsuDriver(Driver):
 
             self._identity = _parse_idn(identity)
             self._connected = True
+            # Rebuild capabilities now that model-specific features are known.
+            self._capabilities = self._build_capabilities()
 
         except Exception:
             with contextlib.suppress(Exception):
@@ -192,12 +194,31 @@ class AimTtiPsuDriver(Driver):
                 ),
             ])
 
+        # The QL355P provides three selectable operating ranges. RANGE1 is
+        # readable and writable, and changing it causes the PSU itself to turn
+        # the output off.
+        if self._is_ql355p():
+            positions.append(
+                Position(
+                    "range1",
+                    "Voltage Range",
+                    PositionKind.OUTPUT_ANALOG,
+                )
+            )
+
         return CapabilityDescriptor(
             device_type="aimtti_psu",
             device_id=self.device_id,
             display_name="Aim-TTi PSU",
             positions=positions,
         )
+
+    def _is_ql355p(self) -> bool:
+        """Return True when the connected instrument identifies as a QL355P."""
+        if not self._identity:
+            return False
+
+        return self._identity.get("model", "").strip().upper() == "QL355P"
 
     # ------------------------------------------------------------------
     # Low-level serial helpers
@@ -245,6 +266,21 @@ class AimTtiPsuDriver(Driver):
     def write(self, position_id: str, value: Any) -> None:
         self._require_connected()
 
+        if position_id == "range1":
+            if not self._is_ql355p():
+                raise KeyError(
+                    f"{self.device_id}: voltage range selection is not "
+                    "available for this instrument"
+                )
+
+            range_value = _normalise_ql355p_range(value)
+            self._write_raw(f"RANGE1 {range_value}")
+
+            # The QL355P disables its output when the range is changed.
+            self._emit("range1", range_value, None, event_type="state")
+            self._emit("output1", False, None, event_type="state")
+            return
+
         if position_id.startswith("v") and not position_id.endswith("_meas"):
             channel = self._parse_channel(position_id, "v")
             numeric_value = float(value)
@@ -274,7 +310,18 @@ class AimTtiPsuDriver(Driver):
     def read(self, position_id: str) -> Any:
         self._require_connected()
 
-        if position_id.endswith("_meas"):
+        if position_id == "range1":
+            if not self._is_ql355p():
+                raise KeyError(
+                    f"{self.device_id}: voltage range selection is not "
+                    "available for this instrument"
+                )
+
+            raw = self._query_raw("RANGE1?")
+            value = _parse_range_response(raw)
+            unit = None
+
+        elif position_id.endswith("_meas"):
             base = position_id[:-len("_meas")]
 
             if base.startswith("v"):
@@ -355,6 +402,69 @@ class AimTtiPsuDriver(Driver):
             )
 
         return channel
+
+
+def _normalise_ql355p_range(value: Any) -> int:
+    """
+    Convert a QL355P range selection to the instrument's numeric code.
+
+    Accepted values:
+
+    - 0 or "15V/5A"
+    - 1 or "35V/3A"
+    - 2 or "35V/0.5A"
+    """
+    labels = {
+        "15V/5A": 0,
+        "15 V / 5 A": 0,
+        "35V/3A": 1,
+        "35 V / 3 A": 1,
+        "35V/0.5A": 2,
+        "35 V / 0.5 A": 2,
+        "35V/500MA": 2,
+        "35 V / 500 MA": 2,
+    }
+
+    if isinstance(value, str):
+        normalised = value.strip().upper()
+        if normalised in labels:
+            return labels[normalised]
+
+    try:
+        numeric = int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            f"invalid QL355P range {value!r}; expected 0, 1 or 2"
+        ) from exc
+
+    if numeric not in (0, 1, 2):
+        raise ValueError(
+            f"invalid QL355P range {numeric}; expected 0, 1 or 2"
+        )
+
+    return numeric
+
+
+def _parse_range_response(raw: str) -> int:
+    """Parse a response such as ``RANGE1 1`` or ``1``."""
+    parts = raw.strip().split()
+
+    if not parts:
+        raise ValueError("empty range response")
+
+    try:
+        value = int(parts[-1])
+    except ValueError as exc:
+        raise ValueError(
+            f"could not parse range response {raw!r}"
+        ) from exc
+
+    if value not in (0, 1, 2):
+        raise ValueError(
+            f"unexpected QL355P range response {raw!r}"
+        )
+
+    return value
 
 
 def _parse_idn(raw: str) -> dict[str, str]:

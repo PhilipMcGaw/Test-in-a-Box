@@ -14,6 +14,7 @@ This folder explains the purpose, scope and design of **Test in a Box**.
 
 - [Why Blockly](BLOCKLY.md)
 - [Instrument Library](INSTRUMENT-LIBRARY.md)
+- [Instrument setup guides](instruments/README.md)
 - [Engineering Results](ENGINEERING-RESULTS.md)
 - [Hello World examples](HELLO-WORLD.md)
 - [Engineering examples](../examples/README.md)

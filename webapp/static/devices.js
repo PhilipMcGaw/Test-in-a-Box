@@ -315,85 +315,138 @@ function fmt(value, digits) {
 
 
 function renderPsuBody(card, capabilities) {
-  const numChannels = capabilities
-    ? (
-        new Set(
-          (capabilities.positions || []).map(position => {
-            const match = position.id.match(/^\D*(\d+)/);
-            return match ? match[1] : '1';
-          })
-        ).size || 1
-      )
+  const positions = capabilities?.positions || [];
+
+  const channelNumbers = positions
+    .map(position => {
+      const match = String(position.id).match(/(\d+)/);
+      return match ? Number(match[1]) : null;
+    })
+    .filter(channel => channel !== null);
+
+  const numChannels = channelNumbers.length
+    ? Math.max(...channelNumbers)
     : parseInt(card.kwargs.num_channels || 1, 10);
 
   let html = '';
 
   for (let channel = 1; channel <= numChannels; channel += 1) {
-    const hasNumberedVoltage = capabilities &&
-      capabilities.positions.some(
-        position => position.id === `v${channel}`
-      );
+    const voltageKey = positions.some(
+      position => position.id === `v${channel}`
+    ) ? `v${channel}` : 'voltage';
 
-    const hasNumberedCurrent = capabilities &&
-      capabilities.positions.some(
-        position => position.id === `i${channel}`
-      );
+    const currentKey = positions.some(
+      position => position.id === `i${channel}`
+    ) ? `i${channel}` : 'current';
 
-    const hasNumberedOutput = capabilities &&
-      capabilities.positions.some(
-        position => position.id === `output${channel}`
-      );
+    const outputKey = positions.some(
+      position => position.id === `output${channel}`
+    ) ? `output${channel}` : 'output';
 
-    const voltageKey =
-      numChannels > 1 || hasNumberedVoltage
-        ? `v${channel}`
-        : 'voltage';
+    const measuredVoltageKey = positions.some(
+      position => position.id === `v${channel}_meas`
+    ) ? `v${channel}_meas` : `${voltageKey}_meas`;
 
-    const currentKey =
-      numChannels > 1 || hasNumberedCurrent
-        ? `i${channel}`
-        : 'current';
+    const measuredCurrentKey = positions.some(
+      position => position.id === `i${channel}_meas`
+    ) ? `i${channel}_meas` : `${currentKey}_meas`;
 
-    const outputKey =
-      numChannels > 1 || hasNumberedOutput
-        ? `output${channel}`
-        : 'output';
+    const rangeKey = positions.some(
+      position => position.id === `range${channel}`
+    ) ? `range${channel}` : null;
 
-    const voltageValue =
-      getLive(card.device_id, `${voltageKey}_meas`) ??
-      getLive(card.device_id, voltageKey);
+    const channelPrefix = numChannels > 1
+      ? `Ch${channel} `
+      : '';
 
-    const currentValue =
-      getLive(card.device_id, `${currentKey}_meas`) ??
-      getLive(card.device_id, currentKey);
-
-    const outputValue = getLive(
+    const voltageSetpoint = getLive(card.device_id, voltageKey);
+    const currentSetpoint = getLive(card.device_id, currentKey);
+    const measuredVoltage = getLive(
       card.device_id,
-      outputKey
+      measuredVoltageKey
     );
+    const measuredCurrent = getLive(
+      card.device_id,
+      measuredCurrentKey
+    );
+    const outputValue = getLive(card.device_id, outputKey);
+    const rangeValue = rangeKey
+      ? getLive(card.device_id, rangeKey)
+      : undefined;
 
     html += `
+      <div class="psu-section-label">${channelPrefix}SETTINGS</div>
+
       <div class="readout-row">
-        <span class="readout-label">Ch${channel} V</span>
+        <span class="readout-label">${channelPrefix}Set Voltage</span>
         <span
-          class="readout-value volts"
-          data-readout="${voltageKey}_meas|${voltageKey}">
-          ${fmt(voltageValue, 2)}
+          class="readout-value volts setpoint"
+          data-readout="${voltageKey}">
+          ${fmt(voltageSetpoint, 3)}
         </span>
       </div>
 
       <div class="readout-row">
-        <span class="readout-label">Ch${channel} A</span>
+        <span class="readout-label">${channelPrefix}Current Limit</span>
+        <span
+          class="readout-value amps setpoint"
+          data-readout="${currentKey}">
+          ${fmt(currentSetpoint, 3)}
+        </span>
+      </div>
+    `;
+
+    if (rangeKey) {
+      html += `
+        <div class="range-row">
+          <label class="readout-label" for="${card.uid}-${rangeKey}">
+            Range
+          </label>
+          <select
+            id="${card.uid}-${rangeKey}"
+            class="range-select"
+            data-range-select="${rangeKey}">
+            <option value="0" ${Number(rangeValue) === 0 ? 'selected' : ''}>
+              15 V / 5 A
+            </option>
+            <option value="1" ${Number(rangeValue) === 1 ? 'selected' : ''}>
+              35 V / 3 A
+            </option>
+            <option value="2" ${Number(rangeValue) === 2 ? 'selected' : ''}>
+              35 V / 500 mA
+            </option>
+          </select>
+        </div>
+        <div class="range-warning">
+          Changing range switches the PSU output off.
+        </div>
+      `;
+    }
+
+    html += `
+      <div class="psu-section-label">${channelPrefix}OUTPUT</div>
+
+      <div class="readout-row">
+        <span class="readout-label">${channelPrefix}Voltage</span>
+        <span
+          class="readout-value volts"
+          data-readout="${measuredVoltageKey}">
+          ${fmt(measuredVoltage, 3)}
+        </span>
+      </div>
+
+      <div class="readout-row">
+        <span class="readout-label">${channelPrefix}Current</span>
         <span
           class="readout-value amps"
-          data-readout="${currentKey}_meas|${currentKey}">
-          ${fmt(currentValue, 3)}
+          data-readout="${measuredCurrentKey}">
+          ${fmt(measuredCurrent, 3)}
         </span>
       </div>
 
       <div class="toggle-row">
         <span class="readout-label">
-          Output ${numChannels > 1 ? channel : ''}
+          ${channelPrefix}Output
         </span>
         <div
           class="toggle-switch ${outputValue ? 'on' : ''}"
@@ -406,7 +459,6 @@ function renderPsuBody(card, capabilities) {
 
   return html;
 }
-
 
 function renderRelayBody(card, capabilities) {
   const numChannels = capabilities
@@ -542,6 +594,25 @@ function renderSettings(card, typeInfo) {
     `;
   }
 
+  if (typeInfo.setup_note) {
+    html += `
+      <div class="instrument-setup-note">
+        <strong>Setup note</strong>
+        <p>${escapeHtml(typeInfo.setup_note)}</p>
+        ${
+          typeInfo.product_url
+            ? `<a
+                 href="${escapeHtml(typeInfo.product_url)}"
+                 target="_blank"
+                 rel="noopener noreferrer">
+                 Open manufacturer product page
+               </a>`
+            : ''
+        }
+      </div>
+    `;
+  }
+
   return html || (
     '<div style="color:#8fa1b3;font-size:11px;">' +
     '(no settings for this device type)' +
@@ -663,6 +734,70 @@ function wireCardEvents(element, card) {
         toggle.classList.toggle('on');
       } catch (error) {
         alert(`Could not toggle: ${error.message || error}`);
+      }
+    });
+  });
+
+  element.querySelectorAll('[data-range-select]').forEach(select => {
+    select.addEventListener('mousedown', event => {
+      event.stopPropagation();
+    });
+
+    select.addEventListener('change', async () => {
+      const positionId = select.dataset.rangeSelect;
+      const previousValue = getLive(
+        card.device_id,
+        positionId
+      );
+
+      const confirmed = window.confirm(
+        'Changing the PSU range will switch its output off. Continue?'
+      );
+
+      if (!confirmed) {
+        if (previousValue !== undefined) {
+          select.value = String(previousValue);
+        }
+        return;
+      }
+
+      select.disabled = true;
+
+      try {
+        const response = await fetch('/api/set_position', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            device_id: card.device_id,
+            position_id: positionId,
+            value: Number(select.value),
+          }),
+        });
+
+        const data = await readJsonSafely(response);
+
+        if (!response.ok) {
+          throw new Error(
+            formatApiError(data, `HTTP ${response.status}`)
+          );
+        }
+
+        // The physical QL355P disables its output during a range change.
+        liveValues[card.device_id] = liveValues[card.device_id] || {};
+        liveValues[card.device_id][positionId] = Number(select.value);
+        liveValues[card.device_id].output1 = false;
+
+        await pollLiveValues();
+        renderCanvas();
+      } catch (error) {
+        if (previousValue !== undefined) {
+          select.value = String(previousValue);
+        }
+        alert(`Could not change PSU range: ${error.message || error}`);
+      } finally {
+        select.disabled = false;
       }
     });
   });
@@ -994,6 +1129,31 @@ function updateReadoutsInPlace() {
     }
 
     element.classList.toggle('on', Boolean(value));
+  });
+
+  document.querySelectorAll('[data-range-select]').forEach(element => {
+    const cardElement = element.closest('.device-card');
+
+    if (!cardElement) {
+      return;
+    }
+
+    const card = cards.find(
+      candidate => candidate.uid === cardElement.dataset.uid
+    );
+
+    if (!card) {
+      return;
+    }
+
+    const value = getLive(
+      card.device_id,
+      element.dataset.rangeSelect
+    );
+
+    if (value !== undefined) {
+      element.value = String(value);
+    }
   });
 }
 

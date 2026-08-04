@@ -245,12 +245,25 @@ hardware before relying on it for production work.
 
 ---
 
-## FTDI Serial Devices
+## Seeit USB-RELAY08
 
-Relay boards and other FTDI-based serial devices should appear as normal COM
-ports once the FTDI drivers are installed.
+The Seeit USB-RELAY08 uses a **Prolific PL2303 USB-to-serial converter**, not an
+FTDI converter.
 
-Windows Device Manager can be used to determine the assigned COM port.
+Windows may require the PL2303 driver before the board appears as a COM port.
+The driver is available from the manufacturer product page:
+
+https://seeit.fr/produits.php?produit_ref=USB-RELAY08
+
+Installing the driver normally requires **administrator rights**.
+
+After installing the driver, reconnect the board and use Windows Device Manager
+to determine the assigned COM port.
+
+For regular bench use, shared laboratories or education, consider fitting the
+relay board inside an enclosure and breaking the relay contacts out to clearly
+labelled, touch-safe connectors. Document how each external connector maps to
+the logical relay number used by Test in a Box.
 
 ---
 

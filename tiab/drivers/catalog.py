@@ -104,7 +104,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         ),
     },
     "seeit_relay08": {
-        "label": "Seeit USBB-RELAY08",
+        "label": "Seeit USB-RELAY08",
         "manufacturer": "Seeit",
         "instrument_category": "Relay Controller",
         "category": "relay",
@@ -118,9 +118,19 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
             },
         ],
         "description": (
-            "Eight-channel USB relay board. The serial protocol is based on a "
-            "community implementation for the same board family because no "
-            "public vendor protocol document has been identified."
+            "Eight-channel USB relay board using a virtual serial COM port at "
+            "9600 baud. The board uses a Prolific PL2303 USB-to-serial "
+            "converter and may require the vendor driver before Windows "
+            "creates the COM port."
+        ),
+        "setup_note": (
+            "Driver required: this board uses a Prolific PL2303 USB-to-serial "
+            "converter. Download the Windows driver from the Seeit product "
+            "page. Installing the driver normally requires administrator "
+            "rights. Reconnect the board afterwards and select its COM port."
+        ),
+        "product_url": (
+            "https://seeit.fr/produits.php?produit_ref=USB-RELAY08"
         ),
         "status": "unverified",
         "status_description": VALIDATION_STATUSES["unverified"],

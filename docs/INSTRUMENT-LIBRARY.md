@@ -187,7 +187,7 @@ The repository currently includes support for:
 
 - Generic SCPI instruments.
 - Aim-TTi programmable power supplies.
-- Seeit relay hardware.
+- [Seeit USB-RELAY08](instruments/seeit-usb-relay08.md).
 - Pico TC-08.
 - Pico ADC-20/24.
 - Mock hardware.
@@ -196,6 +196,22 @@ Additional drivers will be added as real engineering projects require them.
 
 ---
 
+
+## Seeit USB-RELAY08 setup
+
+The Seeit USB-RELAY08 uses a Prolific PL2303 USB-to-serial converter. Windows
+may require the vendor driver before the board appears as a COM port, and
+installing that driver normally requires administrator rights.
+
+See the dedicated setup guide:
+
+[Seeit USB-RELAY08](instruments/seeit-usb-relay08.md)
+
+For shared laboratories and education, an enclosed board with relay contacts
+broken out to clearly labelled, touch-safe connectors is preferable to routine
+use of the bare PCB.
+
+---
 
 ## QL355P bench validation
 
