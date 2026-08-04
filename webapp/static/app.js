@@ -24,7 +24,7 @@ const TOOLBOX = {
         { kind: "block", type: "controls_whileUntil" },
         { kind: "block", type: "controls_for" },
       ] },
-    { kind: "category", name: "Timing & Notes", colour: "65",
+    { kind: "category", name: "Timing & Results", colour: "65",
       contents: [
         { kind: "block", type: "hw_wait" },
         { kind: "block", type: "hw_log" },

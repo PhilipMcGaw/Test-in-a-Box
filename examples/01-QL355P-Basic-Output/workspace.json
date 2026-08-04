@@ -1,0 +1,96 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "hw_set",
+        "id": "ex1_set_v",
+        "fields": {
+          "POSITION": "aimtti_psu_1|v1"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "math_number",
+              "id": "ex1_num_10",
+              "fields": {
+                "NUM": 10
+              }
+            }
+          }
+        },
+        "next": {
+          "block": {
+            "type": "hw_set",
+            "id": "ex1_set_i",
+            "fields": {
+              "POSITION": "aimtti_psu_1|i1"
+            },
+            "inputs": {
+              "VALUE": {
+                "block": {
+                  "type": "math_number",
+                  "id": "ex1_num_3",
+                  "fields": {
+                    "NUM": 3
+                  }
+                }
+              }
+            },
+            "next": {
+              "block": {
+                "type": "hw_set",
+                "id": "ex1_output_on",
+                "fields": {
+                  "POSITION": "aimtti_psu_1|output1"
+                },
+                "inputs": {
+                  "VALUE": {
+                    "block": {
+                      "type": "math_number",
+                      "id": "ex1_num_on",
+                      "fields": {
+                        "NUM": 1
+                      }
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "hw_wait",
+                    "id": "ex1_wait",
+                    "fields": {
+                      "SECONDS": 5
+                    },
+                    "next": {
+                      "block": {
+                        "type": "hw_set",
+                        "id": "ex1_output_off",
+                        "fields": {
+                          "POSITION": "aimtti_psu_1|output1"
+                        },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "math_number",
+                              "id": "ex1_num_off",
+                              "fields": {
+                                "NUM": 0
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x": 40,
+        "y": 40
+      }
+    ]
+  }
+}

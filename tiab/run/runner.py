@@ -28,6 +28,9 @@ from .csv_logger import CsvRunLogger
 from .mapping import DutMapping
 
 
+_MISSING = object()
+
+
 class AssertionFailure(Exception):
     pass
 
@@ -90,13 +93,40 @@ class TestRunner:
         self._say(f"[wait] {seconds}s")
         time.sleep(seconds)
 
-    def log(self, message: str, device_id: Optional[str] = None,
-             position_id: Optional[str] = None) -> None:
-        self._say(f"[log] {message}")
+    def log(
+        self,
+        label: str,
+        value: Any = _MISSING,
+        unit: Optional[str] = None,
+        device_id: Optional[str] = None,
+        position_id: Optional[str] = None,
+    ) -> None:
+        """
+        Record a script-level note or a labelled engineering value.
+
+        ``log("note")`` preserves the original message-only behaviour.
+
+        ``log("Measured voltage", measured_voltage)`` records the label in the
+        position/channel columns and the measurement in the value column.
+        """
+        if value is _MISSING:
+            self._say(f"[log] {label}")
+            event_position = position_id
+            event_value = label
+        else:
+            suffix = f" {unit}" if unit else ""
+            self._say(f"[log] {label} = {value}{suffix}")
+            event_position = position_id or label
+            event_value = value
+
         self.logger.handle_event(LogEvent(
-            timestamp=LogEvent.now(), device_id=device_id or "script",
-            position=position_id, channel=position_id, value=message,
-            unit=None, event_type="log",
+            timestamp=LogEvent.now(),
+            device_id=device_id or "script",
+            position=event_position,
+            channel=event_position,
+            value=event_value,
+            unit=unit,
+            event_type="log",
         ))
 
     def assert_that(self, condition: bool, message: str,
@@ -114,7 +144,7 @@ class TestRunner:
     def record_metadata(self, dut_uid: str, label: str, value) -> None:
         """Record an operator-entered value (serial number, ID, etc.) directly against a DUT."""
         self._say(f"[metadata] {label} (DUT {dut_uid}) = {value}")
-        self.logger.record_direct(dut_uid, label, value)
+        self.logger.record_metadata(dut_uid, label, value)
 
     # -- teardown ----------------------------------------------------------
     def finish(self) -> None:

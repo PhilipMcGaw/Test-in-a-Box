@@ -51,11 +51,18 @@ Blockly.Blocks['hw_wait'] = {
 Blockly.Blocks['hw_log'] = {
   init: function () {
     this.appendDummyInput()
-      .appendField("log message")
-      .appendField(new Blockly.FieldTextInput("note"), "MESSAGE");
+      .appendField("log")
+      .appendField(new Blockly.FieldTextInput("Measured value"), "MESSAGE");
+    this.appendValueInput("VALUE")
+      .setCheck(null)
+      .appendField("value");
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour(65);
+    this.setTooltip(
+      "Record a labelled engineering value. The value can be a measurement, " +
+      "variable, number, calculation, or text."
+    );
   }
 };
 

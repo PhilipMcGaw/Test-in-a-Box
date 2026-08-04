@@ -50,3 +50,6 @@ desktop.ini
 
 # Log files
 *.log
+
+# Generated and local files
+Desktop.ini

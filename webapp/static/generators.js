@@ -28,8 +28,20 @@ Blockly.Python.forBlock['hw_wait'] = function (block) {
 };
 
 Blockly.Python.forBlock['hw_log'] = function (block) {
-  const message = block.getFieldValue('MESSAGE');
-  return `log(${JSON.stringify(message)})\n`;
+  const label = block.getFieldValue('MESSAGE') || 'Value';
+  const value = Blockly.Python.valueToCode(
+    block,
+    'VALUE',
+    Blockly.Python.ORDER_NONE
+  );
+
+  // Old saved workspaces may not contain a VALUE input. Preserve their
+  // original log-message behaviour rather than refusing to generate code.
+  if (!value) {
+    return `log(${JSON.stringify(label)})\n`;
+  }
+
+  return `log(${JSON.stringify(label)}, ${value})\n`;
 };
 
 Blockly.Python.forBlock['hw_assert'] = function (block) {

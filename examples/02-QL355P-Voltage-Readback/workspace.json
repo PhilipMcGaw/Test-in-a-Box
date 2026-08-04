@@ -1,0 +1,194 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "hw_set",
+        "id": "ex2_set_v",
+        "fields": {
+          "POSITION": "aimtti_psu_1|v1"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "math_number",
+              "id": "ex2_num_10",
+              "fields": {
+                "NUM": 10
+              }
+            }
+          }
+        },
+        "next": {
+          "block": {
+            "type": "hw_set",
+            "id": "ex2_set_i",
+            "fields": {
+              "POSITION": "aimtti_psu_1|i1"
+            },
+            "inputs": {
+              "VALUE": {
+                "block": {
+                  "type": "math_number",
+                  "id": "ex2_num_3",
+                  "fields": {
+                    "NUM": 3
+                  }
+                }
+              }
+            },
+            "next": {
+              "block": {
+                "type": "hw_set",
+                "id": "ex2_output_on",
+                "fields": {
+                  "POSITION": "aimtti_psu_1|output1"
+                },
+                "inputs": {
+                  "VALUE": {
+                    "block": {
+                      "type": "math_number",
+                      "id": "ex2_num_on",
+                      "fields": {
+                        "NUM": 1
+                      }
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "hw_wait",
+                    "id": "ex2_wait",
+                    "fields": {
+                      "SECONDS": 1
+                    },
+                    "next": {
+                      "block": {
+                        "type": "variables_set",
+                        "id": "ex2_store_voltage",
+                        "fields": {
+                          "VAR": {
+                            "id": "var_measured_voltage"
+                          }
+                        },
+                        "inputs": {
+                          "VALUE": {
+                            "block": {
+                              "type": "hw_get",
+                              "id": "ex2_read_voltage",
+                              "fields": {
+                                "POSITION": "aimtti_psu_1|v1_meas"
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "hw_log",
+                            "id": "ex2_log_voltage",
+                            "fields": {
+                              "MESSAGE": "Measured voltage"
+                            },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "variables_get",
+                                  "id": "ex2_get_var_log",
+                                  "fields": {
+                                    "VAR": {
+                                      "id": "var_measured_voltage"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "hw_assert",
+                                "id": "ex2_assert",
+                                "fields": {
+                                  "MESSAGE": "Measured voltage outside 10 V \u00b1 0.2 V"
+                                },
+                                "inputs": {
+                                  "CONDITION": {
+                                    "block": {
+                                      "type": "hw_within_tolerance",
+                                      "id": "ex2_tolerance",
+                                      "inputs": {
+                                        "MEASURED": {
+                                          "block": {
+                                            "type": "variables_get",
+                                            "id": "ex2_get_var_assert",
+                                            "fields": {
+                                              "VAR": {
+                                                "id": "var_measured_voltage"
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "TARGET": {
+                                          "block": {
+                                            "type": "math_number",
+                                            "id": "ex2_target_10",
+                                            "fields": {
+                                              "NUM": 10
+                                            }
+                                          }
+                                        },
+                                        "TOLERANCE": {
+                                          "block": {
+                                            "type": "math_number",
+                                            "id": "ex2_tolerance_02",
+                                            "fields": {
+                                              "NUM": 0.2
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "hw_set",
+                                    "id": "ex2_output_off",
+                                    "fields": {
+                                      "POSITION": "aimtti_psu_1|output1"
+                                    },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "math_number",
+                                          "id": "ex2_num_off",
+                                          "fields": {
+                                            "NUM": 0
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x": 40,
+        "y": 40
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "measured_voltage",
+      "id": "var_measured_voltage"
+    }
+  ]
+}
