@@ -104,7 +104,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         ),
     },
     "seeit_relay08": {
-        "label": "Seeit USB-RELAY08",
+        "label": "Seeit USB-RELAY08 (Serial)",
         "manufacturer": "Seeit",
         "instrument_category": "Relay Controller",
         "category": "relay",
@@ -118,19 +118,54 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
             },
         ],
         "description": (
-            "Eight-channel USB relay board using a virtual serial COM port at "
-            "9600 baud. The board uses a Prolific PL2303 USB-to-serial "
-            "converter and may require the vendor driver before Windows "
-            "creates the COM port."
+            "Eight-channel USB-RELAY08 controlled through a Prolific PL2303 "
+            "virtual serial COM port at 9600 baud."
         ),
         "setup_note": (
-            "Driver required: this board uses a Prolific PL2303 USB-to-serial "
-            "converter. Download the Windows driver from the Seeit product "
-            "page. Installing the driver normally requires administrator "
-            "rights. Reconnect the board afterwards and select its COM port."
+            "Install the PL2303 driver if Windows does not create a COM port, "
+            "then select that COM port in Configure Devices."
         ),
         "product_url": (
             "https://seeit.fr/produits.php?produit_ref=USB-RELAY08"
+        ),
+        "status": "unverified",
+        "status_description": VALIDATION_STATUSES["unverified"],
+    },
+    "seeit_usbb_native": {
+        "label": "Seeit USBB Relay (Native USB)",
+        "manufacturer": "Seeit",
+        "instrument_category": "Relay Controller",
+        "category": "relay",
+        "default_role": "Relay Controller",
+        "fields": [
+            {
+                "name": "dll_path",
+                "label": "Vendor DLL Path",
+                "type": "text",
+                "default": "usb_relay_device.dll",
+            },
+            {
+                "name": "serial_number",
+                "label": "Device Serial Number",
+                "type": "text",
+                "default": "",
+            },
+            {
+                "name": "safe_state",
+                "label": "Safe State (open_all or close_all)",
+                "type": "text",
+                "default": "close_all",
+            },
+        ],
+        "description": (
+            "One, two, four or eight-channel USBB relay controlled directly "
+            "through the vendor-supplied Windows usb_relay_device.dll. This "
+            "variant does not use a COM port."
+        ),
+        "setup_note": (
+            "Provide the vendor DLL path. Python and the DLL must use matching "
+            "32-bit or 64-bit architectures. Confirm open/close behaviour on "
+            "the physical board before relying on the configured safe state."
         ),
         "status": "unverified",
         "status_description": VALIDATION_STATUSES["unverified"],

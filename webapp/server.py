@@ -39,7 +39,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 import tiab.drivers.aimtti_psu  # noqa: F401
 import tiab.drivers.mock  # noqa: F401
 import tiab.drivers.scpi_generic  # noqa: F401
-import tiab.drivers.seeit_relay  # noqa: F401
+import tiab.drivers.serial.seeit_relay  # noqa: F401
+import tiab.drivers.usb.seeit_relay  # noqa: F401
 
 try:
     import tiab.drivers.pico_adc  # noqa: F401

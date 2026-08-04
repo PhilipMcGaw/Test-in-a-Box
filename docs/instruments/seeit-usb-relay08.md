@@ -1,58 +1,68 @@
-# Seeit USB-RELAY08
+# Seeit USB and USBB Relay Controllers
 
-## Status
+Test in a Box supports two different Seeit relay-board interfaces. They expose
+the same logical relay positions but use different transports.
 
-Driver support is present but remains unverified against the physical board
-until bench testing is complete.
+## Driver status
 
-## Interface
+Both implementations remain unverified against the physical boards until bench
+testing is complete.
 
-The USB-RELAY08 is an eight-channel relay controller connected through a
-virtual serial COM port.
+## USB-RELAY08 using a virtual COM port
 
-The board communicates at:
+Select:
+
+```text
+Seeit USB-RELAY08 (Serial)
+```
+
+This board uses a Prolific PL2303 USB-to-serial converter and communicates at:
 
 ```text
 9600 baud
 ```
 
-## Windows driver installation
+After the Windows PL2303 driver is installed, find the assigned COM port in
+Device Manager and enter it on the **Configure Devices** page.
 
-The board uses a **Prolific PL2303 USB-to-serial converter**.
+The serial command set was adapted from a community implementation because a
+public vendor protocol document was not available. Confirm all channel and
+state behaviour during the first bench test.
 
-Windows may require the PL2303 driver before the board appears as a COM port.
-The driver and supporting downloads are available from the manufacturer page:
+## USBB relay using the native USB DLL
 
-https://seeit.fr/produits.php?produit_ref=USB-RELAY08
-
-Installing the driver normally requires **administrator rights**.
-
-After installation:
-
-1. Disconnect the relay board.
-2. Reconnect it using a USB-A to Micro-USB cable.
-3. Open Windows Device Manager.
-4. Find the new COM port under **Ports (COM & LPT)**.
-5. Enter that COM port on the Test in a Box **Configure Devices** page.
-6. Press **Save & Reconnect**.
-
-## Test in a Box configuration
-
-Add:
+Select:
 
 ```text
-Seeit USB-RELAY08
+Seeit USBB Relay (Native USB)
 ```
 
-Then set:
+This version uses the vendor-supplied:
 
 ```text
-COM Port: the port shown by Windows Device Manager
+usb_relay_device.dll
 ```
 
-## Channel numbering
+It does not use a COM port.
 
-Test in a Box exposes the eight relays as:
+Configure:
+
+- **Vendor DLL Path** — the absolute path to `usb_relay_device.dll`, or a path
+  relative to the Test in a Box working directory.
+- **Device Serial Number** — required when more than one compatible relay board
+  is attached.
+- **Safe State** — `open_all` or `close_all`.
+
+Python and the DLL must have matching architectures. A 64-bit Python
+installation requires a 64-bit DLL.
+
+The DLL is vendor software and is not included in the Test in a Box repository.
+Obtain it from the hardware supplier and confirm that its licence permits your
+intended use and redistribution arrangements.
+
+## Relay positions
+
+Both drivers expose channels as:
 
 ```text
 relay1
@@ -65,39 +75,45 @@ relay7
 relay8
 ```
 
-Confirm the physical terminal numbering during the first bench test before
-connecting a DUT.
+Native USB devices with fewer channels expose only the channels reported by the
+vendor DLL.
+
+## Important state terminology
+
+The serial implementation uses logical **ON** and **OFF** states.
+
+The native DLL uses the vendor terms **open** and **close**, and reports one bit
+per relay where `1` means open and `0` means closed. Test in a Box currently
+maps a truthy write value to the vendor's `open` operation.
+
+Confirm what those states mean electrically for the relay coil, NO/NC contacts,
+external wiring and intended safe condition before relying on automated
+shutdown.
 
 ## Enclosure and breakout recommendation
 
-For regular engineering use, and particularly for education or shared
-laboratories, the bare relay board should preferably be fitted inside a
-suitable enclosure.
+For regular engineering use, fit bare relay boards inside a suitable enclosure
+and bring the relay contacts out to clearly labelled, touch-safe connectors.
 
-Bring the relay contacts out to clearly labelled, touch-safe connectors such
-as jacks or terminal sockets. The enclosure should identify:
+The enclosure should identify:
 
 - relay number;
 - common contact;
 - normally-open contact;
 - normally-closed contact;
-- any voltage or current limits imposed by the local installation.
+- local voltage and current limits.
 
-This reduces wiring errors, protects the electronics and provides a repeatable
-fixture interface.
-
-Document the enclosure wiring separately because Test in a Box controls logical
-relay numbers; it cannot determine how those contacts have been wired
-externally.
+Document the enclosure wiring separately. Test in a Box controls logical relay
+numbers; it cannot determine how contacts are wired externally.
 
 ## Safety
 
-The relay-board contact rating is not, by itself, a complete statement of what
-is safe in a particular enclosure or fixture.
+A relay-board contact rating is not, by itself, a complete statement of what is
+safe in a fixture.
 
 Use appropriate fusing, insulation, creepage and clearance, touch-safe
 connectors, cable ratings, strain relief and protective-earth arrangements
 where applicable.
 
-Do not use a bare relay board for hazardous-voltage teaching or unattended
-testing.
+Do not rely on an unverified driver or unconfirmed `open`/`close` interpretation
+for hazardous-voltage or unattended testing.

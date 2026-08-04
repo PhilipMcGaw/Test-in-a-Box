@@ -187,7 +187,7 @@ The repository currently includes support for:
 
 - Generic SCPI instruments.
 - Aim-TTi programmable power supplies.
-- [Seeit USB-RELAY08](instruments/seeit-usb-relay08.md).
+- [Seeit USB and USBB relay controllers](instruments/seeit-usb-relay08.md).
 - Pico TC-08.
 - Pico ADC-20/24.
 - Mock hardware.
@@ -197,15 +197,9 @@ Additional drivers will be added as real engineering projects require them.
 ---
 
 
-## Seeit USB-RELAY08 setup
+## Seeit USB and USBB relay setup
 
-The Seeit USB-RELAY08 uses a Prolific PL2303 USB-to-serial converter. Windows
-may require the vendor driver before the board appears as a COM port, and
-installing that driver normally requires administrator rights.
-
-See the dedicated setup guide:
-
-[Seeit USB-RELAY08](instruments/seeit-usb-relay08.md)
+Test in a Box supports both the USB-RELAY08 virtual-COM-port variant and the USBB native-USB variant that uses the vendor DLL. See [Seeit USB and USBB relay controllers](instruments/seeit-usb-relay08.md)
 
 For shared laboratories and education, an enclosed board with relay contacts
 broken out to clearly labelled, touch-safe connectors is preferable to routine
