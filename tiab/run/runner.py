@@ -15,12 +15,14 @@ import socket
 import sys
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Callable, Optional
 
 from ..drivers.base import Driver, LogEvent
 from ..drivers.registry import create_driver
 from .csv_logger import CsvRunLogger
 from .mapping import DutMapping
+from .provenance import collect_software_identity, write_run_reports
 
 
 class AssertionFailure(Exception):
@@ -46,6 +48,11 @@ class TestRunner:
             )
         )
         self.devices: dict[str, Driver] = {}
+        self._run_start_utc = datetime.now(timezone.utc).isoformat()
+        self._project_root: Path | None = None
+        self._configuration_snapshot: dict[str, Any] = {}
+        self._generated_code = ""
+        self._instrument_identities: dict[str, Any] = {}
 
         self._record_host_metadata()
 
@@ -67,7 +74,7 @@ class TestRunner:
 
         metadata = {
             "run_id": self.run_id,
-            "run_start_utc": datetime.now(timezone.utc).isoformat(),
+            "run_start_utc": self._run_start_utc,
             "hostname": safe_value(socket.gethostname),
             "logged_in_user": safe_value(getpass.getuser),
             "operating_system": safe_value(platform.system),
@@ -158,11 +165,87 @@ class TestRunner:
                 )
                 continue
 
+            self._instrument_identities[device_id] = dict(identity)
+
             for key, value in identity.items():
                 self.logger.record_run_metadata(
                     f"instrument.{device_id}.{key}",
                     value,
                 )
+
+    def record_run_provenance(
+        self,
+        *,
+        project_root: str | Path,
+        configuration: dict[str, Any],
+        generated_code: str,
+    ) -> None:
+        """Record software identity and immutable run-input hashes."""
+        self._project_root = Path(project_root).resolve()
+        self._configuration_snapshot = configuration
+        self._generated_code = generated_code
+
+        software = collect_software_identity(self._project_root)
+        mapping_snapshot = self.mapping.as_dict()
+
+        metadata = {
+            "tiab.version": software["version"],
+            "tiab.update_channel": software["update_channel"],
+            "tiab.update_ref": software["update_ref"],
+            "tiab.commit": software["commit"],
+            "tiab.archive_sha256": software["archive_sha256"],
+            "tiab.updater_version": software["updater_version"],
+            "configuration.sha256": __import__(
+                "tiab.run.provenance",
+                fromlist=["sha256_json"],
+            ).sha256_json(configuration),
+            "dut_mapping.sha256": __import__(
+                "tiab.run.provenance",
+                fromlist=["sha256_json"],
+            ).sha256_json(mapping_snapshot),
+            "procedure.sha256": __import__(
+                "tiab.run.provenance",
+                fromlist=["sha256_text"],
+            ).sha256_text(generated_code),
+        }
+        self.logger.record_run_metadata_many(metadata)
+
+        write_run_reports(
+            output_dir=self.logger.output_dir,
+            run_id=self.run_id,
+            start_utc=self._run_start_utc,
+            finish_utc=None,
+            status="running",
+            software=software,
+            configuration=configuration,
+            mapping=mapping_snapshot,
+            generated_code=generated_code,
+            instruments=self._instrument_identities,
+        )
+
+    def finalize_run_provenance(self, status: str) -> None:
+        """Finalize the manifest and Markdown summary for this run."""
+        finish_utc = datetime.now(timezone.utc).isoformat()
+        self.logger.record_run_metadata_many({
+            "run_finish_utc": finish_utc,
+            "run_status": status,
+        })
+
+        if self._project_root is None:
+            return
+
+        write_run_reports(
+            output_dir=self.logger.output_dir,
+            run_id=self.run_id,
+            start_utc=self._run_start_utc,
+            finish_utc=finish_utc,
+            status=status,
+            software=collect_software_identity(self._project_root),
+            configuration=self._configuration_snapshot,
+            mapping=self.mapping.as_dict(),
+            generated_code=self._generated_code,
+            instruments=self._instrument_identities,
+        )
 
     def release_devices(self) -> None:
         """Detach from shared devices without closing them."""

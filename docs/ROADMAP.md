@@ -151,6 +151,11 @@ support.
 - Lab notebook integration
 
 
-## Completed usability improvements
+## Completed deployment and traceability work
 
-- ✅ Relay channel naming and Blockly labels
+- ✅ Updater V2 with Stable, Development and Rollback actions
+- ✅ Automatic bootstrap after update
+- ✅ Managed-update state and archive hash
+- ✅ Test in a Box version recorded in run reports
+- ✅ Configuration, DUT mapping and procedure hashes
+- ✅ Machine-readable run manifest

@@ -1,88 +1,56 @@
 @echo off
 setlocal EnableExtensions
-set "PROJECT_ROOT=%~dp0"
-set "CHANNEL=%~1"
+cd /d "%~dp0"
+set "PROJECT_ROOT=%CD%"
+set "ACTION=%~1"
 
-if defined CHANNEL goto :normalise_channel
+if not defined ACTION goto :menu
+if /I "%ACTION%"=="S" set "ACTION=stable"
+if /I "%ACTION%"=="D" set "ACTION=development"
 
-:menu
-echo.
-echo Test in a Box Updater
-echo =====================
-echo.
-echo   [S] Stable
-echo       Latest published release, falling back to the newest tag.
-echo.
-echo   [D] Development
-echo       Latest contents of the main branch.
-echo.
-echo   [Q] Quit
-echo.
-choice /C SDQ /N /M "Select update channel [S/D/Q]: "
+if /I "%ACTION%"=="stable" goto :run
+if /I "%ACTION%"=="development" goto :run
+if /I "%ACTION%"=="rollback" goto :run
 
-if errorlevel 3 goto :quit
-if errorlevel 2 (
-    set "CHANNEL=development"
-) else (
-    set "CHANNEL=stable"
-)
-goto :run_updater
-
-:normalise_channel
-if /I "%CHANNEL%"=="S" set "CHANNEL=stable"
-if /I "%CHANNEL%"=="D" set "CHANNEL=development"
-
-if /I "%CHANNEL%"=="stable" goto :run_updater
-if /I "%CHANNEL%"=="development" goto :run_updater
-
-echo.
-echo ERROR: Unknown update channel "%CHANNEL%".
-echo.
-echo Use one of:
-echo   update.bat S
-echo   update.bat D
-echo   update.bat stable
-echo   update.bat development
-echo.
+echo ERROR: use update.bat stable, development, or rollback
 pause
 exit /b 1
 
-:run_updater
+:menu
 echo.
-echo Selected update channel: %CHANNEL%
+echo Test in a Box Updater V2
+echo ========================
 echo.
+echo   [S] Stable
+echo   [D] Development
+echo   [R] Roll back
+echo   [Q] Quit
+echo.
+choice /C SDRQ /N /M "Select [S/D/R/Q]: "
+if errorlevel 4 exit /b 0
+if errorlevel 3 set "ACTION=rollback"
+if errorlevel 3 goto :run
+if errorlevel 2 set "ACTION=development"
+if errorlevel 2 goto :run
+set "ACTION=stable"
 
-if not exist "%PROJECT_ROOT%updater\update.ps1" (
-    echo ERROR: Updater script not found:
-    echo   %PROJECT_ROOT%updater\update.ps1
-    echo.
+:run
+if not exist "%PROJECT_ROOT%\updater\updater.ps1" (
+    echo ERROR: updater\updater.ps1 is missing.
     pause
     exit /b 1
 )
 
-rem Pass the channel in two independent ways:
-rem   1. as the named PowerShell argument;
-rem   2. as an environment-variable fallback.
-rem
-rem Keep this invocation on one physical line. This avoids caret-continuation
-rem problems caused by editors adding whitespace after a caret.
-set "TIAB_UPDATE_CHANNEL=%CHANNEL%"
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%PROJECT_ROOT%updater\update.ps1" -ProjectRoot "%PROJECT_ROOT%" -Channel "%CHANNEL%"
-
+set "TIAB_UPDATE_ACTION=%ACTION%"
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%PROJECT_ROOT%\updater\updater.ps1" -ProjectRoot "%PROJECT_ROOT%"
 set "RESULT=%ERRORLEVEL%"
-set "TIAB_UPDATE_CHANNEL="
+set "TIAB_UPDATE_ACTION="
 
 if not "%RESULT%"=="0" (
     echo.
-    echo Update failed. Review the messages above.
-    echo.
+    echo Updater V2 failed.
     pause
     exit /b %RESULT%
 )
 
-echo.
-pause
-exit /b 0
-
-:quit
 exit /b 0

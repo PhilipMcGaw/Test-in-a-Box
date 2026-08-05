@@ -217,3 +217,32 @@ The objective is not simply to automate the test.
 The objective is to preserve sufficient engineering evidence that another
 engineer can understand the results without needing access to the original test
 bench.
+
+---
+
+# Run Manifest and Software Provenance
+
+Each run now creates:
+
+```text
+run_<run_id>_manifest.json
+run_<run_id>_summary.md
+```
+
+The manifest records:
+
+- Test in a Box version;
+- updater channel, ref and commit identity;
+- downloaded source-archive SHA-256, when managed by Updater V2;
+- Python version;
+- complete configuration snapshot and SHA-256;
+- DUT mapping snapshot and SHA-256;
+- generated procedure source and SHA-256;
+- connected instrument identities;
+- start time, finish time and final run status.
+
+The Markdown summary provides a concise human-readable view of the same
+provenance.
+
+This allows a result to identify the exact software, configuration, mapping,
+procedure and instrument setup used to produce it.
