@@ -57,3 +57,4 @@ Desktop.ini
 /vendor/seeit/*.dll
 !/vendor/seeit/README.md
 /_bootstrap_winpython
+/_update_backups
