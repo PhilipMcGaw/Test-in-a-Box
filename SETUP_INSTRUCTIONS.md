@@ -19,35 +19,9 @@ file and opening the local web interface in your browser.
 
 ---
 
-# Step 1 – Download a portable copy of Python
+# Step 1 – Extract Test in a Box
 
-Download **WinPython** from:
-
-https://winpython.github.io/
-
-Choose a recent **64-bit Dot release** (Python 3.11 or newer).
-
-The Dot releases contain everything required to run Test in a Box without the
-additional development tools included in the full WinPython distribution.
-
-Although the download is an `.exe` file, it is **not** an installer. It simply
-extracts a portable copy of Python into a folder of your choosing.
-
-Extract it somewhere temporary.
-
-For example:
-
-```text
-C:\Users\<you>\Downloads\WinPythonTemp
-```
-
-No administrator rights are required.
-
----
-
-# Step 2 – Arrange the folders
-
-Create a folder for Test in a Box.
+Extract the repository to a local folder or a mapped drive.
 
 For example:
 
@@ -55,81 +29,54 @@ For example:
 C:\Users\<you>\Documents\Test-in-a-Box
 ```
 
-Inside the extracted WinPython folder you'll find a directory similar to:
-
-```text
-WPy64-312xx\
-    python-3.xx.x.amd64\
-```
-
-Rename the **python-3.xx.x.amd64** folder to simply:
-
-```text
-python
-```
-
-and move it into your Test-in-a-Box folder.
-
-You should end up with something similar to:
-
-```text
-Test-in-a-Box\
-    python\
-        python.exe
-```
-
-The temporary WinPython download folder can then be deleted.
+Do not run bootstrap directly from a UNC path such as
+`\\server\share\Test-in-a-Box`. Map the share to a drive letter first.
 
 ---
 
-# Step 3 – Copy the Test in a Box files
-
-Extract the Test in a Box repository into the same folder.
-
-The resulting structure should look similar to:
-
-```text
-Test-in-a-Box\
-    python\
-        python.exe
-
-    tiab\
-    webapp\
-    docs\
-
-    requirements.txt
-
-    1_install_dependencies.bat
-    2_start_app.bat
-
-    README.md
-    SETUP_INSTRUCTIONS.md
-```
-
----
-
-# Step 4 – Install the required Python packages
+# Step 2 – Run the bootstrap
 
 Double-click:
 
 ```text
-1_install_dependencies.bat
+bootstrap.bat
 ```
 
-A command window will open and download the required Python packages.
+The bootstrap checks for:
 
-This only needs to be done:
+```text
+python\python.exe
+```
 
-- when first installing Test in a Box;
-- or when the `requirements.txt` file changes.
+If it is missing, bootstrap downloads a stable official 64-bit WinPython Dot
+runtime and creates the project `python` folder automatically. WinPython is
+portable and does not require administrator rights.
 
-Internet access is required for this step.
+Bootstrap then:
 
-If your organisation blocks access to Python package repositories, you may need
-to ask your IT department to allow access to:
+- creates required writable folders;
+- installs or updates `requirements.txt`;
+- checks optional vendor components;
+- verifies the Python environment and project imports;
+- offers to start Test in a Box.
 
-- pypi.org
-- files.pythonhosted.org
+The older file `1_install_dependencies.bat` remains as a compatibility wrapper
+and now launches the same bootstrap process.
+
+Internet access may be required for:
+
+- `api.github.com`
+- `github.com`
+- `objects.githubusercontent.com`
+- `pypi.org`
+- `files.pythonhosted.org`
+
+The Seeit native USB relay DLL is optional and is not downloaded by bootstrap.
+Place a licensed matching DLL at:
+
+```text
+vendor\seeit\usb_relay_device.dll
+```
 
 ---
 

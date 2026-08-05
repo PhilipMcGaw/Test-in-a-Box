@@ -1,0 +1,54 @@
+# Test in a Box Bootstrap
+
+Run the repository-root file:
+
+```text
+bootstrap.bat
+```
+
+The bootstrap is intended for Windows systems where administrator rights may
+not be available.
+
+## What it does
+
+1. Checks for `python\python.exe`.
+2. Downloads a stable official 64-bit WinPython Dot runtime when Python is
+   missing.
+3. Creates required writable project folders.
+4. Installs or updates `requirements.txt`.
+5. Checks optional vendor components.
+6. Runs installation verification.
+7. Offers to start Test in a Box.
+
+The process is idempotent: running it again reuses the existing portable Python
+runtime and only updates or verifies what is required.
+
+## Files
+
+- `bootstrap.bat` — orchestrator called by the root launcher.
+- `bootstrap_winpython.ps1` — downloads and extracts WinPython.
+- `bootstrap_folders.ps1` — creates writable project directories.
+- `bootstrap_dependencies.ps1` — installs Python dependencies.
+- `bootstrap_vendor.ps1` — reports optional vendor components.
+- `bootstrap_verify.ps1` — produces the final bootstrap report.
+
+## Internet access
+
+First-time bootstrap may require access to:
+
+- `api.github.com`
+- `github.com`
+- `objects.githubusercontent.com`
+- `pypi.org`
+- `files.pythonhosted.org`
+
+## Optional Seeit DLL
+
+The Seeit native USBB relay DLL is not downloaded automatically. Redistribution
+permission and licensing must be respected.
+
+Place the correct licensed DLL at:
+
+```text
+vendor\seeit\usb_relay_device.dll
+```

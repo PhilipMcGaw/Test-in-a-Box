@@ -11,3 +11,5 @@ wiring documentation are usually more useful than a photograph of the bare
 board.
 
 See [Platform Support](../PLATFORM-SUPPORT.md) for operating-system limitations.
+
+- [Windows bootstrap](../bootstrap/README.md)

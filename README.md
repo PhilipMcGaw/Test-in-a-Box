@@ -233,7 +233,17 @@ See:
 
 for the complete setup process.
 
-Once the portable Python environment and dependencies are ready, start the application using:
+On Windows, prepare the portable runtime and dependencies by running:
+
+```text
+bootstrap.bat
+```
+
+The bootstrap downloads WinPython automatically when the project `python`
+folder is missing, installs dependencies, creates required folders and verifies
+the environment. No administrator rights are required.
+
+After bootstrap completes, start the application using:
 
 ```text
 2_start_app.bat
