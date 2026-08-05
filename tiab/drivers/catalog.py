@@ -79,9 +79,9 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         ),
     },
 
-"korad_tenma_psu": {
-    "label": "Korad / Tenma Programmable PSU",
-    "manufacturer": "Korad / Tenma",
+"ea_ps2000b": {
+    "label": "EA PS 2000 B (2020 TFT)",
+    "manufacturer": "EA Elektro-Automatik",
     "instrument_category": "Power Supply",
     "category": "psu",
     "default_role": "Power Supply",
@@ -90,87 +90,36 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
             "name": "serial_port",
             "label": "COM Port",
             "type": "text",
-            "default": "COM5",
-        },
-        {
-            "name": "baudrate",
-            "label": "Baud Rate (TBC)",
-            "type": "number",
-            "default": 9600,
+            "default": "COM9",
         },
         {
             "name": "command_terminator",
-            "label": "Command Terminator (TBC)",
-            "type": "text",
-            "default": "\\n",
-        },
-        {
-            "name": "reply_terminator",
-            "label": "Reply Terminator (TBC)",
-            "type": "text",
-            "default": "\\n",
-        },
-        {
-            "name": "model_hint",
-            "label": "Model (optional)",
+            "label": "Command Terminator",
             "type": "text",
             "default": "",
         },
-    ],
-    "description": (
-        "Initial single-output driver for the shared Korad/Tenma command "
-        "set. Communication settings and current hardware behaviour are "
-        "marked TO BE CONFIRMED before use in validation work."
-    ),
-    "status": "unverified",
-    "status_description": (
-        "Driver scaffold implemented from LabLogBook records. Baud rate, "
-        "line termination, reply formatting and current bench behaviour "
-        "remain TO BE CONFIRMED."
-    ),
-},
-"kel103_load": {
-    "label": "KEL103 Programmable Electronic Load",
-    "manufacturer": "Kunkin",
-    "instrument_category": "Electronic Load",
-    "category": "generic",
-    "default_role": "Electronic Load",
-    "fields": [
-        {
-            "name": "serial_port",
-            "label": "COM Port",
-            "type": "text",
-            "default": "COM5",
-        },
-        {
-            "name": "baudrate",
-            "label": "Baud Rate (TBC)",
-            "type": "number",
-            "default": 9600,
-        },
-        {
-            "name": "command_terminator",
-            "label": "Command Terminator (TBC)",
-            "type": "text",
-            "default": "\\n",
-        },
         {
             "name": "reply_terminator",
-            "label": "Reply Terminator (TBC)",
+            "label": "Reply Terminator",
             "type": "text",
             "default": "\\n",
         },
+        {
+            "name": "minimum_interval",
+            "label": "Minimum Command Interval (s)",
+            "type": "number",
+            "default": 0.05,
+        },
     ],
     "description": (
-        "Initial KEL103 electronic-load driver covering normal CV, CC, CR "
-        "and CP operation from LabLogBook records. :MEAS? remains "
-        "deliberately unsupported because its behaviour is unknown."
+        "Native SCPI driver for the 2020 TFT generation of EA PS 2000 B "
+        "power supplies over the front USB virtual COM port."
     ),
     "status": "unverified",
     "status_description": (
-        "Driver scaffold implemented from mostly tested LabLogBook "
-        "commands. Serial settings and current bench behaviour remain "
-        "TO BE CONFIRMED."
+        "Identification has been confirmed on a PS 2084-05 B. Read-only "
+        "measurements, remote control, setpoints and output control remain "
+        "TO BE CONFIRMED with the supplied bench-test tool."
     ),
 },
 

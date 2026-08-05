@@ -10,5 +10,4 @@ connection names, driver requirements, logical channel numbering and enclosure
 wiring documentation are usually more useful than a photograph of the bare
 board.
 
-- [Korad / Tenma programmable PSU](korad-tenma-psu.md)
-- [KEL103 programmable electronic load](kel103-load.md)
+- [EA PS 2000 B (2020 TFT)](ea-ps2000b.md)

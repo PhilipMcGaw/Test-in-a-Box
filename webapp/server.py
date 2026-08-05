@@ -39,8 +39,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 import tiab.drivers.aimtti_psu  # noqa: F401
 import tiab.drivers.mock  # noqa: F401
 import tiab.drivers.scpi_generic  # noqa: F401
-import tiab.drivers.serial.kel103_load  # noqa: F401
-import tiab.drivers.serial.korad_tenma_psu  # noqa: F401
+import tiab.drivers.serial.ea_ps2000b  # noqa: F401
 import tiab.drivers.serial.seeit_relay  # noqa: F401
 import tiab.drivers.usb.seeit_relay  # noqa: F401
 
@@ -52,7 +51,7 @@ except Exception as exc:
     print(f"[startup] Pico drivers not fully available: {exc}")
 
 from tiab.drivers.catalog import DEVICE_CATALOG
-from tiab.drivers.registry import create_driver, discover_instruments
+from tiab.drivers.registry import create_driver, discover_instruments, discover_instruments
 from tiab.run.control import RunControl, StopRequested
 from tiab.run.instrument import instrument_source
 from tiab.run.mapping import DutMapping
