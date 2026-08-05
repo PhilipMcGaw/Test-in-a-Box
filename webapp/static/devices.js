@@ -184,6 +184,7 @@ async function loadExistingConfig() {
       device_id: entry.device_id,
       device_type: entry.device_type,
       kwargs: entry.kwargs || {},
+      channel_labels: entry.channel_labels || {},
       x: typeof entry.x === 'number'
         ? entry.x
         : 40 + (typeCounters[entry.device_type] * 30),
@@ -460,27 +461,58 @@ function renderPsuBody(card, capabilities) {
   return html;
 }
 
-function renderRelayBody(card, capabilities) {
-  const numChannels = capabilities
-    ? capabilities.positions.filter(
-        position => position.id.startsWith('relay')
-      ).length
-    : parseInt(card.kwargs.num_channels || 8, 10);
+function relayChannelCount(card, capabilities) {
+  if (capabilities) {
+    const count = (capabilities.positions || []).filter(
+      position => String(position.id).startsWith('relay')
+    ).length;
 
+    if (count > 0) {
+      return count;
+    }
+  }
+
+  return parseInt(card.kwargs.num_channels || 8, 10);
+}
+
+
+function relayChannelLabel(card, capabilities, positionId, channel) {
+  const configured = card.channel_labels?.[positionId];
+
+  if (configured) {
+    return configured;
+  }
+
+  const position = (capabilities?.positions || []).find(
+    item => item.id === positionId
+  );
+
+  return position?.label || `Relay ${channel}`;
+}
+
+
+function renderRelayBody(card, capabilities) {
+  const numChannels = relayChannelCount(card, capabilities);
   let cells = '';
 
   for (let channel = 1; channel <= numChannels; channel += 1) {
-    const value = getLive(
-      card.device_id,
-      `relay${channel}`
+    const positionId = `relay${channel}`;
+    const value = getLive(card.device_id, positionId);
+    const label = relayChannelLabel(
+      card,
+      capabilities,
+      positionId,
+      channel
     );
 
     cells += `
       <div class="relay-cell">
         <div
           class="relay-led ${value ? 'on' : ''}"
-          data-toggle="relay${channel}">
-          ${channel}
+          data-toggle="${positionId}"
+          title="${escapeHtml(`Relay ${channel}: ${label}`)}">
+          <span class="relay-number">${channel}</span>
+          <span class="relay-label">${escapeHtml(label)}</span>
         </div>
       </div>
     `;
@@ -628,6 +660,40 @@ function renderSettings(card, typeInfo) {
     `;
   }
 
+  if (typeInfo.category === 'relay') {
+    const capabilities = capsByDeviceId[card.device_id];
+    const numChannels = relayChannelCount(card, capabilities);
+
+    html += `
+      <div class="relay-label-settings">
+        <div class="relay-label-heading">Relay channel labels</div>
+        <div class="relay-label-help">
+          Give each channel a meaningful engineering name.
+          Leave a field blank to use the default relay number.
+        </div>
+    `;
+
+    for (let channel = 1; channel <= numChannels; channel += 1) {
+      const positionId = `relay${channel}`;
+      const configuredLabel =
+        card.channel_labels?.[positionId] || '';
+
+      html += `
+        <label class="relay-label-setting">
+          <span>Relay ${channel}</span>
+          <input
+            type="text"
+            maxlength="80"
+            data-channel-label="${positionId}"
+            value="${escapeHtml(configuredLabel)}"
+            placeholder="Relay ${channel}">
+        </label>
+      `;
+    }
+
+    html += '</div>';
+  }
+
   if (typeInfo.setup_note) {
     html += `
       <div class="instrument-setup-note">
@@ -724,6 +790,27 @@ function wireCardEvents(element, card) {
           control.type === 'number'
             ? Number(control.value)
             : control.value;
+      });
+
+      control.addEventListener('mousedown', event => {
+        event.stopPropagation();
+      });
+    });
+
+  settingsPanel
+    .querySelectorAll('[data-channel-label]')
+    .forEach(control => {
+      control.addEventListener('change', () => {
+        const positionId = control.dataset.channelLabel;
+        const label = control.value.trim();
+
+        card.channel_labels = card.channel_labels || {};
+
+        if (label) {
+          card.channel_labels[positionId] = label;
+        } else {
+          delete card.channel_labels[positionId];
+        }
       });
 
       control.addEventListener('mousedown', event => {
@@ -994,6 +1081,7 @@ function setupCanvasDropTarget() {
       device_id: `${deviceType}_${existingOfType + 1}`,
       device_type: deviceType,
       kwargs: defaultKwargs(deviceType),
+      channel_labels: {},
       x: Math.max(0, x - 100),
       y: Math.max(0, y - 20),
     };
@@ -1056,6 +1144,7 @@ async function saveAndReconnect() {
     device_type: card.device_type,
     device_id: card.device_id.trim(),
     kwargs: card.kwargs,
+    channel_labels: card.channel_labels || {},
     x: card.x,
     y: card.y,
   }));

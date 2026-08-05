@@ -74,11 +74,21 @@
                           border-radius: 50%; background: #ddd; transition: left 0.15s; }
   .toggle-switch.on .knob { left: 24px; background: #fff; }
 
-  .relay-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-  .relay-cell { text-align: center; }
-  .relay-led { width: 100%; aspect-ratio: 1.6; border-radius: 3px; background: #333; cursor: pointer;
-               display: flex; align-items: center; justify-content: center; font-size: 10px; color: #666; }
+  .relay-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .relay-cell { text-align: center; min-width: 0; }
+  .relay-led { width: 100%; min-height: 42px; border-radius: 3px; background: #333; cursor: pointer;
+               display: flex; flex-direction: column; align-items: center; justify-content: center;
+               gap: 2px; padding: 4px; box-sizing: border-box; color: #999; }
   .relay-led.on { background: #27ae60; color: #fff; }
+  .relay-number { font-size: 9px; font-weight: 700; opacity: 0.8; }
+  .relay-label { width: 100%; overflow: hidden; text-overflow: ellipsis;
+                 white-space: nowrap; font-size: 10px; font-weight: 600; }
+  .relay-label-settings { margin-top: 10px; padding-top: 8px; border-top: 1px solid #444; }
+  .relay-label-heading { color: #fff; font-size: 11px; font-weight: 700; }
+  .relay-label-help { color: #8fa1b3; font-size: 9px; line-height: 1.35; margin: 4px 0 7px; }
+  .relay-label-setting { display: grid !important; grid-template-columns: 58px 1fr;
+                         align-items: center; gap: 6px; }
+  .relay-label-setting input { margin-top: 0 !important; }
 
   .settings-panel { background: #1d2025; border-top: 1px solid #444; padding: 8px; border-radius: 0 0 8px 8px; }
   .settings-panel label { display: block; font-size: 10px; color: #8fa1b3; margin-top: 6px; }
