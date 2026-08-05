@@ -59,3 +59,93 @@ Possible longer-term work includes:
 - notifications;
 - andon lights;
 - production and end-of-line features.
+
+# Test in a Box Roadmap
+
+## v0.2.0 – Engineering Workflow
+
+### Instrument Drivers
+- [ ] Complete EA PS 2000 B output-on validation
+- [ ] Bench test Korad/Tenma PSU driver
+- [ ] Bench test KEL103 electronic load driver
+- [ ] Pico TC-08 integration
+
+### Blockly
+- [ ] Relay blocks
+- [ ] Electronic load blocks
+- [ ] Additional PSU blocks
+- [ ] Temperature blocks
+
+### Instrument Discovery
+- [ ] Multi-board native USB relay support
+- [ ] Improved COM-port discovery
+- [ ] Automatic instrument identification
+
+## Future Releases
+
+### Dedicated Engineering Tools Menu
+
+These tools support instrument development, driver validation and hardware
+commissioning. They should be available from a dedicated top-level
+**Engineering Tools** menu so they remain separate from the normal Blockly
+test-builder workflow.
+
+#### Instrument Development
+- [ ] Protocol Explorer
+- [ ] Serial Terminal
+- [ ] Driver Tester
+- [ ] Instrument Identifier
+- [ ] USB Inspector
+- [ ] SCPI Console
+- [ ] Device Commissioning Wizard
+
+#### Driver Validation
+- [ ] Driver Validation Wizard
+- [ ] Safe-state verifier
+- [ ] Instrument capability explorer
+- [ ] Communication log viewer
+
+#### Engineering Utilities
+- [ ] CSV viewer
+- [ ] Run log viewer
+- [ ] Metadata inspector
+- [ ] Configuration validator
+
+#### Intended menu structure
+
+```text
+Engineering Tools
+──────────────────────────
+Protocol Explorer
+Serial Terminal
+Driver Tester
+Instrument Identifier
+USB Inspector
+SCPI Console
+Device Commissioning Wizard
+Log Viewer
+```
+
+Blockly remains the place for using instruments in test procedures.
+Engineering Tools are for developing, commissioning and validating instrument
+support.
+
+### Reporting
+- [ ] PDF report generation
+- [ ] Engineering report templates
+- [ ] Calibration information
+
+### Documentation
+- [ ] Professional diagram set
+- [ ] Annotated screenshots
+- [ ] Driver development guide
+- [ ] Contributor guide
+
+## Long-term Vision
+
+- Plugin architecture
+- REST API
+- Remote execution
+- Dashboard
+- Test scheduling
+- Lab notebook integration
