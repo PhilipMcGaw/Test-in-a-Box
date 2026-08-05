@@ -86,3 +86,10 @@ back to Python 3.12, and downloads the named asset through GitHub's ordinary
 This avoids the low unauthenticated REST API allowance that can affect several
 machines sharing the same public IP address. The downloaded file is always
 verified against the SHA-256 value published in the WinPython manifest.
+
+
+## Repository responsibility
+
+The `bootstrap/` directory contains installation and environment
+preparation only. Engineering utilities belong in `tools/`; update and
+rollback logic belongs in `updater/`.

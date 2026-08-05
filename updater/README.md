@@ -40,3 +40,10 @@ update.bat stable
 update.bat development
 update.bat rollback
 ```
+
+
+## Repository responsibility
+
+The `updater/` directory contains deployment and rollback logic only.
+Bootstrap owns Python and dependency preparation; engineering utilities
+belong in `tools/`.

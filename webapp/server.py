@@ -51,7 +51,7 @@ except Exception as exc:
     print(f"[startup] Pico drivers not fully available: {exc}")
 
 from tiab.drivers.catalog import DEVICE_CATALOG
-from tiab.drivers.registry import create_driver, discover_instruments, discover_instruments
+from tiab.drivers.registry import create_driver, discover_instruments
 from tiab.run.control import RunControl, StopRequested
 from tiab.run.instrument import instrument_source
 from tiab.run.mapping import DutMapping

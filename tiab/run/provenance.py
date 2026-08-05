@@ -52,9 +52,19 @@ def collect_software_identity(project_root: Path) -> dict[str, Any]:
     """Return the installed Test in a Box and updater identity."""
     project_root = project_root.resolve()
     update_state = load_json(project_root / ".update-state.json")
+    build_info = load_json(project_root / "support" / "BUILD.json")
 
     return {
         "version": read_text(project_root / "VERSION"),
+        "release_stage": build_info.get("release_stage", "unknown"),
+        "repository_layout": build_info.get(
+            "repository_layout",
+            "unknown",
+        ),
+        "bootstrap_version": build_info.get(
+            "bootstrap_version",
+            "unknown",
+        ),
         "update_channel": update_state.get("channel", "unmanaged"),
         "update_ref": update_state.get("ref", "unknown"),
         "commit": update_state.get("commit", "unknown"),
@@ -65,7 +75,7 @@ def collect_software_identity(project_root: Path) -> dict[str, Any]:
         "updated_at": update_state.get("updated_at", "unknown"),
         "updater_version": update_state.get(
             "updater_version",
-            "unknown",
+            build_info.get("updater_version", "unknown"),
         ),
         "python_version": platform.python_version(),
     }
@@ -146,6 +156,7 @@ def write_run_reports(
         f"- Update channel: `{software.get('update_channel', 'unknown')}`",
         f"- Ref: `{software.get('update_ref', 'unknown')}`",
         f"- Commit: `{software.get('commit', 'unknown')}`",
+        f"- Bootstrap: `{software.get('bootstrap_version', 'unknown')}`",
         f"- Updater: `{software.get('updater_version', 'unknown')}`",
         f"- Python: `{software.get('python_version', 'unknown')}`",
         "",

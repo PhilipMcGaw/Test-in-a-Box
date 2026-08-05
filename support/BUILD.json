@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "version_file": "../VERSION",
+  "bootstrap_version": "1.2",
+  "updater_version": "2.0",
+  "release_stage": "alpha",
+  "repository_layout": "refactor-v1"
+}

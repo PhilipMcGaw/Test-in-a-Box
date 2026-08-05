@@ -58,3 +58,7 @@ Desktop.ini
 !/vendor/seeit/README.md
 /_bootstrap_winpython
 /_update_backups
+
+/.update-state.json
+/_update_work/
+/_bootstrap_winpython/

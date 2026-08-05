@@ -1,15 +1,38 @@
-# Instrument Setup Guides
+# Documentation
 
-These guides contain practical setup and connection notes for physical
-instruments supported by Test in a Box.
+## Getting started
 
-- [Seeit USB and USBB relay controllers](seeit-usb-relay08.md)
+- [Windows setup](getting-started/WINDOWS.md)
+- [macOS, Linux and Raspberry Pi setup](getting-started/MAC-LINUX-RASPBERRY-PI.md)
+- [User workflow](USER-WORKFLOW.md)
+- [Hello World](HELLO-WORLD.md)
 
-Instrument photographs are optional. For day-to-day engineering work, clear
-connection names, driver requirements, logical channel numbering and enclosure
-wiring documentation are usually more useful than a photograph of the bare
-board.
+## Instruments and Blockly
 
-See [Platform Support](../PLATFORM-SUPPORT.md) for operating-system limitations.
+- [Instrument Library](INSTRUMENT-LIBRARY.md)
+- [Instrument setup guides](instruments/README.md)
+- [Seeit USB and USBB relays](instruments/seeit-usb-relay08.md)
+- [Blockly](BLOCKLY.md)
+- [Relay blocks](blockly/relay-blocks.md)
+
+## Engineering and architecture
+
+- [Architecture](ARCHITECTURE.md)
+- [Engineering philosophy](ENGINEERING-PHILOSOPHY.md)
+- [Project philosophy](PROJECT-PHILOSOPHY.md)
+- [Engineering results](ENGINEERING-RESULTS.md)
+- [Platform support](PLATFORM-SUPPORT.md)
+
+## Project planning and release
+
+- [Roadmap](ROADMAP.md)
+- [Feature requests](FEATURE_REQUESTS.md)
+- [Development status](project/DEVELOPMENT-STATUS.md)
+- [Repository Refactor v1](project/REPOSITORY-REFACTOR-v1.md)
+- [Release checklist](release/RELEASE-CHECKLIST.md)
+- [v0.1.0-alpha release notes](release/RELEASE-NOTES-v0.1.0-alpha.md)
+
+## Installation and deployment internals
 
 - [Windows bootstrap](../bootstrap/README.md)
+- [Updater V2](../updater/README.md)

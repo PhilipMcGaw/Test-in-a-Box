@@ -24,8 +24,7 @@ if not exist "%PYTHON%" (
     echo Could not find python.exe at:
     echo   %PYTHON%
     echo.
-    echo Check SETUP_INSTRUCTIONS.md - the portable Python folder needs to
-    echo be renamed to "python" and placed next to this .bat file.
+    echo Run bootstrap.bat, or see docs\getting-started\WINDOWS.md.
     pause
     exit /b 1
 )

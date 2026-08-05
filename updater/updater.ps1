@@ -181,7 +181,15 @@ try {
     $Owner = [string] $Config.repository_owner
     $Repo = [string] $Config.repository_name
     $Branch = [string] $Config.development_branch
-    $UpdaterVersion = [string] $Config.updater_version
+    $BuildInfoPath = Join-Path $ProjectRoot "support\BUILD.json"
+    if (Test-Path -LiteralPath $BuildInfoPath) {
+        $BuildInfo = Get-Content -LiteralPath $BuildInfoPath -Raw |
+            ConvertFrom-Json
+        $UpdaterVersion = [string] $BuildInfo.updater_version
+    }
+    else {
+        $UpdaterVersion = [string] $Config.updater_version
+    }
 
     Write-Host ""
     Write-Host "Test in a Box Updater V2"

@@ -229,7 +229,7 @@ Test in a Box is designed to run in restricted engineering environments where us
 
 See:
 
-[`SETUP_INSTRUCTIONS.md`](SETUP_INSTRUCTIONS.md)
+[`docs/getting-started/WINDOWS.md`](docs/getting-started/WINDOWS.md)
 
 for the complete setup process.
 
@@ -435,3 +435,13 @@ See the [`LICENSE`](LICENSE) file for the complete licence text.
 Official licence page:
 
 https://polyformproject.org/licenses/noncommercial/1.0.0
+
+## Installation, updates and releases
+
+- [Windows setup](docs/getting-started/WINDOWS.md)
+- [macOS, Linux and Raspberry Pi setup](docs/getting-started/MAC-LINUX-RASPBERRY-PI.md)
+- [Windows bootstrap](bootstrap/README.md)
+- [Updater V2](updater/README.md)
+- [Repository Refactor v1](docs/project/REPOSITORY-REFACTOR-v1.md)
+- [Release checklist](docs/release/RELEASE-CHECKLIST.md)
+- [Changelog](CHANGELOG.md)
