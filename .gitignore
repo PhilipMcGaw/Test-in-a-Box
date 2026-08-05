@@ -54,5 +54,5 @@ desktop.ini
 # Generated and local files
 Desktop.ini
 # Vendor binary libraries
-/vendor/seeit/*.dll
+#/vendor/seeit/*.dll
 !/vendor/seeit/README.md
