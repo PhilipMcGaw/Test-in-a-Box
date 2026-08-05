@@ -1,0 +1,18 @@
+{
+  "repository_owner": "PhilipMcGaw",
+  "repository_name": "Test-in-a-Box",
+  "development_branch": "main",
+  "stable_fallback": "latest_tag",
+  "preserve_directories": [
+    "python",
+    "vendor",
+    "logs",
+    "runs",
+    "results",
+    "sequences",
+    "_update_backups"
+  ],
+  "preserve_files": [
+    "webapp/config.json"
+  ]
+}
