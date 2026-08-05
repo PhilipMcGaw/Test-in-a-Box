@@ -66,6 +66,25 @@
   .range-warning { color: #d6a84a; font-size: 9px; line-height: 1.3;
                    margin: 4px 0 8px; }
 
+  .commission-channel-heading { margin: 9px 0 5px; padding-bottom: 4px;
+                                border-bottom: 1px solid #465461; color: #fff;
+                                font-size: 11px; font-weight: 700; }
+  .commission-control { margin: 6px 0; }
+  .commission-control > label { display: block; margin-bottom: 3px;
+                                color: #c6d1db; font-size: 10px; }
+  .commission-input-row { display: grid;
+                          grid-template-columns: minmax(0, 1fr) auto auto;
+                          gap: 5px; align-items: center; }
+  .commission-number { width: 100%; min-width: 0; box-sizing: border-box;
+                       padding: 5px 6px; border: 1px solid #526270;
+                       border-radius: 3px; background: #17212a; color: #fff; }
+  .commission-unit { min-width: 16px; color: #9cadba; font-size: 10px; }
+  .commission-apply { padding: 5px 8px; border: 1px solid #647787;
+                      border-radius: 3px; background: #324452; color: #fff;
+                      cursor: pointer; }
+  .commission-apply:hover { background: #405767; }
+  .commission-apply:disabled { cursor: wait; opacity: 0.55; }
+
   .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
   .toggle-switch { width: 44px; height: 22px; border-radius: 11px; background: #444; position: relative;
                    cursor: pointer; transition: background 0.15s; }

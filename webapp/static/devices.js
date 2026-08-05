@@ -315,98 +315,190 @@ function fmt(value, digits) {
 }
 
 
+function findPosition(positions, ids, predicate = null) {
+  for (const id of ids) {
+    const match = positions.find(position => position.id === id);
+    if (match) {
+      return match;
+    }
+  }
+  return predicate ? positions.find(predicate) || null : null;
+}
+
+
+function commissioningSetpoint(card, position, value) {
+  if (!position) {
+    return '';
+  }
+
+  return `
+    <div class="commission-control">
+      <label>${escapeHtml(position.label)}</label>
+      <div class="commission-input-row">
+        <input
+          type="number"
+          step="any"
+          inputmode="decimal"
+          class="commission-number"
+          data-commission-value="${escapeHtml(position.id)}"
+          value="${
+            typeof value === 'number' && Number.isFinite(value)
+              ? escapeHtml(value)
+              : ''
+          }">
+        <span class="commission-unit">
+          ${escapeHtml(position.unit || '')}
+        </span>
+        <button
+          type="button"
+          class="commission-apply"
+          data-commission-apply="${escapeHtml(position.id)}">
+          Apply
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+
+function commissioningMeasurement(card, position) {
+  if (!position) {
+    return '';
+  }
+
+  const value = getLive(card.device_id, position.id);
+
+  return `
+    <div class="readout-row">
+      <span class="readout-label">${escapeHtml(position.label)}</span>
+      <span
+        class="readout-value plain"
+        data-readout="${escapeHtml(position.id)}">
+        ${fmt(value, 3)}${
+          position.unit ? ` ${escapeHtml(position.unit)}` : ''
+        }
+      </span>
+    </div>
+  `;
+}
+
+
 function renderPsuBody(card, capabilities) {
-  const positions = capabilities?.positions || [];
+  if (!capabilities) {
+    return (
+      '<div class="generic-row">' +
+      'Save &amp; Reconnect to commission this PSU.' +
+      '</div>'
+    );
+  }
+
+  if (capabilities.error) {
+    return `
+      <div class="generic-row">
+        <span>Connection error</span>
+        <span class="val">${escapeHtml(capabilities.error)}</span>
+      </div>
+    `;
+  }
+
+  const positions = capabilities.positions || [];
+  const numbered = positions.some(position =>
+    /^v\d+$|^i\d+$|^output\d+$/.test(String(position.id))
+  );
 
   const channelNumbers = positions
     .map(position => {
-      const match = String(position.id).match(/(\d+)/);
-      return match ? Number(match[1]) : null;
+      const match = String(position.id).match(/\d+/);
+      return match ? Number(match[0]) : null;
     })
-    .filter(channel => channel !== null);
+    .filter(value => value !== null);
 
-  const numChannels = channelNumbers.length
+  const channelCount = numbered && channelNumbers.length
     ? Math.max(...channelNumbers)
-    : parseInt(card.kwargs.num_channels || 1, 10);
+    : 1;
 
   let html = '';
 
-  for (let channel = 1; channel <= numChannels; channel += 1) {
-    const voltageKey = positions.some(
-      position => position.id === `v${channel}`
-    ) ? `v${channel}` : 'voltage';
-
-    const currentKey = positions.some(
-      position => position.id === `i${channel}`
-    ) ? `i${channel}` : 'current';
-
-    const outputKey = positions.some(
-      position => position.id === `output${channel}`
-    ) ? `output${channel}` : 'output';
-
-    const measuredVoltageKey = positions.some(
-      position => position.id === `v${channel}_meas`
-    ) ? `v${channel}_meas` : `${voltageKey}_meas`;
-
-    const measuredCurrentKey = positions.some(
-      position => position.id === `i${channel}_meas`
-    ) ? `i${channel}_meas` : `${currentKey}_meas`;
-
-    const rangeKey = positions.some(
-      position => position.id === `range${channel}`
-    ) ? `range${channel}` : null;
-
-    const channelPrefix = numChannels > 1
-      ? `Ch${channel} `
+  for (let channel = 1; channel <= channelCount; channel += 1) {
+    const suffix = numbered ? String(channel) : '';
+    const channelHeading = channelCount > 1
+      ? `<div class="commission-channel-heading">Channel ${channel}</div>`
       : '';
 
-    const voltageSetpoint = getLive(card.device_id, voltageKey);
-    const currentSetpoint = getLive(card.device_id, currentKey);
-    const measuredVoltage = getLive(
-      card.device_id,
-      measuredVoltageKey
+    const voltageSet = findPosition(
+      positions,
+      [`v${suffix}`, 'voltage_set', 'voltage'],
+      position =>
+        position.kind === 'output_analog' &&
+        String(position.unit || '').toLowerCase() === 'v'
     );
-    const measuredCurrent = getLive(
-      card.device_id,
-      measuredCurrentKey
+
+    const currentSet = findPosition(
+      positions,
+      [`i${suffix}`, 'current_set', 'current'],
+      position =>
+        position.kind === 'output_analog' &&
+        String(position.unit || '').toLowerCase() === 'a'
     );
-    const outputValue = getLive(card.device_id, outputKey);
-    const rangeValue = rangeKey
-      ? getLive(card.device_id, rangeKey)
-      : undefined;
 
-    html += `
-      <div class="psu-section-label">${channelPrefix}SETTINGS</div>
+    const output = findPosition(
+      positions,
+      [`output${suffix}`, 'output'],
+      position =>
+        position.kind === 'output_digital' &&
+        /output|enable/i.test(`${position.id} ${position.label}`)
+    );
 
-      <div class="readout-row">
-        <span class="readout-label">${channelPrefix}Set Voltage</span>
-        <span
-          class="readout-value volts setpoint"
-          data-readout="${voltageKey}">
-          ${fmt(voltageSetpoint, 3)}
-        </span>
-      </div>
+    const voltageActual = findPosition(
+      positions,
+      [`v${suffix}_meas`, 'voltage_actual', 'voltage_meas'],
+      position =>
+        position.kind === 'input_analog' &&
+        String(position.unit || '').toLowerCase() === 'v'
+    );
 
-      <div class="readout-row">
-        <span class="readout-label">${channelPrefix}Current Limit</span>
-        <span
-          class="readout-value amps setpoint"
-          data-readout="${currentKey}">
-          ${fmt(currentSetpoint, 3)}
-        </span>
-      </div>
-    `;
+    const currentActual = findPosition(
+      positions,
+      [`i${suffix}_meas`, 'current_actual', 'current_meas'],
+      position =>
+        position.kind === 'input_analog' &&
+        String(position.unit || '').toLowerCase() === 'a'
+    );
 
-    if (rangeKey) {
+    const powerActual = findPosition(
+      positions,
+      ['power_actual', 'power_meas'],
+      position =>
+        position.kind === 'input_analog' &&
+        String(position.unit || '').toLowerCase() === 'w'
+    );
+
+    const range = findPosition(
+      positions,
+      [`range${suffix}`, 'range1', 'range']
+    );
+
+    html += channelHeading;
+    html += '<div class="psu-section-label">SETPOINTS</div>';
+    html += commissioningSetpoint(
+      card,
+      voltageSet,
+      voltageSet ? getLive(card.device_id, voltageSet.id) : undefined
+    );
+    html += commissioningSetpoint(
+      card,
+      currentSet,
+      currentSet ? getLive(card.device_id, currentSet.id) : undefined
+    );
+
+    if (range) {
+      const rangeValue = getLive(card.device_id, range.id);
       html += `
         <div class="range-row">
-          <label class="readout-label" for="${card.uid}-${rangeKey}">
-            Range
-          </label>
+          <label class="readout-label">${escapeHtml(range.label)}</label>
           <select
-            id="${card.uid}-${rangeKey}"
             class="range-select"
-            data-range-select="${rangeKey}">
+            data-range-select="${escapeHtml(range.id)}">
             <option value="0" ${Number(rangeValue) === 0 ? 'selected' : ''}>
               15 V / 5 A
             </option>
@@ -424,41 +516,30 @@ function renderPsuBody(card, capabilities) {
       `;
     }
 
-    html += `
-      <div class="psu-section-label">${channelPrefix}OUTPUT</div>
-
-      <div class="readout-row">
-        <span class="readout-label">${channelPrefix}Voltage</span>
-        <span
-          class="readout-value volts"
-          data-readout="${measuredVoltageKey}">
-          ${fmt(measuredVoltage, 3)}
-        </span>
-      </div>
-
-      <div class="readout-row">
-        <span class="readout-label">${channelPrefix}Current</span>
-        <span
-          class="readout-value amps"
-          data-readout="${measuredCurrentKey}">
-          ${fmt(measuredCurrent, 3)}
-        </span>
-      </div>
-
-      <div class="toggle-row">
-        <span class="readout-label">
-          ${channelPrefix}Output
-        </span>
-        <div
-          class="toggle-switch ${outputValue ? 'on' : ''}"
-          data-toggle="${outputKey}">
-          <div class="knob"></div>
+    if (output) {
+      const enabled = Boolean(getLive(card.device_id, output.id));
+      html += `
+        <div class="psu-section-label">OUTPUT CONTROL</div>
+        <div class="toggle-row">
+          <span class="readout-label">${escapeHtml(output.label)}</span>
+          <div
+            class="toggle-switch ${enabled ? 'on' : ''}"
+            data-toggle="${escapeHtml(output.id)}">
+            <div class="knob"></div>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
+
+    html += '<div class="psu-section-label">LIVE MEASUREMENTS</div>';
+    html += commissioningMeasurement(card, voltageActual);
+    html += commissioningMeasurement(card, currentActual);
+    html += commissioningMeasurement(card, powerActual);
   }
 
-  return html;
+  return html || (
+    '<div class="generic-row">No PSU commissioning controls available.</div>'
+  );
 }
 
 function relayChannelCount(card, capabilities) {
@@ -939,6 +1020,65 @@ function wireCardEvents(element, card) {
         toggle.classList.toggle('on');
       } catch (error) {
         alert(`Could not toggle: ${error.message || error}`);
+      }
+    });
+  });
+
+  element.querySelectorAll('[data-commission-apply]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const positionId = button.dataset.commissionApply;
+      const input = element.querySelector(
+        `[data-commission-value="${positionId}"]`
+      );
+      const value = Number(input?.value);
+
+      if (!capsByDeviceId[card.device_id]) {
+        alert('Save & Reconnect first so this instrument is connected.');
+        return;
+      }
+
+      if (!Number.isFinite(value) || value < 0) {
+        alert('Enter a valid non-negative numeric value.');
+        return;
+      }
+
+      button.disabled = true;
+
+      try {
+        const response = await fetch('/api/set_position', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            device_id: card.device_id,
+            position_id: positionId,
+            value,
+          }),
+        });
+
+        const data = await readJsonSafely(response);
+        if (!response.ok) {
+          throw new Error(formatApiError(data, `HTTP ${response.status}`));
+        }
+
+        liveValues[card.device_id] = liveValues[card.device_id] || {};
+        liveValues[card.device_id][positionId] = value;
+        await pollLiveValues();
+      } catch (error) {
+        alert(`Could not apply value: ${error.message || error}`);
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+
+  element.querySelectorAll('[data-commission-value]').forEach(input => {
+    input.addEventListener('mousedown', event => event.stopPropagation());
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        const positionId = input.dataset.commissionValue;
+        element.querySelector(
+          `[data-commission-apply="${positionId}"]`
+        )?.click();
       }
     });
   });

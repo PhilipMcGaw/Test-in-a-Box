@@ -12,4 +12,4 @@ board.
 
 - [EA PS 2000 B (2020 TFT)](ea-ps2000b.md)
 
-- [Relay channel labels](relay-channel-labels.md)
+- [PSU commissioning controls](commissioning-controls.md)
