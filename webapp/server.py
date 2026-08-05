@@ -107,6 +107,7 @@ class DeviceConfigEntry(BaseModel):
     device_type: str
     device_id: str
     kwargs: dict[str, Any] = Field(default_factory=dict)
+    channel_labels: dict[str, str] = Field(default_factory=dict)
     x: float | None = None
     y: float | None = None
 
@@ -117,6 +118,47 @@ class DeviceConfigEntry(BaseModel):
         if not value:
             raise ValueError("must not be empty")
         return value
+
+
+    @field_validator("channel_labels", mode="before")
+    @classmethod
+    def validate_channel_labels(
+        cls,
+        value: Any,
+    ) -> dict[str, str]:
+        if value is None:
+            return {}
+
+        if not isinstance(value, dict):
+            raise ValueError("channel_labels must be an object")
+
+        cleaned: dict[str, str] = {}
+
+        for raw_position_id, raw_label in value.items():
+            position_id = str(raw_position_id).strip()
+            label = str(raw_label).strip()
+
+            if not position_id:
+                raise ValueError(
+                    "channel label position IDs must not be empty"
+                )
+
+            if len(position_id) > 80:
+                raise ValueError(
+                    "channel label position IDs must be 80 characters or fewer"
+                )
+
+            if len(label) > 80:
+                raise ValueError(
+                    "channel labels must be 80 characters or fewer"
+                )
+
+            # Empty labels restore the driver's default display label and
+            # therefore do not need to be persisted.
+            if label:
+                cleaned[position_id] = label
+
+        return cleaned
 
 
 class MappingEntry(BaseModel):
@@ -588,6 +630,11 @@ def api_devices() -> JSONResponse:
     result: list[dict[str, Any]] = []
 
     with _device_lock:
+        labels_by_device = {
+            entry["device_id"]: entry.get("channel_labels", {})
+            for entry in _config.get("devices", [])
+        }
+
         for device_id, driver in _devices.items():
             try:
                 caps = driver.capabilities()
@@ -606,7 +653,10 @@ def api_devices() -> JSONResponse:
                 "positions": [
                     {
                         "id": position.id,
-                        "label": position.label,
+                        "label": labels_by_device.get(
+                            device_id,
+                            {},
+                        ).get(position.id, position.label),
                         "kind": position.kind.value,
                         "unit": position.unit,
                     }

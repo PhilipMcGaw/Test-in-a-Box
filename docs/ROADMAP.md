@@ -159,3 +159,8 @@ support.
 - ✅ Test in a Box version recorded in run reports
 - ✅ Configuration, DUT mapping and procedure hashes
 - ✅ Machine-readable run manifest
+
+
+## Completed usability improvements
+
+- ✅ Relay channel naming and Blockly labels
