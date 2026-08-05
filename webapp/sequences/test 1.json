@@ -1,0 +1,40 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "controls_repeat_ext",
+        "id": "gPHCJCo[dD{JENreP|DF",
+        "x": 161,
+        "y": 165,
+        "inputs": {
+          "TIMES": {
+            "block": {
+              "type": "math_number",
+              "id": "U2!.Y9*C$?cpndSmR{Zq",
+              "fields": {
+                "NUM": 20
+              }
+            }
+          },
+          "DO": {
+            "block": {
+              "type": "hw_relay_set",
+              "id": "xSIhBI?dm-T8q{wL/+o?",
+              "fields": {
+                "POSITION": "none|none",
+                "STATE": "ON"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "variables": [
+    {
+      "name": "Measured Voltage",
+      "id": "nD`mr]+1U0TOS96Psge)"
+    }
+  ]
+}
