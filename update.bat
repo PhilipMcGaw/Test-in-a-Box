@@ -21,14 +21,17 @@ echo.
 choice /C SDQ /N /M "Select update channel [S/D/Q]: "
 
 if errorlevel 3 goto :quit
-if errorlevel 2 set "CHANNEL=development"
-if errorlevel 2 goto :run_updater
-set "CHANNEL=stable"
+if errorlevel 2 (
+    set "CHANNEL=development"
+) else (
+    set "CHANNEL=stable"
+)
 goto :run_updater
 
 :normalise_channel
 if /I "%CHANNEL%"=="S" set "CHANNEL=stable"
 if /I "%CHANNEL%"=="D" set "CHANNEL=development"
+
 if /I "%CHANNEL%"=="stable" goto :run_updater
 if /I "%CHANNEL%"=="development" goto :run_updater
 
@@ -57,12 +60,17 @@ if not exist "%PROJECT_ROOT%updater\update.ps1" (
     exit /b 1
 )
 
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass ^
-    -File "%PROJECT_ROOT%updater\update.ps1" ^
-    -ProjectRoot "%PROJECT_ROOT%" ^
-    -Channel "%CHANNEL%"
+rem Pass the channel in two independent ways:
+rem   1. as the named PowerShell argument;
+rem   2. as an environment-variable fallback.
+rem
+rem Keep this invocation on one physical line. This avoids caret-continuation
+rem problems caused by editors adding whitespace after a caret.
+set "TIAB_UPDATE_CHANNEL=%CHANNEL%"
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%PROJECT_ROOT%updater\update.ps1" -ProjectRoot "%PROJECT_ROOT%" -Channel "%CHANNEL%"
 
 set "RESULT=%ERRORLEVEL%"
+set "TIAB_UPDATE_CHANNEL="
 
 if not "%RESULT%"=="0" (
     echo.

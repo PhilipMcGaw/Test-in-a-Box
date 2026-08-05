@@ -11,6 +11,15 @@ $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 $ProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
 
+if ([string]::IsNullOrWhiteSpace($Channel)) {
+    throw (
+        "No update channel was supplied. " +
+        "Run update.bat stable or update.bat development."
+    )
+}
+
+Write-Host "PowerShell received channel: $Channel"
+
 $Channel = $Channel.Trim().ToLowerInvariant()
 
 switch ($Channel) {
