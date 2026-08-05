@@ -47,13 +47,42 @@ call :run_step "Installation verification" "%BOOTSTRAP_DIR%bootstrap_verify.ps1"
 if errorlevel 1 goto :failed
 
 echo.
-echo Bootstrap completed successfully.
+echo ============================================================
+echo                  Bootstrap Complete
+echo ============================================================
 echo.
-echo Start Test in a Box with:
-echo   2_start_app.bat
+echo Environment Summary
+echo -------------------
+echo.
+echo   [PASS] Portable Python
+echo   [PASS] Python dependencies
+echo   [PASS] Project folders
+echo   [PASS] Installation verification
+echo.
+echo Optional Components
+echo -------------------
+echo.
+if exist "%PROJECT_ROOT%\vendor\seeit\usb_relay_device.dll" (
+    echo   [PASS] Native Seeit USB relay support
+) else (
+    echo   [INFO] Native Seeit USB relay DLL not installed
+    echo          Native USBB relay support will be unavailable until
+    echo          a licensed matching DLL is placed at:
+    echo.
+    echo              vendor\seeit\usb_relay_device.dll
+)
+echo.
+echo Ready to use
+echo ------------
+echo.
+echo Start Test in a Box using:
+echo.
+echo     2_start_app.bat
 echo.
 set /p "LAUNCH=Launch Test in a Box now? [Y/N]: "
-if /I "%LAUNCH%"=="Y" start "" "%PROJECT_ROOT%\2_start_app.bat"
+if /I "%LAUNCH%"=="Y" (
+    start "" "%PROJECT_ROOT%\2_start_app.bat"
+)
 exit /b 0
 
 :run_step

@@ -4,148 +4,203 @@
 
 The current alpha includes:
 
-- a local FastAPI web application;
-- a Blockly test-procedure editor;
-- the Configure Devices interface;
-- mock instruments;
-- driver-based hardware abstraction;
-- run, pause, resume, step and stop controls;
-- sequence save and load;
-- DUT-to-position mapping;
-- per-DUT CSV result logging;
-- engineering examples;
-- bench-tested control of a physical Thurlby Thandar QL355P;
-- native Windows control of physical Seeit USBB relay hardware;
-- driver-level instrument discovery;
-- run metadata containing host, user, OS, Python and instrument identity.
+- ✅ Local FastAPI web application
+- ✅ Blockly test-procedure editor
+- ✅ Configure Devices interface
+- ✅ Instrument Library
+- ✅ Driver-based hardware abstraction
+- ✅ Driver-level instrument discovery
+- ✅ Mock instruments
+- ✅ Sequence save and load
+- ✅ DUT-to-position mapping
+- ✅ Run, pause, resume, step and stop controls
+- ✅ Per-DUT CSV result logging
+- ✅ Run metadata
+  - host name
+  - logged-in user
+  - operating system
+  - Python version
+  - connected instrument identity
+- ✅ Engineering examples
+- ✅ Bench-tested Aim-TTi PSU driver
+- ✅ Bench-tested EA PS 2000 B driver
+  - output-enable validation remains outstanding
+- ✅ Native Windows Seeit USBB relay support
+- ✅ Portable vendor DLL support
+- ✅ Portable Windows bootstrap
+  - automatic WinPython download
+  - SHA-256 verification
+  - GitHub API rate-limit avoidance
+  - automatic dependency installation
+  - project-folder creation
+  - vendor-component checks
+  - installation verification
+  - clear completion summary and optional launch
 
-## Remaining Version 0.1 work
+---
 
-Version 0.1 is intended to add or complete:
+# Version 0.1 — Current milestone
 
-- reusable Instrument Library workflows;
-- parameters defined in one place;
-- explicit engineering units;
-- logical hardware roles;
-- progress percentage and estimated finish time;
-- current DUT and current test step;
-- a Markdown run summary;
-- validated safe-state behaviour across applicable drivers;
-- final validation of multiple identical native USBB relay boards in the main application;
-- a complete real electrical or environmental validation procedure;
-- at least two different physical instrument classes used together.
+The objective of Version 0.1 is to demonstrate a complete engineering
+validation workflow using multiple physical instrument classes.
 
-## After Version 0.1
+## Blockly
 
-Planned improvements include:
+- ✅ PSU blocks
+- ✅ Generic instrument blocks
+- ✅ Relay blocks
+- ⬜ Electronic-load blocks
+- ⬜ Temperature blocks
 
-- better reports and plots;
-- reusable engineering blocks;
-- richer pass, warning and fail behaviour;
-- stronger pre-run validation;
-- improved recovery and diagnostics;
-- additional instrument drivers.
+## Drivers
 
-## Longer term
+- ✅ Aim-TTi PSU — bench tested
+- 🟡 EA PS 2000 B — bench tested; output-enable validation outstanding
+- 🟡 Korad / Tenma PSU — driver implemented; bench validation required
+- 🟡 KEL103 electronic load — driver implemented; bench validation required
+- 🟡 Native Seeit USBB relay — multi-board validation outstanding
+- ⬜ Pico TC-08 integration
 
-Possible longer-term work includes:
+## Instrument Library
 
-- database storage;
-- test versioning;
-- calibration integration;
-- operator workflows;
-- barcode support;
-- multi-rig dashboards;
-- notifications;
-- andon lights;
-- production and end-of-line features.
+- ✅ Logical hardware roles
+- ✅ Instrument discovery
+- ✅ Portable driver loading
+- ⬜ Validation status shown consistently for every driver
 
-# Test in a Box Roadmap
+## Test execution
 
-## v0.2.0 – Engineering Workflow
+- ⬜ Parameters defined in one place
+- ⬜ Explicit engineering units
+- ⬜ Progress percentage
+- ⬜ Estimated finish time
+- ⬜ Current DUT display
+- ⬜ Current test-step display
+- ⬜ Markdown run summary
+- ⬜ Validated safe-state behaviour across all applicable drivers
+- ⬜ Stronger pre-run validation
 
-### Instrument Drivers
-- [ ] Complete EA PS 2000 B output-on validation
-- [ ] Bench test Korad/Tenma PSU driver
-- [ ] Bench test KEL103 electronic load driver
-- [ ] Pico TC-08 integration
+## Engineering validation
 
-### Blockly
-- [ ] Relay blocks
-- [ ] Electronic load blocks
-- [ ] Additional PSU blocks
-- [ ] Temperature blocks
+- ⬜ Complete real electrical validation procedure
+- ⬜ Complete environmental validation procedure
+- ⬜ Demonstrate at least two physical instrument classes operating together
 
-### Instrument Discovery
-- [ ] Multi-board native USB relay support
-- [ ] Improved COM-port discovery
-- [ ] Automatic instrument identification
+---
 
-## Future Releases
+# Recommended next work
 
-### Dedicated Engineering Tools Menu
+1. Verify EA PS 2000 B output ON/OFF with no DUT connected.
+2. Bench-test the Korad / Tenma PSU driver.
+3. Bench-test the KEL103 electronic-load driver.
+4. Add electronic-load Blockly blocks.
+5. Build the first complete electrical validation procedure using multiple
+   physical instruments.
+6. Complete multi-board native USBB relay validation.
+
+---
+
+# Version 0.2
+
+## Dedicated Engineering Tools menu
 
 These tools support instrument development, driver validation and hardware
 commissioning. They should be available from a dedicated top-level
-**Engineering Tools** menu so they remain separate from the normal Blockly
-test-builder workflow.
+**Engineering Tools** menu, separate from the normal Blockly test-builder
+workflow.
 
-#### Instrument Development
-- [ ] Protocol Explorer
-- [ ] Serial Terminal
-- [ ] Driver Tester
-- [ ] Instrument Identifier
-- [ ] USB Inspector
-- [ ] SCPI Console
-- [ ] Device Commissioning Wizard
+### Instrument development
 
-#### Driver Validation
-- [ ] Driver Validation Wizard
-- [ ] Safe-state verifier
-- [ ] Instrument capability explorer
-- [ ] Communication log viewer
+- ⬜ Protocol Explorer
+- ⬜ Serial Terminal
+- ⬜ Driver Tester
+- ⬜ Instrument Identifier
+- ⬜ USB Inspector
+- ⬜ SCPI Console
+- ⬜ Device Commissioning Wizard
 
-#### Engineering Utilities
-- [ ] CSV viewer
-- [ ] Run log viewer
-- [ ] Metadata inspector
-- [ ] Configuration validator
+### Driver validation
 
-#### Intended menu structure
+- ⬜ Driver Validation Wizard
+- ⬜ Safe-state verifier
+- ⬜ Instrument capability explorer
+- ⬜ Communication log viewer
 
-```text
-Engineering Tools
-──────────────────────────
-Protocol Explorer
-Serial Terminal
-Driver Tester
-Instrument Identifier
-USB Inspector
-SCPI Console
-Device Commissioning Wizard
-Log Viewer
-```
+### Engineering utilities
+
+- ⬜ CSV viewer
+- ⬜ Run log viewer
+- ⬜ Metadata inspector
+- ⬜ Configuration validator
 
 Blockly remains the place for using instruments in test procedures.
 Engineering Tools are for developing, commissioning and validating instrument
 support.
 
-### Reporting
-- [ ] PDF report generation
-- [ ] Engineering report templates
-- [ ] Calibration information
+## Blockly and procedure reuse
 
-### Documentation
-- [ ] Professional diagram set
-- [ ] Annotated screenshots
-- [ ] Driver development guide
-- [ ] Contributor guide
+- ⬜ Reusable engineering blocks
+- ⬜ Test templates
+- ⬜ Procedure library
+- ⬜ Richer pass, warning and fail behaviour
 
-## Long-term Vision
+## Reports
 
-- Plugin architecture
+- ⬜ Better plots
+- ⬜ PDF reports
+- ⬜ Engineering report templates
+- ⬜ Rich run summaries
+
+## Diagnostics
+
+- ⬜ Improved recovery
+- ⬜ Better diagnostics
+- ⬜ Stronger configuration validation
+
+---
+
+# Longer term
+
+Possible future work includes:
+
+- database storage
+- test versioning
+- calibration integration
+- barcode support
+- operator workflows
+- production and end-of-line testing
+- multi-rig dashboards
+- notifications
+- andon lights
+- plugin architecture
 - REST API
-- Remote execution
-- Dashboard
-- Test scheduling
-- Lab notebook integration
+- remote execution
+- test scheduling
+- lab notebook integration
+
+---
+
+# Driver validation status
+
+| Driver | Status |
+|---|---|
+| Aim-TTi PSU | ✅ Bench tested |
+| EA PS 2000 B | 🟡 Bench tested; output-enable validation outstanding |
+| Seeit USBB Native | 🟡 Bench tested; multi-board validation outstanding |
+| Korad / Tenma PSU | 🟡 Driver implemented; bench validation required |
+| KEL103 Electronic Load | 🟡 Driver implemented; bench validation required |
+| Pico TC-08 | ⬜ Planned |
+
+---
+
+# Project priorities
+
+Test in a Box is an engineering validation platform. Priorities are:
+
+1. Reliability
+2. Traceability
+3. Repeatability
+4. Simplicity
+5. Extensibility
+
+Features should support real engineering workflows before convenience features.
