@@ -4,13 +4,27 @@ param(
     [string] $ProjectRoot,
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet("stable", "development")]
     [string] $Channel
 )
 
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 $ProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
+
+$Channel = $Channel.Trim().ToLowerInvariant()
+
+switch ($Channel) {
+    "s" { $Channel = "stable" }
+    "stable" { $Channel = "stable" }
+    "d" { $Channel = "development" }
+    "development" { $Channel = "development" }
+    default {
+        throw (
+            "Unknown update channel '$Channel'. " +
+            "Use stable, development, S or D."
+        )
+    }
+}
 
 function Write-Step {
     param([string] $Message)
