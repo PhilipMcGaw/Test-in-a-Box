@@ -142,23 +142,69 @@ else {
     Fail "Unsupported WinPython asset type: $Extension"
 }
 
-$RuntimeCandidates = @(
-    Get-ChildItem -LiteralPath $ExtractPath -Directory -Recurse |
-    Where-Object {
-        $_.Name -match "^python-[0-9.]+\.amd64$" -and
-        (Test-Path -LiteralPath (Join-Path $_.FullName "python.exe"))
+Write-Host "Locating the portable Python runtime..."
+
+$PythonExecutables = @(
+    Get-ChildItem -LiteralPath $ExtractPath -Filter "python.exe" -File -Recurse
+)
+
+if ($PythonExecutables.Count -eq 0) {
+    Fail "No python.exe files were found after extracting WinPython."
+}
+
+$RuntimeCandidates = @()
+
+foreach ($PythonExecutable in $PythonExecutables) {
+    $CandidateRoot = $PythonExecutable.Directory.FullName
+
+    $HasLib = Test-Path -LiteralPath (Join-Path $CandidateRoot "Lib")
+    $HasDlls = Test-Path -LiteralPath (Join-Path $CandidateRoot "DLLs")
+    $HasStdlib = Test-Path -LiteralPath (
+        Join-Path $CandidateRoot "Lib\os.py"
+    )
+
+    if ($HasLib -and $HasDlls -and $HasStdlib) {
+        $RuntimeCandidates += $PythonExecutable.Directory
     }
+}
+
+# Remove duplicate directory objects if more than one python.exe search result
+# points at the same runtime folder.
+$RuntimeCandidates = @(
+    $RuntimeCandidates |
+    Sort-Object -Property FullName -Unique
 )
 
 if ($RuntimeCandidates.Count -ne 1) {
-    Fail "Expected exactly one python-*.amd64 runtime after extraction, but found $($RuntimeCandidates.Count)."
+    Write-Host ""
+    Write-Host "Extracted python.exe files:"
+    foreach ($PythonExecutable in $PythonExecutables) {
+        Write-Host "  $($PythonExecutable.FullName)"
+    }
+
+    Write-Host ""
+    Write-Host "Runtime candidates containing python.exe, Lib, DLLs and Lib\os.py:"
+    if ($RuntimeCandidates.Count -eq 0) {
+        Write-Host "  (none)"
+    }
+    else {
+        foreach ($Candidate in $RuntimeCandidates) {
+            Write-Host "  $($Candidate.FullName)"
+        }
+    }
+
+    Fail "Expected exactly one usable portable Python runtime after extraction, but found $($RuntimeCandidates.Count)."
 }
+
+$RuntimeSource = $RuntimeCandidates[0].FullName
+Write-Host "Using portable runtime:"
+Write-Host "  $RuntimeSource"
 
 if (Test-Path -LiteralPath $PythonTarget) {
     Remove-Item -LiteralPath $PythonTarget -Recurse -Force
 }
 
-Move-Item -LiteralPath $RuntimeCandidates[0].FullName -Destination $PythonTarget
+Move-Item -LiteralPath $RuntimeSource -Destination $PythonTarget
 
 if (-not (Test-Path -LiteralPath $PythonExe)) {
     Fail "python.exe was not present after extraction."

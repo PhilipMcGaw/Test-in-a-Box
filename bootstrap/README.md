@@ -52,3 +52,19 @@ Place the correct licensed DLL at:
 ```text
 vendor\seeit\usb_relay_device.dll
 ```
+
+## WinPython archive layout
+
+Bootstrap does not depend on a particular WinPython folder name. After
+extraction it searches recursively for `python.exe` and selects the runtime
+folder that also contains:
+
+```text
+Lib\
+DLLs\
+Lib\os.py
+```
+
+If the archive layout changes again, bootstrap lists every discovered
+`python.exe` and every runtime candidate before stopping. This makes failures
+diagnosable without manually inspecting the archive.
