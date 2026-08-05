@@ -93,3 +93,12 @@ verified against the SHA-256 value published in the WinPython manifest.
 The `bootstrap/` directory contains installation and environment
 preparation only. Engineering utilities belong in `tools/`; update and
 rollback logic belongs in `updater/`.
+
+
+## Pico runtime support
+
+`bootstrap_pico.ps1` downloads the current official 64-bit PicoSDK
+installer and stages the TC-08 and PicoHRDL runtime DLLs under
+`vendor/pico/runtime`. It does not make a permanent system PATH change.
+
+See `docs/getting-started/PICO-RUNTIME.md`.

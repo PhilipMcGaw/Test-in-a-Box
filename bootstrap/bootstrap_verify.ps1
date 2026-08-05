@@ -28,7 +28,7 @@ function Add-Check(
 
 Add-Check "Portable Python" (Test-Path -LiteralPath $PythonExe) $PythonExe
 
-foreach ($Folder in @("logs", "runs", "sequences", "vendor", "vendor\seeit")) {
+foreach ($Folder in @("logs", "runs", "sequences", "vendor", "vendor\seeit", "vendor\pico")) {
     $Path = Join-Path $ProjectRoot $Folder
     Add-Check "Folder: $Folder" (Test-Path -LiteralPath $Path) $Path
 }
@@ -36,6 +36,14 @@ foreach ($Folder in @("logs", "runs", "sequences", "vendor", "vendor\seeit")) {
 $DllPath = Join-Path $ProjectRoot "vendor\seeit\usb_relay_device.dll"
 Add-Check "Seeit native DLL" (Test-Path -LiteralPath $DllPath) `
     "Optional Windows-only component" $false
+
+$PicoTc08Dll = Join-Path $ProjectRoot "vendor\pico\runtime\usb_tc08.dll"
+$PicoHrdlDll = Join-Path $ProjectRoot "vendor\pico\runtime\picohrdl.dll"
+
+Add-Check "Pico TC-08 runtime" (Test-Path -LiteralPath $PicoTc08Dll) `
+    $PicoTc08Dll $false
+Add-Check "Pico ADC-20/24 runtime" (Test-Path -LiteralPath $PicoHrdlDll) `
+    $PicoHrdlDll $false
 
 if (Test-Path -LiteralPath $PythonExe) {
     Push-Location $ProjectRoot

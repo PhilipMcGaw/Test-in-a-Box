@@ -43,6 +43,9 @@ if errorlevel 1 goto :failed
 call :run_step "Optional vendor components" "%BOOTSTRAP_DIR%bootstrap_vendor.ps1"
 if errorlevel 1 goto :failed
 
+call :run_step "Pico runtime support" "%BOOTSTRAP_DIR%bootstrap_pico.ps1"
+if errorlevel 1 goto :failed
+
 call :run_step "Installation verification" "%BOOTSTRAP_DIR%bootstrap_verify.ps1"
 if errorlevel 1 goto :failed
 
@@ -70,6 +73,15 @@ if exist "%PROJECT_ROOT%\vendor\seeit\usb_relay_device.dll" (
     echo          a licensed matching DLL is placed at:
     echo.
     echo              vendor\seeit\usb_relay_device.dll
+)
+if exist "%PROJECT_ROOT%\vendor\pico\runtime\usb_tc08.dll" (
+    if exist "%PROJECT_ROOT%\vendor\pico\runtime\picohrdl.dll" (
+        echo   [PASS] Pico TC-08 and ADC-20/24 runtime support
+    ) else (
+        echo   [INFO] Pico runtime is incomplete: picohrdl.dll missing
+    )
+) else (
+    echo   [INFO] Pico runtime support is not installed
 )
 echo.
 echo Ready to use

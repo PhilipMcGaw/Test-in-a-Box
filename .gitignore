@@ -62,3 +62,7 @@ Desktop.ini
 /.update-state.json
 /_update_work/
 /_bootstrap_winpython/
+
+/vendor/pico/runtime/
+/vendor/pico/runtime-manifest.json
+/_bootstrap_pico/
