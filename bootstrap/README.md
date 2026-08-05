@@ -68,3 +68,21 @@ Lib\os.py
 If the archive layout changes again, bootstrap lists every discovered
 `python.exe` and every runtime candidate before stopping. This makes failures
 diagnosable without manually inspecting the archive.
+
+## GitHub rate limiting
+
+Bootstrap does not use the GitHub REST API for normal WinPython discovery.
+
+Instead, it downloads WinPython's public checksum manifest:
+
+```text
+https://winpython.github.io/md5_sha1.txt
+```
+
+It selects the newest stable matching 64-bit Python 3.13 Dot build, falling
+back to Python 3.12, and downloads the named asset through GitHub's ordinary
+`releases/latest/download` endpoint.
+
+This avoids the low unauthenticated REST API allowance that can affect several
+machines sharing the same public IP address. The downloaded file is always
+verified against the SHA-256 value published in the WinPython manifest.

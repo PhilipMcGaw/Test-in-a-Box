@@ -41,62 +41,92 @@ New-Item -ItemType Directory -Path $ExtractPath | Out-Null
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$Headers = @{
-    "Accept" = "application/vnd.github+json"
-    "User-Agent" = "Test-in-a-Box-bootstrap"
+Write-Host "Reading the official WinPython checksum manifest..."
+
+$ManifestUri = "https://winpython.github.io/md5_sha1.txt"
+$ManifestPath = Join-Path $TempRoot "winpython-checksums.txt"
+
+Invoke-WebRequest `
+    -Uri $ManifestUri `
+    -UseBasicParsing `
+    -OutFile $ManifestPath
+
+if (-not (Test-Path -LiteralPath $ManifestPath)) {
+    Fail "The WinPython checksum manifest could not be downloaded."
 }
 
-Write-Host "Finding a stable official WinPython Dot release..."
-
-$Releases = Invoke-RestMethod `
-    -Uri "https://api.github.com/repos/winpython/winpython/releases?per_page=30" `
-    -Headers $Headers
+$ManifestLines = Get-Content -LiteralPath $ManifestPath
 
 $PreferredSeries = @("3.13", "3.12")
-$SelectedAsset = $null
-$SelectedRelease = $null
+$SelectedName = $null
+$ExpectedSha256 = $null
 
 foreach ($Series in $PreferredSeries) {
-    foreach ($Release in $Releases) {
-        if ($Release.draft -or $Release.prerelease) {
-            continue
-        }
+    # The official manifest is ordered newest first. Match only stable
+    # 64-bit Dot ZIP/EXE filenames with numeric release components.
+    $Pattern = (
+        "^\s*[0-9a-fA-F]{32}\s*\|\s*" +
+        "[0-9a-fA-F]{40}\s*\|\s*" +
+        "([0-9a-fA-F]{64})\s*\|\s*" +
+        "(Win[Pp]ython64-" +
+        [regex]::Escape($Series) +
+        "\.[0-9.]+dot\.(?:zip|exe))\s*\|"
+    )
 
-        $Candidates = @(
-            $Release.assets | Where-Object {
-                $_.name -match ("^WinPython64-" + [regex]::Escape($Series) + "\.[0-9.]+dot\.(exe|zip)$")
-            }
-        )
-
-        if ($Candidates.Count -gt 0) {
-            $SelectedAsset = $Candidates |
-                Sort-Object @{Expression = { if ($_.name.EndsWith(".zip")) { 0 } else { 1 } }} |
-                Select-Object -First 1
-            $SelectedRelease = $Release
+    foreach ($Line in $ManifestLines) {
+        if ($Line -match $Pattern) {
+            $ExpectedSha256 = $Matches[1].ToUpperInvariant()
+            $SelectedName = $Matches[2]
             break
         }
     }
 
-    if ($null -ne $SelectedAsset) {
+    if ($null -ne $SelectedName) {
         break
     }
 }
 
-if ($null -eq $SelectedAsset) {
-    Fail "No stable 64-bit WinPython 3.13 or 3.12 Dot release asset was found in the latest official releases."
+if ($null -eq $SelectedName) {
+    Fail "No stable 64-bit WinPython 3.13 or 3.12 Dot ZIP/EXE was found in the official checksum manifest."
 }
 
-$Extension = [System.IO.Path]::GetExtension($SelectedAsset.name)
+$Extension = [System.IO.Path]::GetExtension($SelectedName)
 $DownloadPath = $DownloadPath + $Extension
 
-Write-Host "Release: $($SelectedRelease.name)"
-Write-Host "Asset:   $($SelectedAsset.name)"
-Write-Host "Downloading from the official WinPython GitHub release..."
+# GitHub's normal release-download endpoint does not use the REST API and
+# therefore avoids unauthenticated API rate limits.
+$DownloadUri = (
+    "https://github.com/winpython/winpython/releases/latest/download/" +
+    $SelectedName
+)
 
-Invoke-WebRequest `
-    -Uri $SelectedAsset.browser_download_url `
-    -Headers $Headers `
-    -OutFile $DownloadPath
+Write-Host "Asset:  $SelectedName"
+Write-Host "Source: $DownloadUri"
+Write-Host "Downloading the official WinPython release asset..."
+
+try {
+    Invoke-WebRequest `
+        -Uri $DownloadUri `
+        -UseBasicParsing `
+        -OutFile $DownloadPath
+}
+catch {
+    Fail @"
+The WinPython release asset could not be downloaded.
+
+Asset:
+  $SelectedName
+
+Source:
+  $DownloadUri
+
+This method does not use the GitHub REST API. If it still fails, the network
+may be blocking github.com or objects.githubusercontent.com.
+
+Original error:
+  $($_.Exception.Message)
+"@
+}
 
 if (-not (Test-Path -LiteralPath $DownloadPath)) {
     Fail "The WinPython download did not complete."
@@ -107,17 +137,24 @@ if ($Length -lt 1000000) {
     Fail "The downloaded WinPython asset is unexpectedly small ($Length bytes)."
 }
 
-if ($SelectedAsset.PSObject.Properties.Name -contains "digest" -and $SelectedAsset.digest) {
-    if ($SelectedAsset.digest -match "^sha256:([0-9a-fA-F]{64})$") {
-        Write-Host "Verifying published SHA-256 digest..."
-        $Expected = $Matches[1].ToUpperInvariant()
-        $Actual = (Get-FileHash -LiteralPath $DownloadPath -Algorithm SHA256).Hash
-        if ($Actual -ne $Expected) {
-            Fail "WinPython SHA-256 verification failed."
-        }
-        Write-Host "[PASS] SHA-256 verified."
-    }
+Write-Host "Verifying SHA-256 from the official WinPython manifest..."
+$ActualSha256 = (
+    Get-FileHash -LiteralPath $DownloadPath -Algorithm SHA256
+).Hash
+
+if ($ActualSha256 -ne $ExpectedSha256) {
+    Fail @"
+WinPython SHA-256 verification failed.
+
+Expected:
+  $ExpectedSha256
+
+Received:
+  $ActualSha256
+"@
 }
+
+Write-Host "[PASS] SHA-256 verified."
 
 Write-Host "Extracting WinPython..."
 
