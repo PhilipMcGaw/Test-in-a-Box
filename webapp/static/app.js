@@ -16,6 +16,16 @@ const TOOLBOX = {
     },
     {
       kind: "category",
+      name: "Relays",
+      colour: "120",
+      contents: [
+        { kind: "block", type: "hw_relay_set" },
+        { kind: "block", type: "hw_relay_read" },
+        { kind: "block", type: "hw_relay_all" },
+      ],
+    },
+    {
+      kind: "category",
       name: "Generic Instruments",
       colour: "210",
       contents: [
@@ -95,6 +105,9 @@ async function loadDevices() {
   const psuVoltageInputs = [];
   const psuCurrentInputs = [];
 
+  const relayPositions = [];
+  const relayBanks = [];
+
   function channelNumber(positionId) {
     const match = String(positionId).match(/(\d+)/);
     return match ? Number(match[1]) : 1;
@@ -126,6 +139,34 @@ async function loadDevices() {
       } else {
         inputs.push([label, value]);
       }
+    }
+
+    // Identify relay positions by capability rather than by driver name,
+    // so the same Blockly blocks work with serial, native USB and future
+    // relay-controller drivers.
+    const relays = positions.filter(pos =>
+      pos.kind === 'output_digital' &&
+      (
+        String(pos.id).toLowerCase().startsWith('relay') ||
+        String(pos.label).toLowerCase().includes('relay')
+      )
+    );
+
+    for (const pos of relays) {
+      relayPositions.push([
+        `${dev.device_id}: ${pos.label}`,
+        positionValue(dev.device_id, pos.id),
+      ]);
+    }
+
+    if (relays.length) {
+      relayBanks.push([
+        `${dev.device_id}: all ${relays.length} relays`,
+        JSON.stringify({
+          deviceId: dev.device_id,
+          positions: relays.map(pos => pos.id),
+        }),
+      ]);
     }
 
     // Identify PSU positions by engineering meaning rather than by driver
@@ -257,6 +298,14 @@ async function loadDevices() {
   window.HW_PSU_CURRENT_INPUTS = psuCurrentInputs.length
     ? psuCurrentInputs
     : [["(no PSU current measurements)", "none|none"]];
+
+  window.HW_RELAY_POSITIONS = relayPositions.length
+    ? relayPositions
+    : [["(no relay channels)", "none|none"]];
+
+  window.HW_RELAY_BANKS = relayBanks.length
+    ? relayBanks
+    : [["(no relay banks)", "{\"deviceId\":\"none\",\"positions\":[]}"]];
 
   const list = document.getElementById('device-list');
   list.innerHTML = devices.map(device =>

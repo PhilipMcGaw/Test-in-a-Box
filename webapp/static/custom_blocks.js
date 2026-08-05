@@ -21,6 +21,13 @@ window.HW_PSU_OUTPUT_SWITCHES = [["(no PSU outputs)", "none|none"]];
 window.HW_PSU_VOLTAGE_INPUTS = [["(no PSU voltage measurements)", "none|none"]];
 window.HW_PSU_CURRENT_INPUTS = [["(no PSU current measurements)", "none|none"]];
 
+// Relay-specific lists populated by app.js.
+window.HW_RELAY_POSITIONS = [["(no relay channels)", "none|none"]];
+window.HW_RELAY_BANKS = [[
+  "(no relay banks)",
+  "{\"deviceId\":\"none\",\"positions\":[]}"
+]];
+
 
 Blockly.Blocks['hw_set'] = {
   init: function () {
@@ -208,6 +215,77 @@ Blockly.Blocks['hw_psu_ramp_voltage'] = {
     this.setTooltip(
       "Ramp a PSU voltage up or down. Enter a positive step magnitude; " +
       "the direction is determined automatically from the start and end values."
+    );
+  }
+};
+
+
+// ---------------------------------------------------------------------------
+// Relay engineering blocks
+// ---------------------------------------------------------------------------
+
+Blockly.Blocks['hw_relay_set'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("set relay")
+      .appendField(
+        new Blockly.FieldDropdown(() => window.HW_RELAY_POSITIONS),
+        "POSITION"
+      )
+      .appendField(
+        new Blockly.FieldDropdown([
+          ["ON", "ON"],
+          ["OFF", "OFF"],
+        ]),
+        "STATE"
+      );
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(120);
+    this.setTooltip(
+      "Turn one relay channel ON or OFF."
+    );
+  }
+};
+
+
+Blockly.Blocks['hw_relay_read'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("read relay state")
+      .appendField(
+        new Blockly.FieldDropdown(() => window.HW_RELAY_POSITIONS),
+        "POSITION"
+      );
+    this.setOutput(true, "Boolean");
+    this.setColour(120);
+    this.setTooltip(
+      "Read a relay channel state. Returns true for ON and false for OFF."
+    );
+  }
+};
+
+
+Blockly.Blocks['hw_relay_all'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("set relay bank")
+      .appendField(
+        new Blockly.FieldDropdown(() => window.HW_RELAY_BANKS),
+        "BANK"
+      )
+      .appendField(
+        new Blockly.FieldDropdown([
+          ["ALL ON", "ON"],
+          ["ALL OFF", "OFF"],
+        ]),
+        "STATE"
+      );
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(120);
+    this.setTooltip(
+      "Turn every relay in the selected relay bank ON or OFF."
     );
   }
 };

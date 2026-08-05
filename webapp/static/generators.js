@@ -152,6 +152,53 @@ Blockly.Python.forBlock['hw_psu_ramp_voltage'] = function (block) {
 
 
 // ---------------------------------------------------------------------------
+// Relay blocks
+// ---------------------------------------------------------------------------
+
+Blockly.Python.forBlock['hw_relay_set'] = function (block) {
+  const [deviceId, positionId] = splitPosition(block);
+  const enabled = block.getFieldValue('STATE') === 'ON'
+    ? 'True'
+    : 'False';
+
+  return (
+    `set(${JSON.stringify(deviceId)}, ` +
+    `${JSON.stringify(positionId)}, ${enabled})\n`
+  );
+};
+
+
+Blockly.Python.forBlock['hw_relay_read'] = function (block) {
+  const [deviceId, positionId] = splitPosition(block);
+  const code =
+    `get(${JSON.stringify(deviceId)}, ${JSON.stringify(positionId)})`;
+
+  return [code, Blockly.Python.ORDER_ATOMIC];
+};
+
+
+Blockly.Python.forBlock['hw_relay_all'] = function (block) {
+  const raw = block.getFieldValue('BANK') ||
+    '{"deviceId":"none","positions":[]}';
+  const enabled = block.getFieldValue('STATE') === 'ON'
+    ? 'True'
+    : 'False';
+
+  let bank;
+  try {
+    bank = JSON.parse(raw);
+  } catch (error) {
+    bank = { deviceId: 'none', positions: [] };
+  }
+
+  return (bank.positions || []).map(positionId =>
+    `set(${JSON.stringify(bank.deviceId)}, ` +
+    `${JSON.stringify(positionId)}, ${enabled})\n`
+  ).join('');
+};
+
+
+// ---------------------------------------------------------------------------
 // Timing, results and checks
 // ---------------------------------------------------------------------------
 
