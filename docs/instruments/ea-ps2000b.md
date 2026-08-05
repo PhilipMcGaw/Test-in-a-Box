@@ -2,12 +2,13 @@
 
 ## Validation status
 
-**TO BE CONFIRMED**
+**BENCH TESTED — OUTPUT-ON OPERATION STILL TO BE CONFIRMED**
 
-Identification has been confirmed on an EA PS 2084-05 B connected through its
-front USB virtual COM port. The remaining read and control operations are
-provided with a bench-test utility and must be verified before the Instrument
-Library status is changed to `bench_tested`.
+Bench testing on an EA PS 2084-05 B connected through its front USB virtual
+COM port confirmed identification, read-only measurements, nominal ratings,
+remote control, voltage and current setpoints, output-off control, error
+reporting and restoration of the original setpoints. Output-on operation has
+not yet been exercised and remains to be confirmed separately.
 
 ## Driver
 
@@ -74,3 +75,24 @@ and fixture state have been confirmed safe.
 
 Software safe-state handling does not replace fixture-level protection,
 emergency isolation or verification of the physical output.
+
+
+## Recorded bench-test result
+
+The following behaviour was confirmed on the physical PS 2084-05 B:
+
+- `*IDN?` returned the expected manufacturer, model, serial and firmware.
+- `SYST:LOCK:OWN?` reported `NONE` before remote control.
+- `OUTP?` reported the output was off.
+- Voltage and current setpoints were read successfully.
+- `MEAS:ARR?` returned voltage, current and power.
+- Nominal ratings were read as 84 V, 5 A and 160 W.
+- Remote control was acquired.
+- Setpoints of 1.0 V and 0.1 A were written and read back.
+- The output remained off throughout the control test.
+- The original setpoints were restored.
+- The error queue reported `0,"No error"`.
+
+The corrected tester reacquires remote mode when required before cleanup and
+lets `driver.close()` perform the final output-off, leave-remote and port-close
+sequence.

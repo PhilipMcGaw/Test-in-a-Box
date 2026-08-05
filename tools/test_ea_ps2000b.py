@@ -93,8 +93,6 @@ def main() -> int:
         driver.set_output(False)
         driver.set_voltage(original_voltage)
         driver.set_current(original_current)
-        driver.leave_remote()
-
         print("\nControl test completed and original setpoints restored.")
         return 0
 
@@ -106,11 +104,17 @@ def main() -> int:
     finally:
         try:
             if driver.connected:
+                if driver.get_remote_owner() != "REMOTE":
+                    driver.enter_remote()
+
                 driver.set_output(False)
+
                 if original_voltage is not None:
                     driver.set_voltage(original_voltage)
+
                 if original_current is not None:
                     driver.set_current(original_current)
+
         except Exception:
             traceback.print_exc()
 

@@ -115,11 +115,13 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "Native SCPI driver for the 2020 TFT generation of EA PS 2000 B "
         "power supplies over the front USB virtual COM port."
     ),
-    "status": "unverified",
+    "status": "bench_tested",
     "status_description": (
-        "Identification has been confirmed on a PS 2084-05 B. Read-only "
-        "measurements, remote control, setpoints and output control remain "
-        "TO BE CONFIRMED with the supplied bench-test tool."
+        "Bench tested on a physical EA PS 2084-05 B for identification, "
+        "read-only measurements, nominal ratings, remote control, voltage "
+        "and current setpoints, output-off control, error reporting and "
+        "restoration of the original setpoints. Output-on operation remains "
+        "to be confirmed separately."
     ),
 },
 
