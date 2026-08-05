@@ -10,4 +10,5 @@ connection names, driver requirements, logical channel numbering and enclosure
 wiring documentation are usually more useful than a photograph of the bare
 board.
 
-See [Platform Support](../PLATFORM-SUPPORT.md) for operating-system limitations.
+- [Korad / Tenma programmable PSU](korad-tenma-psu.md)
+- [KEL103 programmable electronic load](kel103-load.md)
