@@ -106,6 +106,7 @@ test-builder workflow.
 - [ ] Communication log viewer
 
 #### Engineering Utilities
+- [ ] Web-interface shutdown button and graceful shutdown API
 - [ ] CSV viewer
 - [ ] Run log viewer
 - [ ] Metadata inspector
@@ -183,10 +184,11 @@ support.
 - ✅ Human-readable Markdown run summary
 - ✅ Configuration, mapping and procedure SHA-256 provenance
 
+## Completed updater safety work
 
-## Completed Blockly usability work
-
-- ✅ Wait durations accept literals, variables and expressions
-- ✅ PSU setpoints accept literals, variables and expressions
-- ✅ PSU ramp parameters accept literals, variables and expressions
-- ✅ Existing fixed-field Wait and Ramp blocks migrate on load
+- ✅ Detect Test in a Box processes associated with the current repository
+- ✅ Detect the process listening on `127.0.0.1:8765`
+- ✅ Wait-and-recheck option before update
+- ✅ Explicit force-close option
+- ✅ Cancel option
+- ✅ Prevent file replacement while the application is still running

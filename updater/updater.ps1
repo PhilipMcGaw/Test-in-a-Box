@@ -34,6 +34,198 @@ function Copy-Tree(
     }
 }
 
+function Get-TiabProcesses {
+    $Found = @{}
+    $NormalRoot = $ProjectRoot.TrimEnd("\").ToLowerInvariant()
+
+    # Find Python/CMD processes whose command line points at this repository.
+    try {
+        $Processes = Get-CimInstance Win32_Process -ErrorAction Stop |
+            Where-Object {
+                $CommandLine = [string] $_.CommandLine
+
+                $CommandLine -and
+                $CommandLine.ToLowerInvariant().Contains($NormalRoot) -and
+                (
+                    $CommandLine -match "webapp[\\/]+server\.py" -or
+                    $CommandLine -match "uvicorn" -or
+                    $CommandLine -match "2_start_app\.bat"
+                )
+            }
+
+        foreach ($Process in $Processes) {
+            $Found[[int] $Process.ProcessId] = [pscustomobject]@{
+                ProcessId = [int] $Process.ProcessId
+                Name = [string] $Process.Name
+                CommandLine = [string] $Process.CommandLine
+                Source = "project command line"
+            }
+        }
+    }
+    catch {
+        Write-Host "[INFO] Process command-line inspection is unavailable."
+    }
+
+    # Also identify the process currently listening on the application port.
+    $ListeningPids = @()
+
+    if (Get-Command Get-NetTCPConnection -ErrorAction SilentlyContinue) {
+        try {
+            $ListeningPids = @(
+                Get-NetTCPConnection `
+                    -LocalAddress "127.0.0.1" `
+                    -LocalPort 8765 `
+                    -State Listen `
+                    -ErrorAction Stop |
+                Select-Object -ExpandProperty OwningProcess -Unique
+            )
+        }
+        catch {
+            $ListeningPids = @()
+        }
+    }
+    else {
+        $NetstatLines = @(
+            & netstat.exe -ano -p tcp 2>$null |
+            Select-String -Pattern "127\.0\.0\.1:8765\s+.*LISTENING\s+(\d+)$"
+        )
+
+        foreach ($Line in $NetstatLines) {
+            if ($Line.Line -match "LISTENING\s+(\d+)$") {
+                $ListeningPids += [int] $Matches[1]
+            }
+        }
+    }
+
+    foreach ($ProcessId in $ListeningPids) {
+        if ($Found.ContainsKey([int] $ProcessId)) {
+            continue
+        }
+
+        try {
+            $Process = Get-CimInstance `
+                Win32_Process `
+                -Filter "ProcessId = $ProcessId" `
+                -ErrorAction Stop
+
+            $Found[[int] $ProcessId] = [pscustomobject]@{
+                ProcessId = [int] $ProcessId
+                Name = [string] $Process.Name
+                CommandLine = [string] $Process.CommandLine
+                Source = "listening on 127.0.0.1:8765"
+            }
+        }
+        catch {
+            $Found[[int] $ProcessId] = [pscustomobject]@{
+                ProcessId = [int] $ProcessId
+                Name = "unknown"
+                CommandLine = ""
+                Source = "listening on 127.0.0.1:8765"
+            }
+        }
+    }
+
+    return @($Found.Values | Sort-Object ProcessId)
+}
+
+
+function Wait-ForTiabShutdown {
+    while ($true) {
+        $Running = @(Get-TiabProcesses)
+
+        if ($Running.Count -eq 0) {
+            Write-Host "[PASS] Test in a Box is not running."
+            return
+        }
+
+        Write-Host ""
+        Write-Host "Test in a Box is currently running."
+        Write-Host "It must be closed before application files are updated."
+        Write-Host ""
+
+        foreach ($Process in $Running) {
+            Write-Host ("  PID {0,-7} {1}" -f $Process.ProcessId, $Process.Name)
+            Write-Host ("      Detected by: {0}" -f $Process.Source)
+
+            if (-not [string]::IsNullOrWhiteSpace($Process.CommandLine)) {
+                Write-Host ("      Command: {0}" -f $Process.CommandLine)
+            }
+        }
+
+        Write-Host ""
+        Write-Host "  [C] Check again after five seconds"
+        Write-Host "  [F] Force close the detected Test in a Box process(es)"
+        Write-Host "  [Q] Cancel the update"
+        Write-Host ""
+
+        $Selection = (Read-Host "Select [C/F/Q]").Trim().ToUpperInvariant()
+
+        switch ($Selection) {
+            "C" {
+                Write-Host "Waiting for Test in a Box to close..."
+                Start-Sleep -Seconds 5
+            }
+
+            "F" {
+                Write-Host ""
+                Write-Host "Force closing the detected Test in a Box process(es)..."
+
+                foreach ($Process in $Running) {
+                    try {
+                        Stop-Process `
+                            -Id $Process.ProcessId `
+                            -Force `
+                            -ErrorAction Stop
+
+                        Write-Host (
+                            "[PASS] Stopped PID {0} ({1})." -f
+                            $Process.ProcessId,
+                            $Process.Name
+                        )
+                    }
+                    catch {
+                        Fail (
+                            "Could not stop PID {0}: {1}" -f
+                            $Process.ProcessId,
+                            $_.Exception.Message
+                        )
+                    }
+                }
+
+                $Deadline = (Get-Date).AddSeconds(10)
+
+                do {
+                    Start-Sleep -Milliseconds 500
+                    $Remaining = @(Get-TiabProcesses)
+                } while (
+                    $Remaining.Count -gt 0 -and
+                    (Get-Date) -lt $Deadline
+                )
+
+                if ($Remaining.Count -gt 0) {
+                    Fail (
+                        "Test in a Box is still running after the force-close " +
+                        "request. Close it manually and run the updater again."
+                    )
+                }
+
+                Write-Host "[PASS] Test in a Box has closed."
+                return
+            }
+
+            "Q" {
+                Write-Host "Update cancelled."
+                exit 0
+            }
+
+            default {
+                Write-Host "Please select C, F, or Q."
+            }
+        }
+    }
+}
+
+
 function Read-Config {
     $Path = Join-Path $ProjectRoot "updater\updater_config.json"
     if (-not (Test-Path -LiteralPath $Path)) {
@@ -219,12 +411,8 @@ Create a GitHub release or version tag, or select Development.
     Write-Host "Ref:     $Ref"
     Write-Host "Commit:  $Commit"
     Write-Host ""
-    Write-Host "Close Test in a Box before proceeding."
-    $Confirm = Read-Host "Continue? [Y/N]"
-    if ($Confirm -notmatch "^[Yy]$") {
-        Write-Host "Update cancelled."
-        exit 0
-    }
+    Step "Checking application state"
+    Wait-ForTiabShutdown
 
     $Stamp = Get-Date -Format "yyyyMMdd-HHmmss"
     $Work = Join-Path $ProjectRoot "_update_work"

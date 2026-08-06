@@ -47,3 +47,17 @@ update.bat rollback
 The `updater/` directory contains deployment and rollback logic only.
 Bootstrap owns Python and dependency preparation; engineering utilities
 belong in `tools/`.
+
+## Running application detection
+
+Updater v2.1 checks for a Test in a Box process associated with the current
+repository and for a process listening on `127.0.0.1:8765`.
+
+When an instance is found, the operator can:
+
+- wait five seconds and check again;
+- explicitly force-close the detected process;
+- cancel the update.
+
+The updater does not silently terminate a running test. A future web-interface
+shutdown button and graceful shutdown API are tracked on the project roadmap.
