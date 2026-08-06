@@ -696,6 +696,42 @@ function renderSettings(card, typeInfo) {
         ? card.kwargs[field.name]
         : field.default;
 
+    if (field.name === 'serial_port' || field.type === 'serial_port') {
+      const currentValue = String(value ?? '');
+
+      html += `
+        <label>
+          ${escapeHtml(field.label)}
+          <select
+            data-kwarg="${escapeHtml(field.name)}"
+            data-serial-port-select="${escapeHtml(field.name)}">
+            <option value="${escapeHtml(currentValue)}" selected>
+              ${escapeHtml(currentValue || 'Select a COM port')}
+            </option>
+          </select>
+        </label>
+        <div class="serial-port-actions">
+          <button
+            type="button"
+            class="discover-btn"
+            data-refresh-serial-field="${escapeHtml(field.name)}">
+            Refresh COM Ports
+          </button>
+          <button
+            type="button"
+            class="discover-btn"
+            data-probe-serial-field="${escapeHtml(field.name)}">
+            Find Compatible Instrument
+          </button>
+        </div>
+        <div
+          class="discovery-status"
+          data-serial-status="${escapeHtml(field.name)}">
+        </div>
+      `;
+      continue;
+    }
+
     if (field.type === 'discovery') {
       const currentValue = String(value ?? '');
       const currentLabel = currentValue
@@ -826,6 +862,42 @@ function escapeHtml(value) {
 // Card events
 // ---------------------------------------------------------------------------
 
+async function fetchSerialPorts() {
+  const response = await fetch('/api/serial_ports');
+  const data = await readJsonSafely(response);
+
+  if (!response.ok) {
+    throw new Error(formatApiError(data, `HTTP ${response.status}`));
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+
+function populateSerialPortSelect(select, ports, currentValue = '') {
+  select.innerHTML = '';
+
+  if (!ports.length) {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'No COM ports found';
+    select.appendChild(option);
+    return;
+  }
+
+  for (const port of ports) {
+    const option = document.createElement('option');
+    option.value = port.device;
+    option.textContent = port.display_name || port.device;
+    select.appendChild(option);
+  }
+
+  if (ports.some(port => port.device === currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+
 function wireCardEvents(element, card) {
   const header = element.querySelector('.card-header');
   const deviceIdInput = element.querySelector(
@@ -896,6 +968,130 @@ function wireCardEvents(element, card) {
 
       control.addEventListener('mousedown', event => {
         event.stopPropagation();
+      });
+    });
+
+  settingsPanel
+    .querySelectorAll('[data-refresh-serial-field]')
+    .forEach(button => {
+      button.addEventListener('click', async () => {
+        const fieldName = button.dataset.refreshSerialField;
+        const select = settingsPanel.querySelector(
+          `[data-serial-port-select="${fieldName}"]`
+        );
+        const status = settingsPanel.querySelector(
+          `[data-serial-status="${fieldName}"]`
+        );
+
+        button.disabled = true;
+        status.textContent = 'Reading Windows COM ports…';
+
+        try {
+          const ports = await fetchSerialPorts();
+          populateSerialPortSelect(
+            select,
+            ports,
+            card.kwargs[fieldName] || ''
+          );
+
+          if (!ports.length) {
+            card.kwargs[fieldName] = '';
+            status.textContent = 'No COM ports are currently available.';
+            return;
+          }
+
+          if (!ports.some(
+            port => port.device === card.kwargs[fieldName]
+          )) {
+            select.selectedIndex = 0;
+            card.kwargs[fieldName] = select.value;
+          }
+
+          status.textContent =
+            `Found ${ports.length} COM port${ports.length === 1 ? '' : 's'}.`;
+        } catch (error) {
+          status.textContent =
+            `COM port refresh failed: ${error.message || error}`;
+        } finally {
+          button.disabled = false;
+        }
+      });
+    });
+
+  settingsPanel
+    .querySelectorAll('[data-probe-serial-field]')
+    .forEach(button => {
+      button.addEventListener('click', async () => {
+        const fieldName = button.dataset.probeSerialField;
+        const select = settingsPanel.querySelector(
+          `[data-serial-port-select="${fieldName}"]`
+        );
+        const status = settingsPanel.querySelector(
+          `[data-serial-status="${fieldName}"]`
+        );
+
+        button.disabled = true;
+        status.textContent =
+          'Opening each COM port and requesting instrument identity…';
+
+        try {
+          const response = await fetch('/api/serial_ports/probe', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              device_type: card.device_type,
+              kwargs: card.kwargs,
+            }),
+          });
+
+          const data = await readJsonSafely(response);
+
+          if (!response.ok) {
+            throw new Error(
+              formatApiError(data, `HTTP ${response.status}`)
+            );
+          }
+
+          const compatible = (data || []).filter(
+            item => item.compatible
+          );
+
+          select.innerHTML = '';
+
+          if (!compatible.length) {
+            const ports = (data || []).map(item => item.port_metadata);
+            populateSerialPortSelect(
+              select,
+              ports.filter(Boolean),
+              card.kwargs[fieldName] || ''
+            );
+            status.textContent =
+              'No compatible instrument identified. Check cable, baud rate, ' +
+              'terminator, and whether another program owns the port.';
+            return;
+          }
+
+          for (const item of compatible) {
+            const option = document.createElement('option');
+            option.value = item.port;
+            option.textContent = item.display_name || item.port;
+            select.appendChild(option);
+          }
+
+          select.selectedIndex = 0;
+          card.kwargs[fieldName] = select.value;
+
+          status.textContent =
+            `Identified ${compatible.length} compatible instrument` +
+            `${compatible.length === 1 ? '' : 's'}.`;
+        } catch (error) {
+          status.textContent =
+            `Instrument scan failed: ${error.message || error}`;
+        } finally {
+          button.disabled = false;
+        }
       });
     });
 

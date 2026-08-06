@@ -56,7 +56,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
             {
                 "name": "serial_port",
                 "label": "COM Port",
-                "type": "text",
+                "type": "serial_port",
                 "default": "COM5",
             },
             {
@@ -89,7 +89,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         {
             "name": "serial_port",
             "label": "COM Port",
-            "type": "text",
+            "type": "serial_port",
             "default": "COM9",
         },
         {
@@ -135,7 +135,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
             {
                 "name": "serial_port",
                 "label": "COM Port",
-                "type": "text",
+                "type": "serial_port",
                 "default": "COM5",
             },
             {
@@ -244,7 +244,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
             {
                 "name": "serial_port",
                 "label": "COM Port",
-                "type": "text",
+                "type": "serial_port",
                 "default": "COM5",
             },
         ],

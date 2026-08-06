@@ -190,3 +190,12 @@ support.
 - ✅ Existing capability-based PSU Blockly blocks supported
 - ✅ Output-off safe state
 - ⬜ Physical hardware bench validation
+
+
+## Completed serial discovery work
+
+- ✅ COM-port drop-down populated from Windows
+- ✅ USB/serial description metadata shown
+- ✅ Driver-specific identity filtering
+- ✅ `*IDN?`, `ID`, or equivalent selected by each driver
+- ✅ Serial probing blocked while a test run is active

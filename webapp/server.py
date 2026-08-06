@@ -34,6 +34,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from serial.tools import list_ports
 
 # Import every driver module so its registration decorator runs.
 import tiab.drivers.aimtti_psu  # noqa: F401
@@ -235,6 +236,13 @@ class DiscoveryRequest(BaseModel):
     kwargs: dict[str, Any] = Field(default_factory=dict)
 
 
+class SerialPortProbeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    device_type: str
+    kwargs: dict[str, Any] = Field(default_factory=dict)
+
+
 class SetPositionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -339,6 +347,82 @@ def _safe_sequence_name(name: str) -> str:
             "hyphens and underscores."
         )
     return name
+
+
+def _serial_port_inventory() -> list[dict[str, Any]]:
+    """Return currently enumerated serial ports with Windows metadata."""
+    result: list[dict[str, Any]] = []
+
+    for port in sorted(list_ports.comports(), key=lambda item: item.device):
+        description = port.description or "Serial port"
+        hardware_id = port.hwid or ""
+        label = f"{port.device} — {description}"
+
+        result.append({
+            "device": port.device,
+            "name": port.name or port.device,
+            "description": description,
+            "hardware_id": hardware_id,
+            "manufacturer": port.manufacturer or "",
+            "product": port.product or "",
+            "serial_number": port.serial_number or "",
+            "vid": port.vid,
+            "pid": port.pid,
+            "display_name": label,
+        })
+
+    return result
+
+
+def _probe_serial_port(
+    *,
+    device_type: str,
+    port_name: str,
+    kwargs: dict[str, Any],
+) -> dict[str, Any]:
+    """
+    Attempt a driver-specific identification on one serial port.
+
+    This uses the selected driver's normal connect/identify/close lifecycle,
+    allowing each protocol to use *IDN?, ID or its own equivalent. The probe is
+    explicit because opening serial instruments can briefly place them in
+    remote mode.
+    """
+    probe_kwargs = dict(kwargs)
+    probe_kwargs["serial_port"] = port_name
+
+    # Driver-specific settings that would make a discovery pass noisy are
+    # disabled when the driver supports them.
+    if device_type == "labdch_30_665":
+        probe_kwargs["trace_serial"] = False
+        probe_kwargs["local_on_close"] = True
+
+    driver = create_driver(
+        device_type,
+        f"probe:{port_name}",
+        on_event=None,
+        **probe_kwargs,
+    )
+
+    try:
+        driver.connect()
+        identity = driver.identify()
+        capabilities = driver.capabilities()
+
+        return {
+            "compatible": True,
+            "port": port_name,
+            "display_name": (
+                f"{port_name} — "
+                f"{identity.get('manufacturer', '').strip()} "
+                f"{identity.get('model', '').strip()}"
+            ).strip(" —"),
+            "identity": identity,
+            "driver_type": capabilities.device_type,
+        }
+    finally:
+        with contextlib.suppress(Exception):
+            driver.close()
 
 
 # ---------------------------------------------------------------------------
@@ -726,6 +810,55 @@ def api_duts() -> JSONResponse:
             for entry in _config.get("mapping", [])
         })
     return JSONResponse(duts)
+
+
+@app.get("/api/serial_ports")
+def api_serial_ports() -> JSONResponse:
+    """List serial ports without opening them."""
+    return JSONResponse(_serial_port_inventory())
+
+
+@app.post("/api/serial_ports/probe")
+def api_probe_serial_ports(
+    request: SerialPortProbeRequest,
+) -> JSONResponse:
+    """
+    Probe each serial port using the selected instrument driver.
+
+    Ports that fail to identify are returned with their error so the Configure
+    Devices page can distinguish incompatible and busy ports.
+    """
+    if _run_is_active():
+        return JSONResponse(
+            {"detail": "Serial-port probing is unavailable during a run."},
+            status_code=409,
+        )
+
+    results: list[dict[str, Any]] = []
+
+    for port in _serial_port_inventory():
+        port_name = port["device"]
+
+        try:
+            result = _probe_serial_port(
+                device_type=request.device_type,
+                port_name=port_name,
+                kwargs=request.kwargs,
+            )
+            result["port_metadata"] = port
+            results.append(result)
+        except Exception as exc:
+            results.append({
+                "compatible": False,
+                "port": port_name,
+                "display_name": port["display_name"],
+                "identity": {},
+                "driver_type": request.device_type,
+                "error": str(exc),
+                "port_metadata": port,
+            })
+
+    return JSONResponse(results)
 
 
 @app.get("/api/device_types")
