@@ -20,13 +20,27 @@ function Test-PicoRuntime {
         return $false
     }
 
+    # A missing Pico native runtime is an expected probe result. In Windows
+    # PowerShell 5.1, stderr from a native process is surfaced as a
+    # NativeCommandError when ErrorActionPreference is Stop. Temporarily use
+    # Continue so Python can fail normally and let its exit code decide the
+    # result without aborting the whole bootstrap.
+    $PreviousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+
     Push-Location $ProjectRoot
     try {
-        & $PythonExe -c "from picosdk.usbtc08 import usbtc08; from picosdk.picohrdl import picohrdl; print('Pico runtime imports OK')" *> $null
-        return ($LASTEXITCODE -eq 0)
+        & $PythonExe `
+            -c "from picosdk.usbtc08 import usbtc08; from picosdk.picohrdl import picohrdl" `
+            1>$null `
+            2>$null
+
+        $ProbeExitCode = $LASTEXITCODE
+        return ($ProbeExitCode -eq 0)
     }
     finally {
         Pop-Location
+        $ErrorActionPreference = $PreviousErrorActionPreference
     }
 }
 
