@@ -455,18 +455,30 @@ def _send_direct_serial(request: ProtocolSendRequest) -> str:
         request.reply_terminator
     )
 
-    with serial.Serial(
-        port=request.serial_port,
-        baudrate=int(request.baudrate),
-        bytesize=byte_size_map[request.data_bits],
-        parity=parity_map[parity],
-        stopbits=stop_bits_map[float(request.stop_bits)],
-        timeout=max(0.05, float(request.timeout)),
-        write_timeout=max(0.05, float(request.timeout)),
-        xonxoff=False,
-        rtscts=False,
-        dsrdtr=False,
-    ) as port:
+    try:
+        port_context = serial.Serial(
+            port=request.serial_port,
+            baudrate=int(request.baudrate),
+            bytesize=byte_size_map[request.data_bits],
+            parity=parity_map[parity],
+            stopbits=stop_bits_map[float(request.stop_bits)],
+            timeout=max(0.05, float(request.timeout)),
+            write_timeout=max(0.05, float(request.timeout)),
+            xonxoff=False,
+            rtscts=False,
+            dsrdtr=False,
+        )
+    except serial.SerialException as exc:
+        message = str(exc)
+        if "Access is denied" in message or "PermissionError" in message:
+            raise RuntimeError(
+                f"{request.serial_port} is already open. If the instrument "
+                "is connected in Test in a Box, use 'Connected Test in a "
+                "Box instrument' mode instead of Direct serial port."
+            ) from exc
+        raise
+
+    with port_context as port:
         port.reset_input_buffer()
         payload = request.command.encode("ascii") + command_terminator
         port.write(payload)
@@ -999,7 +1011,17 @@ def api_protocol_send(request: ProtocolSendRequest) -> JSONResponse:
                         f"{request.device_id}: raw query is not supported."
                     )
 
-                response = query_method(command)
+                if request.expect_response:
+                    response = query_method(command)
+                else:
+                    write_method = getattr(driver, "write_command", None)
+                    if not callable(write_method):
+                        raise RuntimeError(
+                            f"{request.device_id}: raw write-only commands "
+                            "are not supported by this driver."
+                        )
+                    write_method(command)
+                    response = ""
 
         elif request.mode == "serial":
             response = _send_direct_serial(request)
