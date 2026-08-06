@@ -1,0 +1,283 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "hw_psu_output",
+        "id": "labdch_output_1",
+        "fields": {
+          "POSITION": "labdch_30_665_1|output",
+          "STATE": "OFF"
+        },
+        "next": {
+          "block": {
+            "type": "hw_set",
+            "id": "labdch_set_2",
+            "fields": {
+              "POSITION": "labdch_30_665_1|ovp"
+            },
+            "inputs": {
+              "VALUE": {
+                "block": {
+                  "type": "math_number",
+                  "id": "labdch_number_3",
+                  "fields": {
+                    "NUM": 36
+                  }
+                }
+              }
+            },
+            "next": {
+              "block": {
+                "type": "hw_set",
+                "id": "labdch_set_4",
+                "fields": {
+                  "POSITION": "labdch_30_665_1|current_set"
+                },
+                "inputs": {
+                  "VALUE": {
+                    "block": {
+                      "type": "math_number",
+                      "id": "labdch_number_5",
+                      "fields": {
+                        "NUM": 1
+                      }
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "hw_set",
+                    "id": "labdch_set_6",
+                    "fields": {
+                      "POSITION": "labdch_30_665_1|voltage_set"
+                    },
+                    "inputs": {
+                      "VALUE": {
+                        "block": {
+                          "type": "math_number",
+                          "id": "labdch_number_7",
+                          "fields": {
+                            "NUM": 12
+                          }
+                        }
+                      }
+                    },
+                    "next": {
+                      "block": {
+                        "type": "hw_psu_output",
+                        "id": "labdch_output_8",
+                        "fields": {
+                          "POSITION": "labdch_30_665_1|output",
+                          "STATE": "ON"
+                        },
+                        "next": {
+                          "block": {
+                            "type": "hw_wait",
+                            "id": "labdch_wait_9",
+                            "inputs": {
+                              "SECONDS": {
+                                "block": {
+                                  "type": "math_number",
+                                  "id": "labdch_number_10",
+                                  "fields": {
+                                    "NUM": 1.0
+                                  }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "hw_log",
+                                "id": "labdch_log_12",
+                                "fields": {
+                                  "MESSAGE": "LAB-DCH measured voltage at 12 V setpoint"
+                                },
+                                "inputs": {
+                                  "VALUE": {
+                                    "block": {
+                                      "type": "hw_psu_read_voltage",
+                                      "id": "labdch_read_11",
+                                      "fields": {
+                                        "POSITION": "labdch_30_665_1|voltage_actual"
+                                      }
+                                    }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "hw_log",
+                                    "id": "labdch_log_14",
+                                    "fields": {
+                                      "MESSAGE": "LAB-DCH measured current with no load"
+                                    },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "hw_psu_read_current",
+                                          "id": "labdch_read_13",
+                                          "fields": {
+                                            "POSITION": "labdch_30_665_1|current_actual"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "hw_assert",
+                                        "id": "labdch_assert_15",
+                                        "fields": {
+                                          "MESSAGE": "LAB-DCH measured voltage outside 12 V \u00b1 0.3 V"
+                                        },
+                                        "inputs": {
+                                          "CONDITION": {
+                                            "block": {
+                                              "type": "hw_within_tolerance",
+                                              "id": "labdch_tol_16",
+                                              "inputs": {
+                                                "MEASURED": {
+                                                  "block": {
+                                                    "type": "hw_psu_read_voltage",
+                                                    "id": "labdch_read_17",
+                                                    "fields": {
+                                                      "POSITION": "labdch_30_665_1|voltage_actual"
+                                                    }
+                                                  }
+                                                },
+                                                "TARGET": {
+                                                  "block": {
+                                                    "type": "math_number",
+                                                    "id": "labdch_number_18",
+                                                    "fields": {
+                                                      "NUM": 12
+                                                    }
+                                                  }
+                                                },
+                                                "TOLERANCE": {
+                                                  "block": {
+                                                    "type": "math_number",
+                                                    "id": "labdch_number_19",
+                                                    "fields": {
+                                                      "NUM": 0.3
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "hw_psu_output",
+                                            "id": "labdch_output_20",
+                                            "fields": {
+                                              "POSITION": "labdch_30_665_1|output",
+                                              "STATE": "OFF"
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "hw_wait",
+                                                "id": "labdch_wait_21",
+                                                "inputs": {
+                                                  "SECONDS": {
+                                                    "block": {
+                                                      "type": "math_number",
+                                                      "id": "labdch_number_22",
+                                                      "fields": {
+                                                        "NUM": 0.5
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "next": {
+                                                  "block": {
+                                                    "type": "hw_assert",
+                                                    "id": "labdch_assert_23",
+                                                    "fields": {
+                                                      "MESSAGE": "LAB-DCH output did not fall below 0.3 V after disable"
+                                                    },
+                                                    "inputs": {
+                                                      "CONDITION": {
+                                                        "block": {
+                                                          "type": "hw_within_tolerance",
+                                                          "id": "labdch_tol_24",
+                                                          "inputs": {
+                                                            "MEASURED": {
+                                                              "block": {
+                                                                "type": "hw_psu_read_voltage",
+                                                                "id": "labdch_read_25",
+                                                                "fields": {
+                                                                  "POSITION": "labdch_30_665_1|voltage_actual"
+                                                                }
+                                                              }
+                                                            },
+                                                            "TARGET": {
+                                                              "block": {
+                                                                "type": "math_number",
+                                                                "id": "labdch_number_26",
+                                                                "fields": {
+                                                                  "NUM": 0
+                                                                }
+                                                              }
+                                                            },
+                                                            "TOLERANCE": {
+                                                              "block": {
+                                                                "type": "math_number",
+                                                                "id": "labdch_number_27",
+                                                                "fields": {
+                                                                  "NUM": 0.3
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "next": {
+                                                      "block": {
+                                                        "type": "hw_log",
+                                                        "id": "labdch_log_29",
+                                                        "fields": {
+                                                          "MESSAGE": "LAB-DCH smoke test complete"
+                                                        },
+                                                        "inputs": {
+                                                          "VALUE": {
+                                                            "block": {
+                                                              "type": "math_number",
+                                                              "id": "labdch_number_28",
+                                                              "fields": {
+                                                                "NUM": 1
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x": 40,
+        "y": 40
+      }
+    ]
+  }
+}

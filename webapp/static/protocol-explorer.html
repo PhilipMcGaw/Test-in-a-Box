@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Test in a Box — Protocol Explorer</title>
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+<style>
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    font-family: Segoe UI, Arial, sans-serif;
+    color: #222;
+    background: #f4f6f8;
+  }
+
+  #top-bar {
+    background: #23272f;
+    color: white;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  #top-bar h1 {
+    font-size: 16px;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  #top-bar a {
+    color: #9fb3c8;
+    text-decoration: none;
+    font-size: 13px;
+  }
+
+  #content {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .warning {
+    background: #fff8df;
+    border: 1px solid #e1ca75;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+  }
+
+  .panel {
+    background: white;
+    border: 1px solid #d8dee5;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(31, 45, 61, 0.05);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: #55626e;
+  }
+
+  select, input, button {
+    font: inherit;
+  }
+
+  select, input[type="text"], input[type="number"] {
+    padding: 7px 8px;
+    border: 1px solid #b8c1ca;
+    border-radius: 4px;
+    background: white;
+  }
+
+  .mode-row, .command-row, .button-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .inline-checkbox {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    color: #55626e;
+  }
+
+  .inline-checkbox input {
+    margin: 0;
+  }
+
+  .command-row input {
+    flex: 1;
+    min-width: 280px;
+    font-family: Consolas, monospace;
+    font-size: 14px;
+  }
+
+  button {
+    border: 0;
+    border-radius: 4px;
+    padding: 8px 14px;
+    cursor: pointer;
+    background: #34495e;
+    color: white;
+  }
+
+  button.primary {
+    background: #2980b9;
+  }
+
+  button:disabled {
+    background: #8a969f;
+    cursor: default;
+  }
+
+  .quick-command {
+    padding: 5px 9px;
+    background: #657786;
+    font-family: Consolas, monospace;
+  }
+
+  #terminal {
+    min-height: 330px;
+    max-height: 520px;
+    overflow: auto;
+    background: #111;
+    color: #d9f7d9;
+    padding: 12px;
+    border-radius: 5px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+  }
+
+  #status {
+    min-height: 20px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #52606c;
+  }
+
+  #serial-settings[hidden],
+  #device-settings[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <div id="top-bar">
+    <img src="/static/icons/icon-32.png" alt="" width="26" height="26">
+    <h1>Engineering Tools — Protocol Explorer</h1>
+    <a href="/">Test Builder</a>
+    <a href="/devices">Configure Devices</a>
+    <a href="/supported-devices">Supported Devices</a>
+    <a href="/about">About</a>
+  </div>
+
+  <main id="content">
+    <div class="warning">
+      Protocol Explorer sends raw commands directly to laboratory hardware.
+      Start with outputs disabled and verify each command against the
+      instrument manual. It is disabled while a test procedure is running.
+    </div>
+
+    <section class="panel">
+      <h2>Connection</h2>
+      <div class="mode-row">
+        <label>
+          <span>Connection mode</span>
+          <select id="mode">
+            <option value="device">Connected Test in a Box instrument</option>
+            <option value="serial">Direct serial port</option>
+          </select>
+        </label>
+
+        <div id="device-settings">
+          <label>
+            <span>Connected instrument</span>
+            <select id="device"></select>
+          </label>
+        </div>
+      </div>
+
+      <div id="serial-settings" hidden>
+        <div class="grid">
+          <label>COM Port
+            <select id="serial-port"></select>
+          </label>
+          <label>Baud
+            <input id="baudrate" type="number" value="9600">
+          </label>
+          <label>Data bits
+            <select id="data-bits">
+              <option>8</option><option>7</option>
+              <option>6</option><option>5</option>
+            </select>
+          </label>
+          <label>Parity
+            <select id="parity">
+              <option value="N">None</option>
+              <option value="E">Even</option>
+              <option value="O">Odd</option>
+              <option value="M">Mark</option>
+              <option value="S">Space</option>
+            </select>
+          </label>
+          <label>Stop bits
+            <select id="stop-bits">
+              <option value="1">1</option>
+              <option value="1.5">1.5</option>
+              <option value="2">2</option>
+            </select>
+          </label>
+          <label>Timeout (s)
+            <input id="timeout" type="number" step="0.1" value="1">
+          </label>
+          <label>Command terminator
+            <select id="command-terminator">
+              <option value="\n">LF</option>
+              <option value="\r">CR</option>
+              <option value="\r\n">CRLF</option>
+              <option value="">None</option>
+            </select>
+          </label>
+          <label>Reply terminator
+            <select id="reply-terminator">
+              <option value="\n">LF</option>
+              <option value="\r">CR</option>
+              <option value="\r\n">CRLF</option>
+              <option value="">None</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Command</h2>
+      <div class="button-row" id="quick-commands"></div>
+      <div class="command-row" style="margin-top:12px;">
+        <input id="command" type="text" autocomplete="off"
+               placeholder="Enter command, e.g. MODE">
+        <label class="inline-checkbox">
+          <input id="expect-response" type="checkbox" checked>
+          <span>Read response</span>
+        </label>
+        <button id="send" class="primary">Send</button>
+      </div>
+      <div id="status"></div>
+    </section>
+
+    <section class="panel">
+      <div class="button-row">
+        <h2 style="margin-right:auto;">Session</h2>
+        <button id="copy-log">Copy Log</button>
+        <button id="save-log">Save Log</button>
+        <button id="clear-log">Clear</button>
+      </div>
+      <pre id="terminal"></pre>
+    </section>
+  </main>
+
+  <script src="/static/protocol-explorer.js"></script>
+</body>
+</html>

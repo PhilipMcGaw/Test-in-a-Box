@@ -16,10 +16,6 @@ __pycache__/
 venv/
 env/
 
-# Generated test results
-/webapp
-# Saved Blockly sequences (if kept outside source control)
-
 # Coverage and testing
 .coverage
 .pytest_cache/
@@ -63,5 +59,6 @@ Desktop.ini
 /vendor/pico/installer/*.exe
 /vendor/pico/installer-manifest.json
 
-/webapp/runs/
-/webapp/sequences/*.json
+# this stops the runs and sequences being synced  these are useful to have access to
+# /webapp/runs/
+# /webapp/sequences/*.json
