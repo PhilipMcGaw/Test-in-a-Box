@@ -11,36 +11,7 @@ const TOOLBOX = {
         { kind: "block", type: "hw_psu_output" },
         { kind: "block", type: "hw_psu_read_voltage" },
         { kind: "block", type: "hw_psu_read_current" },
-        {
-          kind: "block",
-          type: "hw_psu_ramp_voltage",
-          inputs: {
-            START: {
-              shadow: {
-                type: "math_number",
-                fields: { NUM: 0 },
-              },
-            },
-            END: {
-              shadow: {
-                type: "math_number",
-                fields: { NUM: 12 },
-              },
-            },
-            STEP: {
-              shadow: {
-                type: "math_number",
-                fields: { NUM: 0.1 },
-              },
-            },
-            DWELL: {
-              shadow: {
-                type: "math_number",
-                fields: { NUM: 100 },
-              },
-            },
-          },
-        },
+        { kind: "block", type: "hw_psu_ramp_voltage" },
       ],
     },
     {
@@ -97,18 +68,7 @@ const TOOLBOX = {
       name: "Timing & Results",
       colour: "65",
       contents: [
-        {
-          kind: "block",
-          type: "hw_wait",
-          inputs: {
-            SECONDS: {
-              shadow: {
-                type: "math_number",
-                fields: { NUM: 1 },
-              },
-            },
-          },
-        },
+        { kind: "block", type: "hw_wait" },
         { kind: "block", type: "hw_log" },
       ],
     },
@@ -381,72 +341,6 @@ const safeStorage = {
   },
 };
 
-function numberShadow(value) {
-  const numericValue = Number(value);
-
-  return {
-    shadow: {
-      type: 'math_number',
-      fields: {
-        NUM: Number.isFinite(numericValue) ? numericValue : 0,
-      },
-    },
-  };
-}
-
-
-function migrateNumericValueInputs(state) {
-  function visitBlock(block) {
-    if (!block || typeof block !== 'object') {
-      return;
-    }
-
-    block.fields = block.fields || {};
-    block.inputs = block.inputs || {};
-
-    if (block.type === 'hw_wait' && !block.inputs.SECONDS) {
-      block.inputs.SECONDS = numberShadow(
-        block.fields.SECONDS === undefined ? 1 : block.fields.SECONDS
-      );
-      delete block.fields.SECONDS;
-    }
-
-    if (block.type === 'hw_psu_ramp_voltage') {
-      const defaults = {
-        START: 0,
-        END: 12,
-        STEP: 0.1,
-        DWELL: 100,
-      };
-
-      for (const [name, fallback] of Object.entries(defaults)) {
-        if (!block.inputs[name]) {
-          block.inputs[name] = numberShadow(
-            block.fields[name] === undefined
-              ? fallback
-              : block.fields[name]
-          );
-        }
-        delete block.fields[name];
-      }
-    }
-
-    for (const input of Object.values(block.inputs)) {
-      visitBlock(input?.block);
-      visitBlock(input?.shadow);
-    }
-
-    visitBlock(block.next?.block);
-  }
-
-  for (const block of state?.blocks?.blocks || []) {
-    visitBlock(block);
-  }
-
-  return state;
-}
-
-
 function initWorkspace() {
   workspace = Blockly.inject('blocklyDiv', {
     toolbox: TOOLBOX,
@@ -458,10 +352,7 @@ function initWorkspace() {
   const saved = safeStorage.get('tiab_workspace');
   if (saved) {
     try {
-      Blockly.serialization.workspaces.load(
-        migrateNumericValueInputs(JSON.parse(saved)),
-        workspace
-      );
+      Blockly.serialization.workspaces.load(JSON.parse(saved), workspace);
     } catch (e) {
       console.warn('could not restore saved workspace', e);
     }
@@ -471,7 +362,88 @@ function initWorkspace() {
     const state = Blockly.serialization.workspaces.save(workspace);
     safeStorage.set('tiab_workspace', JSON.stringify(state));
   });
+
+  installBlocklyKeyboardShortcuts();
 }
+
+function duplicateSelectedBlock() {
+  const selected = Blockly.getSelected();
+
+  // Ctrl+D is intentionally silent when there is no selected block.
+  if (
+    !selected ||
+    selected.workspace !== workspace ||
+    typeof selected.toCopyData !== 'function' ||
+    (typeof selected.isDuplicatable === 'function' &&
+      !selected.isDuplicatable())
+  ) {
+    return;
+  }
+
+  const copyData = selected.toCopyData();
+  if (!copyData) {
+    return;
+  }
+
+  const duplicate = Blockly.clipboard.paste(copyData, workspace);
+  if (!duplicate) {
+    return;
+  }
+
+  // Blockly normally offsets pasted content. Apply a small fallback offset
+  // when the active paster returns a block at the original position.
+  if (
+    typeof selected.getRelativeToSurfaceXY === 'function' &&
+    typeof duplicate.getRelativeToSurfaceXY === 'function' &&
+    typeof duplicate.moveBy === 'function'
+  ) {
+    const originalPosition = selected.getRelativeToSurfaceXY();
+    const duplicatePosition = duplicate.getRelativeToSurfaceXY();
+
+    if (
+      originalPosition.x === duplicatePosition.x &&
+      originalPosition.y === duplicatePosition.y
+    ) {
+      duplicate.moveBy(24, 24);
+    }
+  }
+
+  if (typeof Blockly.setSelected === 'function') {
+    Blockly.setSelected(duplicate);
+  } else if (Blockly.common?.setSelected) {
+    Blockly.common.setSelected(duplicate);
+  } else if (typeof duplicate.select === 'function') {
+    duplicate.select();
+  }
+}
+
+
+function installBlocklyKeyboardShortcuts() {
+  document.addEventListener('keydown', event => {
+    const target = event.target;
+    const isEditable = (
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement ||
+      target?.isContentEditable
+    );
+
+    if (isEditable) {
+      return;
+    }
+
+    if (
+      (event.ctrlKey || event.metaKey) &&
+      !event.altKey &&
+      !event.shiftKey &&
+      event.key.toLowerCase() === 'd'
+    ) {
+      event.preventDefault();
+      duplicateSelectedBlock();
+    }
+  });
+}
+
 
 function appendConsole(line) {
   const el = document.getElementById('console');
@@ -625,7 +597,7 @@ async function loadSequence() {
       return;
     }
     workspace.clear();
-    Blockly.serialization.workspaces.load(migrateNumericValueInputs(data), workspace);
+    Blockly.serialization.workspaces.load(data, workspace);
   } catch (e) {
     alert(`Could not load: ${e}`);
   }
