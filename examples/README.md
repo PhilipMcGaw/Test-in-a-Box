@@ -31,3 +31,7 @@ before running the procedure.
 
 Always verify wiring, current limits and safe states before energising real
 hardware.
+
+## Validation procedures
+
+- [Instrument validation sequences](validation/README.md)

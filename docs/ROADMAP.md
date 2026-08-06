@@ -91,7 +91,7 @@ commissioning. They should be available from a dedicated top-level
 test-builder workflow.
 
 #### Instrument Development
-- [x] Protocol Explorer
+- [ ] Protocol Explorer
 - [ ] Serial Terminal
 - [ ] Driver Tester
 - [ ] Instrument Identifier
@@ -207,21 +207,9 @@ support.
 - ✅ Friendly catalogue-label default device names
 - ✅ Internal driver type kept separate from visible device name
 
+## Completed validation sequence work
 
-## Protocol Explorer v0.1
-
-- ✅ Connected-driver raw command mode
-- ✅ Direct serial-port command mode
-- ✅ Serial settings and terminators
-- ✅ TX/RX session history
-- ✅ Command history and LAB-DCH quick commands
-- ✅ Copy and save session log
-- ✅ Disabled during active test runs
-
-## Completed LAB-DCH commissioning fixes
-
-- ✅ LAB-DCH characterised output transition
-- ✅ Standby-to-output sequence with configurable delay
-- ✅ Repeated enable command for physical output-stage activation
-- ✅ Protocol Explorer write-only connected-driver commands
-- ✅ Clear direct-COM-port ownership error
+- ✅ LAB-DCH smoke-test workspace
+- ✅ LAB-DCH no-load driver-validation workspace
+- ✅ Voltage sweep and repeated output-cycle regression checks
+- ⬜ LAB-DCH current-limit validation with a suitable electronic load
