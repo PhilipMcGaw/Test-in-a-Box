@@ -297,9 +297,10 @@ Blockly.Blocks['hw_relay_all'] = {
 
 Blockly.Blocks['hw_wait'] = {
   init: function () {
+    this.appendValueInput("SECONDS")
+      .setCheck("Number")
+      .appendField("wait");
     this.appendDummyInput()
-      .appendField("wait")
-      .appendField(new Blockly.FieldNumber(1, 0), "SECONDS")
       .appendField("seconds");
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);

@@ -203,7 +203,12 @@ Blockly.Python.forBlock['hw_relay_all'] = function (block) {
 // ---------------------------------------------------------------------------
 
 Blockly.Python.forBlock['hw_wait'] = function (block) {
-  const seconds = block.getFieldValue('SECONDS');
+  const seconds =
+    Blockly.Python.valueToCode(
+      block,
+      'SECONDS',
+      Blockly.Python.ORDER_NONE
+    ) || '1';
   return `wait(${seconds})\n`;
 };
 
