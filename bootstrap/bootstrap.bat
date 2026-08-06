@@ -88,6 +88,12 @@ echo Start Test in a Box using:
 echo.
 echo     2_start_app.bat
 echo.
+if /I "%TIAB_BOOTSTRAP_NONINTERACTIVE%"=="1" (
+    echo Bootstrap was launched by the updater.
+    echo Application launch will be handled by the updater.
+    exit /b 0
+)
+
 set /p "LAUNCH=Launch Test in a Box now? [Y/N]: "
 if /I "%LAUNCH%"=="Y" (
     start "" "%PROJECT_ROOT%\2_start_app.bat"

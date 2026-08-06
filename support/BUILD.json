@@ -2,11 +2,10 @@
   "schema_version": 1,
   "version_file": "../VERSION",
   "bootstrap_version": "2.1.4",
-  "updater_version": "2.1",
+  "updater_version": "2.2",
   "release_stage": "alpha",
   "repository_layout": "refactor-v1",
   "version_information": "1.0",
   "repository_cleanup": "v2",
-  "reporting_format": "1.1",
-  "engineering_tools": "0.1"
+  "reporting_format": "1.1"
 }

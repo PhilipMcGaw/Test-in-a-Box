@@ -207,9 +207,9 @@ support.
 - ✅ Friendly catalogue-label default device names
 - ✅ Internal driver type kept separate from visible device name
 
-## Completed validation sequence work
+## Completed updater bootstrap cleanup
 
-- ✅ LAB-DCH smoke-test workspace
-- ✅ LAB-DCH no-load driver-validation workspace
-- ✅ Voltage sweep and repeated output-cycle regression checks
-- ⬜ LAB-DCH current-limit validation with a suitable electronic load
+- ✅ Bootstrap runs in the updater console
+- ✅ Updater waits for bootstrap completion
+- ✅ No duplicate application-launch prompt during managed updates
+- ✅ No orphaned bootstrap command window

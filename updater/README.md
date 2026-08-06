@@ -61,3 +61,19 @@ When an instance is found, the operator can:
 
 The updater does not silently terminate a running test. A future web-interface
 shutdown button and graceful shutdown API are tracked on the project roadmap.
+
+## Bootstrap console handling — Updater v2.2
+
+Bootstrap now runs in the updater's existing console rather than through a
+separate `Start-Process` call for the batch file.
+
+During a managed update:
+
+- bootstrap output remains visible in the updater console;
+- the updater waits for bootstrap to finish;
+- bootstrap does not ask whether it should launch Test in a Box;
+- the updater asks once, after bootstrap succeeds;
+- no orphaned bootstrap `cmd.exe` window should remain.
+
+If bootstrap fails, the updater reports the exit code and the outer
+`update.bat` keeps the console available for review.

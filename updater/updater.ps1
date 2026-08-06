@@ -505,18 +505,36 @@ Create a GitHub release or version tag, or select Development.
 
     Step "Running bootstrap"
     $Bootstrap = Join-Path $ProjectRoot "bootstrap.bat"
-    if (-not (Test-Path $Bootstrap)) {
+    if (-not (Test-Path -LiteralPath $Bootstrap)) {
         Fail "Update installed, but bootstrap.bat is missing."
     }
 
-    $BootstrapProcess = Start-Process `
-        -FilePath $Bootstrap `
-        -Wait `
-        -PassThru
+    # Run the batch file inside this updater console. Start-Process on a .bat
+    # file creates a second cmd.exe window, which can remain visible after the
+    # update. The non-interactive flag also prevents bootstrap from prompting
+    # to launch the application; the updater owns that final decision.
+    $PreviousBootstrapMode = $env:TIAB_BOOTSTRAP_NONINTERACTIVE
+    $env:TIAB_BOOTSTRAP_NONINTERACTIVE = "1"
 
-    if ($BootstrapProcess.ExitCode -ne 0) {
-        Fail "Bootstrap failed with exit code $($BootstrapProcess.ExitCode)."
+    try {
+        & $env:ComSpec /D /C "call `"$Bootstrap`""
+        $BootstrapExitCode = $LASTEXITCODE
     }
+    finally {
+        if ($null -eq $PreviousBootstrapMode) {
+            Remove-Item Env:TIAB_BOOTSTRAP_NONINTERACTIVE `
+                -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:TIAB_BOOTSTRAP_NONINTERACTIVE = $PreviousBootstrapMode
+        }
+    }
+
+    if ($BootstrapExitCode -ne 0) {
+        Fail "Bootstrap failed with exit code $BootstrapExitCode."
+    }
+
+    Write-Host "[PASS] Bootstrap completed."
 
     Write-Host ""
     Write-Host "============================================================"
