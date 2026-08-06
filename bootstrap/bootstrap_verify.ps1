@@ -47,8 +47,25 @@ if (Test-Path -LiteralPath $PythonExe) {
         & $PythonExe -m pip check *> $null
         Add-Check "Dependency consistency" ($LASTEXITCODE -eq 0) "pip check"
 
-        & $PythonExe -c "from picosdk.usbtc08 import usbtc08; from picosdk.picohrdl import picohrdl" *> $null
-        Add-Check "Pico runtime support" ($LASTEXITCODE -eq 0) `
+        # Missing Pico native libraries are an expected optional result.
+        # Windows PowerShell 5.1 otherwise converts Python stderr into a
+        # terminating NativeCommandError while ErrorActionPreference is Stop.
+        $PreviousErrorActionPreference = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+
+        try {
+            & $PythonExe `
+                -c "from picosdk.usbtc08 import usbtc08; from picosdk.picohrdl import picohrdl" `
+                1>$null `
+                2>$null
+
+            $PicoProbeExitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $PreviousErrorActionPreference
+        }
+
+        Add-Check "Pico runtime support" ($PicoProbeExitCode -eq 0) `
             "Optional TC-08 and ADC-20/24 runtime" $false
 
         & $PythonExe -m compileall -q tiab webapp *> $null
