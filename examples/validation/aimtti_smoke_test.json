@@ -1,0 +1,160 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "hw_psu_output",
+        "id": "out0",
+        "fields": {
+          "POSITION": "aimtti_psu_1|output1",
+          "STATE": "OFF"
+        },
+        "next": {
+          "block": {
+            "type": "hw_set",
+            "id": "saimtti_psu_1v1",
+            "fields": {
+              "POSITION": "aimtti_psu_1|v1"
+            },
+            "inputs": {
+              "VALUE": {
+                "block": {
+                  "type": "math_number",
+                  "id": "10",
+                  "fields": {
+                    "NUM": 10
+                  }
+                }
+              }
+            },
+            "next": {
+              "block": {
+                "type": "hw_set",
+                "id": "saimtti_psu_1i1",
+                "fields": {
+                  "POSITION": "aimtti_psu_1|i1"
+                },
+                "inputs": {
+                  "VALUE": {
+                    "block": {
+                      "type": "math_number",
+                      "id": "1",
+                      "fields": {
+                        "NUM": 1
+                      }
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "hw_psu_output",
+                    "id": "out1",
+                    "fields": {
+                      "POSITION": "aimtti_psu_1|output1",
+                      "STATE": "ON"
+                    },
+                    "next": {
+                      "block": {
+                        "type": "hw_wait",
+                        "id": "w1",
+                        "inputs": {
+                          "SECONDS": {
+                            "block": {
+                              "type": "math_number",
+                              "id": "1",
+                              "fields": {
+                                "NUM": 1
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "hw_log",
+                            "id": "lMea",
+                            "fields": {
+                              "MESSAGE": "Measured Voltage"
+                            },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "hw_psu_read_voltage",
+                                  "id": "gv",
+                                  "fields": {
+                                    "POSITION": "aimtti_psu_1|v1_meas"
+                                  }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "hw_assert",
+                                "id": "a",
+                                "fields": {
+                                  "MESSAGE": "Voltage outside 10V"
+                                },
+                                "inputs": {
+                                  "CONDITION": {
+                                    "block": {
+                                      "type": "hw_within_tolerance",
+                                      "id": "tol",
+                                      "inputs": {
+                                        "MEASURED": {
+                                          "block": {
+                                            "type": "hw_psu_read_voltage",
+                                            "id": "gm",
+                                            "fields": {
+                                              "POSITION": "aimtti_psu_1|v1_meas"
+                                            }
+                                          }
+                                        },
+                                        "TARGET": {
+                                          "block": {
+                                            "type": "math_number",
+                                            "id": "10",
+                                            "fields": {
+                                              "NUM": 10
+                                            }
+                                          }
+                                        },
+                                        "TOLERANCE": {
+                                          "block": {
+                                            "type": "math_number",
+                                            "id": "0_2",
+                                            "fields": {
+                                              "NUM": 0.2
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "hw_psu_output",
+                                    "id": "out0",
+                                    "fields": {
+                                      "POSITION": "aimtti_psu_1|output1",
+                                      "STATE": "OFF"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x": 40,
+        "y": 40
+      }
+    ]
+  }
+}

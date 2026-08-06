@@ -1,0 +1,1017 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "hw_psu_output",
+        "id": "out0",
+        "fields": {
+          "POSITION": "aimtti_psu_1|output1",
+          "STATE": "OFF"
+        },
+        "next": {
+          "block": {
+            "type": "hw_set",
+            "id": "saimtti_psu_1i1",
+            "fields": {
+              "POSITION": "aimtti_psu_1|i1"
+            },
+            "inputs": {
+              "VALUE": {
+                "block": {
+                  "type": "math_number",
+                  "id": "1",
+                  "fields": {
+                    "NUM": 1
+                  }
+                }
+              }
+            },
+            "next": {
+              "block": {
+                "type": "hw_set",
+                "id": "saimtti_psu_1v1",
+                "fields": {
+                  "POSITION": "aimtti_psu_1|v1"
+                },
+                "inputs": {
+                  "VALUE": {
+                    "block": {
+                      "type": "math_number",
+                      "id": "1",
+                      "fields": {
+                        "NUM": 1
+                      }
+                    }
+                  }
+                },
+                "next": {
+                  "block": {
+                    "type": "hw_psu_output",
+                    "id": "out1",
+                    "fields": {
+                      "POSITION": "aimtti_psu_1|output1",
+                      "STATE": "ON"
+                    },
+                    "next": {
+                      "block": {
+                        "type": "hw_wait",
+                        "id": "w1",
+                        "inputs": {
+                          "SECONDS": {
+                            "block": {
+                              "type": "math_number",
+                              "id": "1",
+                              "fields": {
+                                "NUM": 1
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "block": {
+                            "type": "hw_log",
+                            "id": "lVol",
+                            "fields": {
+                              "MESSAGE": "Voltage 1"
+                            },
+                            "inputs": {
+                              "VALUE": {
+                                "block": {
+                                  "type": "hw_psu_read_voltage",
+                                  "id": "g1",
+                                  "fields": {
+                                    "POSITION": "aimtti_psu_1|v1_meas"
+                                  }
+                                }
+                              }
+                            },
+                            "next": {
+                              "block": {
+                                "type": "hw_assert",
+                                "id": "a",
+                                "fields": {
+                                  "MESSAGE": "Voltage outside 1V"
+                                },
+                                "inputs": {
+                                  "CONDITION": {
+                                    "block": {
+                                      "type": "hw_within_tolerance",
+                                      "id": "tol",
+                                      "inputs": {
+                                        "MEASURED": {
+                                          "block": {
+                                            "type": "hw_psu_read_voltage",
+                                            "id": "gm",
+                                            "fields": {
+                                              "POSITION": "aimtti_psu_1|v1_meas"
+                                            }
+                                          }
+                                        },
+                                        "TARGET": {
+                                          "block": {
+                                            "type": "math_number",
+                                            "id": "1",
+                                            "fields": {
+                                              "NUM": 1
+                                            }
+                                          }
+                                        },
+                                        "TOLERANCE": {
+                                          "block": {
+                                            "type": "math_number",
+                                            "id": "0_2",
+                                            "fields": {
+                                              "NUM": 0.2
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "next": {
+                                  "block": {
+                                    "type": "hw_psu_output",
+                                    "id": "out0",
+                                    "fields": {
+                                      "POSITION": "aimtti_psu_1|output1",
+                                      "STATE": "OFF"
+                                    },
+                                    "next": {
+                                      "block": {
+                                        "type": "hw_wait",
+                                        "id": "w0.5",
+                                        "inputs": {
+                                          "SECONDS": {
+                                            "block": {
+                                              "type": "math_number",
+                                              "id": "0_5",
+                                              "fields": {
+                                                "NUM": 0.5
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "next": {
+                                          "block": {
+                                            "type": "hw_set",
+                                            "id": "saimtti_psu_1v1",
+                                            "fields": {
+                                              "POSITION": "aimtti_psu_1|v1"
+                                            },
+                                            "inputs": {
+                                              "VALUE": {
+                                                "block": {
+                                                  "type": "math_number",
+                                                  "id": "5",
+                                                  "fields": {
+                                                    "NUM": 5
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "next": {
+                                              "block": {
+                                                "type": "hw_psu_output",
+                                                "id": "out1",
+                                                "fields": {
+                                                  "POSITION": "aimtti_psu_1|output1",
+                                                  "STATE": "ON"
+                                                },
+                                                "next": {
+                                                  "block": {
+                                                    "type": "hw_wait",
+                                                    "id": "w1",
+                                                    "inputs": {
+                                                      "SECONDS": {
+                                                        "block": {
+                                                          "type": "math_number",
+                                                          "id": "1",
+                                                          "fields": {
+                                                            "NUM": 1
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    "next": {
+                                                      "block": {
+                                                        "type": "hw_log",
+                                                        "id": "lVol",
+                                                        "fields": {
+                                                          "MESSAGE": "Voltage 5"
+                                                        },
+                                                        "inputs": {
+                                                          "VALUE": {
+                                                            "block": {
+                                                              "type": "hw_psu_read_voltage",
+                                                              "id": "g5",
+                                                              "fields": {
+                                                                "POSITION": "aimtti_psu_1|v1_meas"
+                                                              }
+                                                            }
+                                                          }
+                                                        },
+                                                        "next": {
+                                                          "block": {
+                                                            "type": "hw_assert",
+                                                            "id": "a",
+                                                            "fields": {
+                                                              "MESSAGE": "Voltage outside 5V"
+                                                            },
+                                                            "inputs": {
+                                                              "CONDITION": {
+                                                                "block": {
+                                                                  "type": "hw_within_tolerance",
+                                                                  "id": "tol",
+                                                                  "inputs": {
+                                                                    "MEASURED": {
+                                                                      "block": {
+                                                                        "type": "hw_psu_read_voltage",
+                                                                        "id": "gm",
+                                                                        "fields": {
+                                                                          "POSITION": "aimtti_psu_1|v1_meas"
+                                                                        }
+                                                                      }
+                                                                    },
+                                                                    "TARGET": {
+                                                                      "block": {
+                                                                        "type": "math_number",
+                                                                        "id": "5",
+                                                                        "fields": {
+                                                                          "NUM": 5
+                                                                        }
+                                                                      }
+                                                                    },
+                                                                    "TOLERANCE": {
+                                                                      "block": {
+                                                                        "type": "math_number",
+                                                                        "id": "0_2",
+                                                                        "fields": {
+                                                                          "NUM": 0.2
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            },
+                                                            "next": {
+                                                              "block": {
+                                                                "type": "hw_psu_output",
+                                                                "id": "out0",
+                                                                "fields": {
+                                                                  "POSITION": "aimtti_psu_1|output1",
+                                                                  "STATE": "OFF"
+                                                                },
+                                                                "next": {
+                                                                  "block": {
+                                                                    "type": "hw_wait",
+                                                                    "id": "w0.5",
+                                                                    "inputs": {
+                                                                      "SECONDS": {
+                                                                        "block": {
+                                                                          "type": "math_number",
+                                                                          "id": "0_5",
+                                                                          "fields": {
+                                                                            "NUM": 0.5
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    },
+                                                                    "next": {
+                                                                      "block": {
+                                                                        "type": "hw_set",
+                                                                        "id": "saimtti_psu_1v1",
+                                                                        "fields": {
+                                                                          "POSITION": "aimtti_psu_1|v1"
+                                                                        },
+                                                                        "inputs": {
+                                                                          "VALUE": {
+                                                                            "block": {
+                                                                              "type": "math_number",
+                                                                              "id": "10",
+                                                                              "fields": {
+                                                                                "NUM": 10
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        },
+                                                                        "next": {
+                                                                          "block": {
+                                                                            "type": "hw_psu_output",
+                                                                            "id": "out1",
+                                                                            "fields": {
+                                                                              "POSITION": "aimtti_psu_1|output1",
+                                                                              "STATE": "ON"
+                                                                            },
+                                                                            "next": {
+                                                                              "block": {
+                                                                                "type": "hw_wait",
+                                                                                "id": "w1",
+                                                                                "inputs": {
+                                                                                  "SECONDS": {
+                                                                                    "block": {
+                                                                                      "type": "math_number",
+                                                                                      "id": "1",
+                                                                                      "fields": {
+                                                                                        "NUM": 1
+                                                                                      }
+                                                                                    }
+                                                                                  }
+                                                                                },
+                                                                                "next": {
+                                                                                  "block": {
+                                                                                    "type": "hw_log",
+                                                                                    "id": "lVol",
+                                                                                    "fields": {
+                                                                                      "MESSAGE": "Voltage 10"
+                                                                                    },
+                                                                                    "inputs": {
+                                                                                      "VALUE": {
+                                                                                        "block": {
+                                                                                          "type": "hw_psu_read_voltage",
+                                                                                          "id": "g10",
+                                                                                          "fields": {
+                                                                                            "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                          }
+                                                                                        }
+                                                                                      }
+                                                                                    },
+                                                                                    "next": {
+                                                                                      "block": {
+                                                                                        "type": "hw_assert",
+                                                                                        "id": "a",
+                                                                                        "fields": {
+                                                                                          "MESSAGE": "Voltage outside 10V"
+                                                                                        },
+                                                                                        "inputs": {
+                                                                                          "CONDITION": {
+                                                                                            "block": {
+                                                                                              "type": "hw_within_tolerance",
+                                                                                              "id": "tol",
+                                                                                              "inputs": {
+                                                                                                "MEASURED": {
+                                                                                                  "block": {
+                                                                                                    "type": "hw_psu_read_voltage",
+                                                                                                    "id": "gm",
+                                                                                                    "fields": {
+                                                                                                      "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                                    }
+                                                                                                  }
+                                                                                                },
+                                                                                                "TARGET": {
+                                                                                                  "block": {
+                                                                                                    "type": "math_number",
+                                                                                                    "id": "10",
+                                                                                                    "fields": {
+                                                                                                      "NUM": 10
+                                                                                                    }
+                                                                                                  }
+                                                                                                },
+                                                                                                "TOLERANCE": {
+                                                                                                  "block": {
+                                                                                                    "type": "math_number",
+                                                                                                    "id": "0_2",
+                                                                                                    "fields": {
+                                                                                                      "NUM": 0.2
+                                                                                                    }
+                                                                                                  }
+                                                                                                }
+                                                                                              }
+                                                                                            }
+                                                                                          }
+                                                                                        },
+                                                                                        "next": {
+                                                                                          "block": {
+                                                                                            "type": "hw_psu_output",
+                                                                                            "id": "out0",
+                                                                                            "fields": {
+                                                                                              "POSITION": "aimtti_psu_1|output1",
+                                                                                              "STATE": "OFF"
+                                                                                            },
+                                                                                            "next": {
+                                                                                              "block": {
+                                                                                                "type": "hw_wait",
+                                                                                                "id": "w0.5",
+                                                                                                "inputs": {
+                                                                                                  "SECONDS": {
+                                                                                                    "block": {
+                                                                                                      "type": "math_number",
+                                                                                                      "id": "0_5",
+                                                                                                      "fields": {
+                                                                                                        "NUM": 0.5
+                                                                                                      }
+                                                                                                    }
+                                                                                                  }
+                                                                                                },
+                                                                                                "next": {
+                                                                                                  "block": {
+                                                                                                    "type": "hw_set",
+                                                                                                    "id": "saimtti_psu_1v1",
+                                                                                                    "fields": {
+                                                                                                      "POSITION": "aimtti_psu_1|v1"
+                                                                                                    },
+                                                                                                    "inputs": {
+                                                                                                      "VALUE": {
+                                                                                                        "block": {
+                                                                                                          "type": "math_number",
+                                                                                                          "id": "15",
+                                                                                                          "fields": {
+                                                                                                            "NUM": 15
+                                                                                                          }
+                                                                                                        }
+                                                                                                      }
+                                                                                                    },
+                                                                                                    "next": {
+                                                                                                      "block": {
+                                                                                                        "type": "hw_psu_output",
+                                                                                                        "id": "out1",
+                                                                                                        "fields": {
+                                                                                                          "POSITION": "aimtti_psu_1|output1",
+                                                                                                          "STATE": "ON"
+                                                                                                        },
+                                                                                                        "next": {
+                                                                                                          "block": {
+                                                                                                            "type": "hw_wait",
+                                                                                                            "id": "w1",
+                                                                                                            "inputs": {
+                                                                                                              "SECONDS": {
+                                                                                                                "block": {
+                                                                                                                  "type": "math_number",
+                                                                                                                  "id": "1",
+                                                                                                                  "fields": {
+                                                                                                                    "NUM": 1
+                                                                                                                  }
+                                                                                                                }
+                                                                                                              }
+                                                                                                            },
+                                                                                                            "next": {
+                                                                                                              "block": {
+                                                                                                                "type": "hw_log",
+                                                                                                                "id": "lVol",
+                                                                                                                "fields": {
+                                                                                                                  "MESSAGE": "Voltage 15"
+                                                                                                                },
+                                                                                                                "inputs": {
+                                                                                                                  "VALUE": {
+                                                                                                                    "block": {
+                                                                                                                      "type": "hw_psu_read_voltage",
+                                                                                                                      "id": "g15",
+                                                                                                                      "fields": {
+                                                                                                                        "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                                                      }
+                                                                                                                    }
+                                                                                                                  }
+                                                                                                                },
+                                                                                                                "next": {
+                                                                                                                  "block": {
+                                                                                                                    "type": "hw_assert",
+                                                                                                                    "id": "a",
+                                                                                                                    "fields": {
+                                                                                                                      "MESSAGE": "Voltage outside 15V"
+                                                                                                                    },
+                                                                                                                    "inputs": {
+                                                                                                                      "CONDITION": {
+                                                                                                                        "block": {
+                                                                                                                          "type": "hw_within_tolerance",
+                                                                                                                          "id": "tol",
+                                                                                                                          "inputs": {
+                                                                                                                            "MEASURED": {
+                                                                                                                              "block": {
+                                                                                                                                "type": "hw_psu_read_voltage",
+                                                                                                                                "id": "gm",
+                                                                                                                                "fields": {
+                                                                                                                                  "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                                                                }
+                                                                                                                              }
+                                                                                                                            },
+                                                                                                                            "TARGET": {
+                                                                                                                              "block": {
+                                                                                                                                "type": "math_number",
+                                                                                                                                "id": "15",
+                                                                                                                                "fields": {
+                                                                                                                                  "NUM": 15
+                                                                                                                                }
+                                                                                                                              }
+                                                                                                                            },
+                                                                                                                            "TOLERANCE": {
+                                                                                                                              "block": {
+                                                                                                                                "type": "math_number",
+                                                                                                                                "id": "0_2",
+                                                                                                                                "fields": {
+                                                                                                                                  "NUM": 0.2
+                                                                                                                                }
+                                                                                                                              }
+                                                                                                                            }
+                                                                                                                          }
+                                                                                                                        }
+                                                                                                                      }
+                                                                                                                    },
+                                                                                                                    "next": {
+                                                                                                                      "block": {
+                                                                                                                        "type": "hw_psu_output",
+                                                                                                                        "id": "out0",
+                                                                                                                        "fields": {
+                                                                                                                          "POSITION": "aimtti_psu_1|output1",
+                                                                                                                          "STATE": "OFF"
+                                                                                                                        },
+                                                                                                                        "next": {
+                                                                                                                          "block": {
+                                                                                                                            "type": "hw_wait",
+                                                                                                                            "id": "w0.5",
+                                                                                                                            "inputs": {
+                                                                                                                              "SECONDS": {
+                                                                                                                                "block": {
+                                                                                                                                  "type": "math_number",
+                                                                                                                                  "id": "0_5",
+                                                                                                                                  "fields": {
+                                                                                                                                    "NUM": 0.5
+                                                                                                                                  }
+                                                                                                                                }
+                                                                                                                              }
+                                                                                                                            },
+                                                                                                                            "next": {
+                                                                                                                              "block": {
+                                                                                                                                "type": "hw_set",
+                                                                                                                                "id": "saimtti_psu_1v1",
+                                                                                                                                "fields": {
+                                                                                                                                  "POSITION": "aimtti_psu_1|v1"
+                                                                                                                                },
+                                                                                                                                "inputs": {
+                                                                                                                                  "VALUE": {
+                                                                                                                                    "block": {
+                                                                                                                                      "type": "math_number",
+                                                                                                                                      "id": "20",
+                                                                                                                                      "fields": {
+                                                                                                                                        "NUM": 20
+                                                                                                                                      }
+                                                                                                                                    }
+                                                                                                                                  }
+                                                                                                                                },
+                                                                                                                                "next": {
+                                                                                                                                  "block": {
+                                                                                                                                    "type": "hw_psu_output",
+                                                                                                                                    "id": "out1",
+                                                                                                                                    "fields": {
+                                                                                                                                      "POSITION": "aimtti_psu_1|output1",
+                                                                                                                                      "STATE": "ON"
+                                                                                                                                    },
+                                                                                                                                    "next": {
+                                                                                                                                      "block": {
+                                                                                                                                        "type": "hw_wait",
+                                                                                                                                        "id": "w1",
+                                                                                                                                        "inputs": {
+                                                                                                                                          "SECONDS": {
+                                                                                                                                            "block": {
+                                                                                                                                              "type": "math_number",
+                                                                                                                                              "id": "1",
+                                                                                                                                              "fields": {
+                                                                                                                                                "NUM": 1
+                                                                                                                                              }
+                                                                                                                                            }
+                                                                                                                                          }
+                                                                                                                                        },
+                                                                                                                                        "next": {
+                                                                                                                                          "block": {
+                                                                                                                                            "type": "hw_log",
+                                                                                                                                            "id": "lVol",
+                                                                                                                                            "fields": {
+                                                                                                                                              "MESSAGE": "Voltage 20"
+                                                                                                                                            },
+                                                                                                                                            "inputs": {
+                                                                                                                                              "VALUE": {
+                                                                                                                                                "block": {
+                                                                                                                                                  "type": "hw_psu_read_voltage",
+                                                                                                                                                  "id": "g20",
+                                                                                                                                                  "fields": {
+                                                                                                                                                    "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                                                                                  }
+                                                                                                                                                }
+                                                                                                                                              }
+                                                                                                                                            },
+                                                                                                                                            "next": {
+                                                                                                                                              "block": {
+                                                                                                                                                "type": "hw_assert",
+                                                                                                                                                "id": "a",
+                                                                                                                                                "fields": {
+                                                                                                                                                  "MESSAGE": "Voltage outside 20V"
+                                                                                                                                                },
+                                                                                                                                                "inputs": {
+                                                                                                                                                  "CONDITION": {
+                                                                                                                                                    "block": {
+                                                                                                                                                      "type": "hw_within_tolerance",
+                                                                                                                                                      "id": "tol",
+                                                                                                                                                      "inputs": {
+                                                                                                                                                        "MEASURED": {
+                                                                                                                                                          "block": {
+                                                                                                                                                            "type": "hw_psu_read_voltage",
+                                                                                                                                                            "id": "gm",
+                                                                                                                                                            "fields": {
+                                                                                                                                                              "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                                                                                            }
+                                                                                                                                                          }
+                                                                                                                                                        },
+                                                                                                                                                        "TARGET": {
+                                                                                                                                                          "block": {
+                                                                                                                                                            "type": "math_number",
+                                                                                                                                                            "id": "20",
+                                                                                                                                                            "fields": {
+                                                                                                                                                              "NUM": 20
+                                                                                                                                                            }
+                                                                                                                                                          }
+                                                                                                                                                        },
+                                                                                                                                                        "TOLERANCE": {
+                                                                                                                                                          "block": {
+                                                                                                                                                            "type": "math_number",
+                                                                                                                                                            "id": "0_2",
+                                                                                                                                                            "fields": {
+                                                                                                                                                              "NUM": 0.2
+                                                                                                                                                            }
+                                                                                                                                                          }
+                                                                                                                                                        }
+                                                                                                                                                      }
+                                                                                                                                                    }
+                                                                                                                                                  }
+                                                                                                                                                },
+                                                                                                                                                "next": {
+                                                                                                                                                  "block": {
+                                                                                                                                                    "type": "hw_psu_output",
+                                                                                                                                                    "id": "out0",
+                                                                                                                                                    "fields": {
+                                                                                                                                                      "POSITION": "aimtti_psu_1|output1",
+                                                                                                                                                      "STATE": "OFF"
+                                                                                                                                                    },
+                                                                                                                                                    "next": {
+                                                                                                                                                      "block": {
+                                                                                                                                                        "type": "hw_wait",
+                                                                                                                                                        "id": "w0.5",
+                                                                                                                                                        "inputs": {
+                                                                                                                                                          "SECONDS": {
+                                                                                                                                                            "block": {
+                                                                                                                                                              "type": "math_number",
+                                                                                                                                                              "id": "0_5",
+                                                                                                                                                              "fields": {
+                                                                                                                                                                "NUM": 0.5
+                                                                                                                                                              }
+                                                                                                                                                            }
+                                                                                                                                                          }
+                                                                                                                                                        },
+                                                                                                                                                        "next": {
+                                                                                                                                                          "block": {
+                                                                                                                                                            "type": "hw_set",
+                                                                                                                                                            "id": "saimtti_psu_1v1",
+                                                                                                                                                            "fields": {
+                                                                                                                                                              "POSITION": "aimtti_psu_1|v1"
+                                                                                                                                                            },
+                                                                                                                                                            "inputs": {
+                                                                                                                                                              "VALUE": {
+                                                                                                                                                                "block": {
+                                                                                                                                                                  "type": "math_number",
+                                                                                                                                                                  "id": "25",
+                                                                                                                                                                  "fields": {
+                                                                                                                                                                    "NUM": 25
+                                                                                                                                                                  }
+                                                                                                                                                                }
+                                                                                                                                                              }
+                                                                                                                                                            },
+                                                                                                                                                            "next": {
+                                                                                                                                                              "block": {
+                                                                                                                                                                "type": "hw_psu_output",
+                                                                                                                                                                "id": "out1",
+                                                                                                                                                                "fields": {
+                                                                                                                                                                  "POSITION": "aimtti_psu_1|output1",
+                                                                                                                                                                  "STATE": "ON"
+                                                                                                                                                                },
+                                                                                                                                                                "next": {
+                                                                                                                                                                  "block": {
+                                                                                                                                                                    "type": "hw_wait",
+                                                                                                                                                                    "id": "w1",
+                                                                                                                                                                    "inputs": {
+                                                                                                                                                                      "SECONDS": {
+                                                                                                                                                                        "block": {
+                                                                                                                                                                          "type": "math_number",
+                                                                                                                                                                          "id": "1",
+                                                                                                                                                                          "fields": {
+                                                                                                                                                                            "NUM": 1
+                                                                                                                                                                          }
+                                                                                                                                                                        }
+                                                                                                                                                                      }
+                                                                                                                                                                    },
+                                                                                                                                                                    "next": {
+                                                                                                                                                                      "block": {
+                                                                                                                                                                        "type": "hw_log",
+                                                                                                                                                                        "id": "lVol",
+                                                                                                                                                                        "fields": {
+                                                                                                                                                                          "MESSAGE": "Voltage 25"
+                                                                                                                                                                        },
+                                                                                                                                                                        "inputs": {
+                                                                                                                                                                          "VALUE": {
+                                                                                                                                                                            "block": {
+                                                                                                                                                                              "type": "hw_psu_read_voltage",
+                                                                                                                                                                              "id": "g25",
+                                                                                                                                                                              "fields": {
+                                                                                                                                                                                "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                                                                                                              }
+                                                                                                                                                                            }
+                                                                                                                                                                          }
+                                                                                                                                                                        },
+                                                                                                                                                                        "next": {
+                                                                                                                                                                          "block": {
+                                                                                                                                                                            "type": "hw_assert",
+                                                                                                                                                                            "id": "a",
+                                                                                                                                                                            "fields": {
+                                                                                                                                                                              "MESSAGE": "Voltage outside 25V"
+                                                                                                                                                                            },
+                                                                                                                                                                            "inputs": {
+                                                                                                                                                                              "CONDITION": {
+                                                                                                                                                                                "block": {
+                                                                                                                                                                                  "type": "hw_within_tolerance",
+                                                                                                                                                                                  "id": "tol",
+                                                                                                                                                                                  "inputs": {
+                                                                                                                                                                                    "MEASURED": {
+                                                                                                                                                                                      "block": {
+                                                                                                                                                                                        "type": "hw_psu_read_voltage",
+                                                                                                                                                                                        "id": "gm",
+                                                                                                                                                                                        "fields": {
+                                                                                                                                                                                          "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                                                                                                                        }
+                                                                                                                                                                                      }
+                                                                                                                                                                                    },
+                                                                                                                                                                                    "TARGET": {
+                                                                                                                                                                                      "block": {
+                                                                                                                                                                                        "type": "math_number",
+                                                                                                                                                                                        "id": "25",
+                                                                                                                                                                                        "fields": {
+                                                                                                                                                                                          "NUM": 25
+                                                                                                                                                                                        }
+                                                                                                                                                                                      }
+                                                                                                                                                                                    },
+                                                                                                                                                                                    "TOLERANCE": {
+                                                                                                                                                                                      "block": {
+                                                                                                                                                                                        "type": "math_number",
+                                                                                                                                                                                        "id": "0_2",
+                                                                                                                                                                                        "fields": {
+                                                                                                                                                                                          "NUM": 0.2
+                                                                                                                                                                                        }
+                                                                                                                                                                                      }
+                                                                                                                                                                                    }
+                                                                                                                                                                                  }
+                                                                                                                                                                                }
+                                                                                                                                                                              }
+                                                                                                                                                                            },
+                                                                                                                                                                            "next": {
+                                                                                                                                                                              "block": {
+                                                                                                                                                                                "type": "hw_psu_output",
+                                                                                                                                                                                "id": "out0",
+                                                                                                                                                                                "fields": {
+                                                                                                                                                                                  "POSITION": "aimtti_psu_1|output1",
+                                                                                                                                                                                  "STATE": "OFF"
+                                                                                                                                                                                },
+                                                                                                                                                                                "next": {
+                                                                                                                                                                                  "block": {
+                                                                                                                                                                                    "type": "hw_wait",
+                                                                                                                                                                                    "id": "w0.5",
+                                                                                                                                                                                    "inputs": {
+                                                                                                                                                                                      "SECONDS": {
+                                                                                                                                                                                        "block": {
+                                                                                                                                                                                          "type": "math_number",
+                                                                                                                                                                                          "id": "0_5",
+                                                                                                                                                                                          "fields": {
+                                                                                                                                                                                            "NUM": 0.5
+                                                                                                                                                                                          }
+                                                                                                                                                                                        }
+                                                                                                                                                                                      }
+                                                                                                                                                                                    },
+                                                                                                                                                                                    "next": {
+                                                                                                                                                                                      "block": {
+                                                                                                                                                                                        "type": "hw_set",
+                                                                                                                                                                                        "id": "saimtti_psu_1v1",
+                                                                                                                                                                                        "fields": {
+                                                                                                                                                                                          "POSITION": "aimtti_psu_1|v1"
+                                                                                                                                                                                        },
+                                                                                                                                                                                        "inputs": {
+                                                                                                                                                                                          "VALUE": {
+                                                                                                                                                                                            "block": {
+                                                                                                                                                                                              "type": "math_number",
+                                                                                                                                                                                              "id": "30",
+                                                                                                                                                                                              "fields": {
+                                                                                                                                                                                                "NUM": 30
+                                                                                                                                                                                              }
+                                                                                                                                                                                            }
+                                                                                                                                                                                          }
+                                                                                                                                                                                        },
+                                                                                                                                                                                        "next": {
+                                                                                                                                                                                          "block": {
+                                                                                                                                                                                            "type": "hw_psu_output",
+                                                                                                                                                                                            "id": "out1",
+                                                                                                                                                                                            "fields": {
+                                                                                                                                                                                              "POSITION": "aimtti_psu_1|output1",
+                                                                                                                                                                                              "STATE": "ON"
+                                                                                                                                                                                            },
+                                                                                                                                                                                            "next": {
+                                                                                                                                                                                              "block": {
+                                                                                                                                                                                                "type": "hw_wait",
+                                                                                                                                                                                                "id": "w1",
+                                                                                                                                                                                                "inputs": {
+                                                                                                                                                                                                  "SECONDS": {
+                                                                                                                                                                                                    "block": {
+                                                                                                                                                                                                      "type": "math_number",
+                                                                                                                                                                                                      "id": "1",
+                                                                                                                                                                                                      "fields": {
+                                                                                                                                                                                                        "NUM": 1
+                                                                                                                                                                                                      }
+                                                                                                                                                                                                    }
+                                                                                                                                                                                                  }
+                                                                                                                                                                                                },
+                                                                                                                                                                                                "next": {
+                                                                                                                                                                                                  "block": {
+                                                                                                                                                                                                    "type": "hw_log",
+                                                                                                                                                                                                    "id": "lVol",
+                                                                                                                                                                                                    "fields": {
+                                                                                                                                                                                                      "MESSAGE": "Voltage 30"
+                                                                                                                                                                                                    },
+                                                                                                                                                                                                    "inputs": {
+                                                                                                                                                                                                      "VALUE": {
+                                                                                                                                                                                                        "block": {
+                                                                                                                                                                                                          "type": "hw_psu_read_voltage",
+                                                                                                                                                                                                          "id": "g30",
+                                                                                                                                                                                                          "fields": {
+                                                                                                                                                                                                            "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                                                                                                                                          }
+                                                                                                                                                                                                        }
+                                                                                                                                                                                                      }
+                                                                                                                                                                                                    },
+                                                                                                                                                                                                    "next": {
+                                                                                                                                                                                                      "block": {
+                                                                                                                                                                                                        "type": "hw_assert",
+                                                                                                                                                                                                        "id": "a",
+                                                                                                                                                                                                        "fields": {
+                                                                                                                                                                                                          "MESSAGE": "Voltage outside 30V"
+                                                                                                                                                                                                        },
+                                                                                                                                                                                                        "inputs": {
+                                                                                                                                                                                                          "CONDITION": {
+                                                                                                                                                                                                            "block": {
+                                                                                                                                                                                                              "type": "hw_within_tolerance",
+                                                                                                                                                                                                              "id": "tol",
+                                                                                                                                                                                                              "inputs": {
+                                                                                                                                                                                                                "MEASURED": {
+                                                                                                                                                                                                                  "block": {
+                                                                                                                                                                                                                    "type": "hw_psu_read_voltage",
+                                                                                                                                                                                                                    "id": "gm",
+                                                                                                                                                                                                                    "fields": {
+                                                                                                                                                                                                                      "POSITION": "aimtti_psu_1|v1_meas"
+                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                },
+                                                                                                                                                                                                                "TARGET": {
+                                                                                                                                                                                                                  "block": {
+                                                                                                                                                                                                                    "type": "math_number",
+                                                                                                                                                                                                                    "id": "30",
+                                                                                                                                                                                                                    "fields": {
+                                                                                                                                                                                                                      "NUM": 30
+                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                },
+                                                                                                                                                                                                                "TOLERANCE": {
+                                                                                                                                                                                                                  "block": {
+                                                                                                                                                                                                                    "type": "math_number",
+                                                                                                                                                                                                                    "id": "0_2",
+                                                                                                                                                                                                                    "fields": {
+                                                                                                                                                                                                                      "NUM": 0.2
+                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                }
+                                                                                                                                                                                                              }
+                                                                                                                                                                                                            }
+                                                                                                                                                                                                          }
+                                                                                                                                                                                                        },
+                                                                                                                                                                                                        "next": {
+                                                                                                                                                                                                          "block": {
+                                                                                                                                                                                                            "type": "hw_psu_output",
+                                                                                                                                                                                                            "id": "out0",
+                                                                                                                                                                                                            "fields": {
+                                                                                                                                                                                                              "POSITION": "aimtti_psu_1|output1",
+                                                                                                                                                                                                              "STATE": "OFF"
+                                                                                                                                                                                                            },
+                                                                                                                                                                                                            "next": {
+                                                                                                                                                                                                              "block": {
+                                                                                                                                                                                                                "type": "hw_wait",
+                                                                                                                                                                                                                "id": "w0.5",
+                                                                                                                                                                                                                "inputs": {
+                                                                                                                                                                                                                  "SECONDS": {
+                                                                                                                                                                                                                    "block": {
+                                                                                                                                                                                                                      "type": "math_number",
+                                                                                                                                                                                                                      "id": "0_5",
+                                                                                                                                                                                                                      "fields": {
+                                                                                                                                                                                                                        "NUM": 0.5
+                                                                                                                                                                                                                      }
+                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                  }
+                                                                                                                                                                                                                }
+                                                                                                                                                                                                              }
+                                                                                                                                                                                                            }
+                                                                                                                                                                                                          }
+                                                                                                                                                                                                        }
+                                                                                                                                                                                                      }
+                                                                                                                                                                                                    }
+                                                                                                                                                                                                  }
+                                                                                                                                                                                                }
+                                                                                                                                                                                              }
+                                                                                                                                                                                            }
+                                                                                                                                                                                          }
+                                                                                                                                                                                        }
+                                                                                                                                                                                      }
+                                                                                                                                                                                    }
+                                                                                                                                                                                  }
+                                                                                                                                                                                }
+                                                                                                                                                                              }
+                                                                                                                                                                            }
+                                                                                                                                                                          }
+                                                                                                                                                                        }
+                                                                                                                                                                      }
+                                                                                                                                                                    }
+                                                                                                                                                                  }
+                                                                                                                                                                }
+                                                                                                                                                              }
+                                                                                                                                                            }
+                                                                                                                                                          }
+                                                                                                                                                        }
+                                                                                                                                                      }
+                                                                                                                                                    }
+                                                                                                                                                  }
+                                                                                                                                                }
+                                                                                                                                              }
+                                                                                                                                            }
+                                                                                                                                          }
+                                                                                                                                        }
+                                                                                                                                      }
+                                                                                                                                    }
+                                                                                                                                  }
+                                                                                                                                }
+                                                                                                                              }
+                                                                                                                            }
+                                                                                                                          }
+                                                                                                                        }
+                                                                                                                      }
+                                                                                                                    }
+                                                                                                                  }
+                                                                                                                }
+                                                                                                              }
+                                                                                                            }
+                                                                                                          }
+                                                                                                        }
+                                                                                                      }
+                                                                                                    }
+                                                                                                  }
+                                                                                                }
+                                                                                              }
+                                                                                            }
+                                                                                          }
+                                                                                        }
+                                                                                      }
+                                                                                    }
+                                                                                  }
+                                                                                }
+                                                                              }
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x": 40,
+        "y": 40
+      }
+    ]
+  }
+}
