@@ -37,14 +37,6 @@ $DllPath = Join-Path $ProjectRoot "vendor\seeit\usb_relay_device.dll"
 Add-Check "Seeit native DLL" (Test-Path -LiteralPath $DllPath) `
     "Optional Windows-only component" $false
 
-$PicoTc08Dll = Join-Path $ProjectRoot "vendor\pico\runtime\usb_tc08.dll"
-$PicoHrdlDll = Join-Path $ProjectRoot "vendor\pico\runtime\picohrdl.dll"
-
-Add-Check "Pico TC-08 runtime" (Test-Path -LiteralPath $PicoTc08Dll) `
-    $PicoTc08Dll $false
-Add-Check "Pico ADC-20/24 runtime" (Test-Path -LiteralPath $PicoHrdlDll) `
-    $PicoHrdlDll $false
-
 if (Test-Path -LiteralPath $PythonExe) {
     Push-Location $ProjectRoot
     try {
@@ -54,6 +46,10 @@ if (Test-Path -LiteralPath $PythonExe) {
 
         & $PythonExe -m pip check *> $null
         Add-Check "Dependency consistency" ($LASTEXITCODE -eq 0) "pip check"
+
+        & $PythonExe -c "from picosdk.usbtc08 import usbtc08; from picosdk.picohrdl import picohrdl" *> $null
+        Add-Check "Pico runtime support" ($LASTEXITCODE -eq 0) `
+            "Optional TC-08 and ADC-20/24 runtime" $false
 
         & $PythonExe -m compileall -q tiab webapp *> $null
         Add-Check "Python syntax" ($LASTEXITCODE -eq 0) "compileall tiab webapp"

@@ -3,7 +3,7 @@
 ## Getting started
 
 - [Windows setup](getting-started/WINDOWS.md)
-- [Portable Pico runtime support](getting-started/PICO-RUNTIME.md)
+- [Pico TC-08 and ADC runtime setup](getting-started/PICO-RUNTIME.md)
 - [macOS, Linux and Raspberry Pi setup](getting-started/MAC-LINUX-RASPBERRY-PI.md)
 - [User workflow](USER-WORKFLOW.md)
 - [Hello World](HELLO-WORLD.md)

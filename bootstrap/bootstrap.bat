@@ -74,14 +74,11 @@ if exist "%PROJECT_ROOT%\vendor\seeit\usb_relay_device.dll" (
     echo.
     echo              vendor\seeit\usb_relay_device.dll
 )
-if exist "%PROJECT_ROOT%\vendor\pico\runtime\usb_tc08.dll" (
-    if exist "%PROJECT_ROOT%\vendor\pico\runtime\picohrdl.dll" (
-        echo   [PASS] Pico TC-08 and ADC-20/24 runtime support
-    ) else (
-        echo   [INFO] Pico runtime is incomplete: picohrdl.dll missing
-    )
+if exist "%PROJECT_ROOT%\vendor\pico\installer\PicoSDK_x64_*.exe" (
+    echo   [INFO] Pico offline installer downloaded
+    echo          Administrator installation may still be required
 ) else (
-    echo   [INFO] Pico runtime support is not installed
+    echo   [INFO] Pico offline installer not downloaded
 )
 echo.
 echo Ready to use

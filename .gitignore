@@ -63,6 +63,6 @@ Desktop.ini
 /_update_work/
 /_bootstrap_winpython/
 
-/vendor/pico/runtime/
-/vendor/pico/runtime-manifest.json
+/vendor/pico/installer/*.exe
+/vendor/pico/installer-manifest.json
 /_bootstrap_pico/

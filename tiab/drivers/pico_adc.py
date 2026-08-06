@@ -11,12 +11,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from tiab.runtime import prepare_vendor_runtime, require_vendor_library
-
-# Make the project-local Pico DLL directory visible before importing
-# the official picosdk wrapper, which loads the DLL by filename.
-prepare_vendor_runtime("pico")
-
 from .base import CapabilityDescriptor, Driver, Position, PositionKind
 from .registry import register_driver
 
@@ -34,12 +28,12 @@ class PicoAdcDriver(Driver):
         self._handle = None
 
     def connect(self) -> None:
-        require_vendor_library("pico", "picohrdl.dll")
         if hrdl is None:
             raise RuntimeError(
-                "picosdk is not installed, or the portable Pico ADC-20/24 runtime "
-                "is unavailable. Run bootstrap.bat to install Pico "
-                "runtime support."
+                "picosdk is not installed, or the official Pico ADC-20/24 Windows "
+                "runtime is unavailable. Run bootstrap.bat to download "
+                "the offline PicoSDK installer, then have an administrator "
+                "install it once on this machine."
             )
         self._handle = hrdl.usb_hrdl_open_unit()
         if self._handle <= 0:

@@ -1,10 +1,11 @@
-# Portable Pico Runtime Support
+# Pico TC-08 and ADC-20/24 Runtime Setup
 
-Test in a Box can prepare Windows runtime support for:
+Pico Technology's Windows SDK installer requires administrator access
+because it installs native Windows device drivers and runtime components.
 
-- Pico TC-08;
-- Pico ADC-20;
-- Pico ADC-24.
+Test in a Box therefore does not attempt to install PicoSDK silently.
+
+## Bootstrap behaviour
 
 Run:
 
@@ -12,36 +13,28 @@ Run:
 bootstrap.bat
 ```
 
-Bootstrap uses Pico Technology's official 64-bit SDK download page to find
-the current stable installer. It downloads the installer, stages it in a
-temporary project-local directory, and copies the required runtime DLLs to:
+When the Pico runtime is unavailable, bootstrap:
 
-```text
-vendor/pico/runtime/
-```
+1. downloads Pico Technology's small 64-bit SDK web bootstrapper;
+2. runs its `/layout` action to download the complete offline bundle;
+3. stores the full versioned installer under
+   `vendor/pico/installer/`;
+4. records SHA-256 hashes in
+   `vendor/pico/installer-manifest.json`;
+5. continues bootstrap without requiring elevation.
 
-No permanent system PATH modification is made. The Pico drivers add this
-project-local directory to the DLL search path before importing the
-official `picosdk` Python wrappers.
+Bootstrap never executes the Pico installer.
 
-Bootstrap records the download URL, installer SHA-256 and copied filenames
-in:
+## One-time administrator step
 
-```text
-vendor/pico/runtime-manifest.json
-```
+An administrator must run the downloaded versioned installer once on each
+Windows machine that will use Pico TC-08, ADC-20 or ADC-24 hardware.
 
-## Network access
+After installation, rerun `bootstrap.bat`. The verification stage checks
+that both official Python wrappers can load:
 
-First-time setup requires access to `www.picotech.com`.
+- `picosdk.usbtc08`
+- `picosdk.picohrdl`
 
-## Licensing
-
-The runtime is downloaded directly from Pico Technology. Pico's licence
-applies. Test in a Box does not include Pico binaries in the source
-repository.
-
-## Troubleshooting
-
-If the unattended installer options change, bootstrap retains the
-downloaded installer under `_bootstrap_pico` and reports its path.
+Machines that do not use Pico hardware remain fully functional without
+installing PicoSDK.

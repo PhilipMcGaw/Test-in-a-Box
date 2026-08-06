@@ -1,21 +1,22 @@
-# Pico Runtime Support
+# Pico SDK Offline Installer
 
-This directory is populated by `bootstrap/bootstrap_pico.ps1`.
-
-Bootstrap downloads the official current 64-bit PicoSDK installer from
-Pico Technology, installs it into a temporary project-local directory, and
-retains only runtime DLLs required by Test in a Box.
-
-Expected runtime files include:
+Bootstrap downloads the complete official 64-bit PicoSDK offline installer
+into:
 
 ```text
-runtime/usb_tc08.dll
-runtime/picohrdl.dll
-runtime-manifest.json
+vendor/pico/installer/
 ```
 
-Runtime DLLs are generated installation artifacts and should not normally
-be committed to the repository. The manifest records the official source
-URL and SHA-256 of the downloaded installer.
+Bootstrap does not execute the installer.
 
-Pico Technology licensing applies to the downloaded software.
+Administrator rights are required once to install Pico Technology's
+Windows device drivers and native runtime for TC-08 and ADC-20/24 hardware.
+
+After an administrator completes the installation, run `bootstrap.bat`
+again. The bootstrap verification step checks whether the official
+`picosdk` wrappers can load the native TC-08 and PicoHRDL runtimes.
+
+`installer-manifest.json` records the official source URL and SHA-256
+hashes of the downloaded bootstrapper and offline installer.
+
+Pico Technology's licence applies to the downloaded installer and runtime.
