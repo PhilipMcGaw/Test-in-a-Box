@@ -29,7 +29,7 @@ Version 0.1 is intended to add or complete:
 - logical hardware roles;
 - progress percentage and estimated finish time;
 - current DUT and current test step;
-- a Markdown run summary;
+- a validated Markdown run summary;
 - validated safe-state behaviour across applicable drivers;
 - final validation of multiple identical native USBB relay boards in the main application;
 - a complete real electrical or environmental validation procedure;
@@ -71,7 +71,7 @@ Possible longer-term work includes:
 - [ ] Pico TC-08 integration
 
 ### Blockly
-- [ ] Relay blocks
+- [x] Relay blocks
 - [ ] Electronic load blocks
 - [ ] Additional PSU blocks
 - [ ] Temperature blocks
@@ -172,3 +172,13 @@ support.
 - ✅ Startup version banner
 - ✅ VERSION, BUILD.json and update-state integration
 - ✅ Run reports and About page use the same software identity
+
+
+## Validated reporting and version information
+
+- ✅ Startup version banner
+- ✅ Dynamic About page and `/api/version`
+- ✅ Run metadata CSV
+- ✅ Machine-readable run manifest
+- ✅ Human-readable Markdown run summary
+- ✅ Configuration, mapping and procedure SHA-256 provenance

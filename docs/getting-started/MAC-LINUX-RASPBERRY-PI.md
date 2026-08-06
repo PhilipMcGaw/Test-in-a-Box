@@ -183,7 +183,7 @@ This limitation does not apply to the separate **Seeit USB-RELAY08 (Serial)**
 driver, which uses a virtual serial port and is expected to work when the
 relevant USB-to-serial device is supported by the operating system.
 
-See [`docs/PLATFORM-SUPPORT.md`](docs/PLATFORM-SUPPORT.md) for the current
+See [`../PLATFORM-SUPPORT.md`](../PLATFORM-SUPPORT.md) for the current
 support matrix and validation status.
 
 ## Driver-specific notes for macOS/Pi

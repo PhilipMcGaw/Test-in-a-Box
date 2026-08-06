@@ -11,10 +11,12 @@ $ProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
 
 $Folders = @(
     "logs",
-    "runs",
-    "sequences",
+    "webapp\runs",
+    "webapp\sequences",
     "vendor",
-    "vendor\seeit"
+    "vendor\seeit",
+    "vendor\pico",
+    "vendor\pico\installer"
 )
 
 foreach ($Relative in $Folders) {

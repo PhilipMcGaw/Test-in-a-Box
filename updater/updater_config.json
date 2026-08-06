@@ -7,9 +7,8 @@
     "python",
     "vendor",
     "logs",
-    "runs",
-    "results",
-    "sequences",
+    "webapp/runs",
+    "webapp/sequences",
     "_update_backups"
   ],
   "preserve_files": [

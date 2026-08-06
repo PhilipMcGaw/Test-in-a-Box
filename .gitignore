@@ -17,11 +17,8 @@ venv/
 env/
 
 # Generated test results
-/webapp/runs/
-/runs/
-
+/webapp
 # Saved Blockly sequences (if kept outside source control)
-/sequences/
 
 # Coverage and testing
 .coverage
@@ -65,3 +62,6 @@ Desktop.ini
 
 /vendor/pico/installer/*.exe
 /vendor/pico/installer-manifest.json
+
+/webapp/runs/
+/webapp/sequences/*.json

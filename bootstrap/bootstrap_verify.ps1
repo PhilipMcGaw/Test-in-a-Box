@@ -28,7 +28,7 @@ function Add-Check(
 
 Add-Check "Portable Python" (Test-Path -LiteralPath $PythonExe) $PythonExe
 
-foreach ($Folder in @("logs", "runs", "sequences", "vendor", "vendor\seeit", "vendor\pico")) {
+foreach ($Folder in @("logs", "webapp\runs", "webapp\sequences", "vendor", "vendor\seeit", "vendor\pico", "vendor\pico\installer")) {
     $Path = Join-Path $ProjectRoot $Folder
     Add-Check "Folder: $Folder" (Test-Path -LiteralPath $Path) $Path
 }

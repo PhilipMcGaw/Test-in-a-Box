@@ -150,9 +150,9 @@ function Invoke-Rollback($Config) {
         (Join-Path $ProjectRoot "python"),
         (Join-Path $ProjectRoot "vendor"),
         (Join-Path $ProjectRoot "logs"),
-        (Join-Path $ProjectRoot "runs"),
-        (Join-Path $ProjectRoot "results"),
-        (Join-Path $ProjectRoot "sequences"),
+        (Join-Path $ProjectRoot "webapp\runs"),
+        (Join-Path $ProjectRoot "webapp\results"),
+        (Join-Path $ProjectRoot "webapp\sequences"),
         (Join-Path $ProjectRoot "_update_backups")
     )
     Copy-Tree $Selected $ProjectRoot $Extra
@@ -265,9 +265,9 @@ Create a GitHub release or version tag, or select Development.
         (Join-Path $ProjectRoot "python"),
         (Join-Path $ProjectRoot "vendor"),
         (Join-Path $ProjectRoot "logs"),
-        (Join-Path $ProjectRoot "runs"),
-        (Join-Path $ProjectRoot "results"),
-        (Join-Path $ProjectRoot "sequences"),
+        (Join-Path $ProjectRoot "webapp\runs"),
+        (Join-Path $ProjectRoot "webapp\results"),
+        (Join-Path $ProjectRoot "webapp\sequences"),
         (Join-Path $ProjectRoot "_update_backups"),
         (Join-Path $ProjectRoot "_update_work"),
         (Join-Path $ProjectRoot ".git")
@@ -277,7 +277,7 @@ Create a GitHub release or version tag, or select Development.
     Step "Installing application files"
     $InstallExtra = @(
         "/MIR", "/XD",
-        "python", "vendor", "logs", "runs", "results", "sequences",
+        "python", "vendor", "logs", "webapp\runs", "webapp\results", "webapp\sequences",
         "_update_backups", "_update_work", ".git"
     )
 

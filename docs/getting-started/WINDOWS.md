@@ -2,9 +2,9 @@
 
 
 > This guide is for Windows. For Linux, Raspberry Pi OS and macOS, use
-> [`SETUP_INSTRUCTIONS_MAC_AND_RASPBERRY_PI.md`](SETUP_INSTRUCTIONS_MAC_AND_RASPBERRY_PI.md).
+> [`MAC-LINUX-RASPBERRY-PI.md`](MAC-LINUX-RASPBERRY-PI.md).
 > Driver availability differs by platform; see
-> [`docs/PLATFORM-SUPPORT.md`](docs/PLATFORM-SUPPORT.md).
+> [`../PLATFORM-SUPPORT.md`](../PLATFORM-SUPPORT.md).
 
 This guide explains how to run **Test in a Box** on a Windows computer where
 you do not have administrator rights.
@@ -304,5 +304,5 @@ hubs or connected-board count.
 
 See:
 
-[`docs/instruments/seeit-usb-relay08.md`](docs/instruments/seeit-usb-relay08.md)
+[`../instruments/seeit-usb-relay08.md`](../instruments/seeit-usb-relay08.md)
 

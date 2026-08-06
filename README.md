@@ -278,7 +278,7 @@ The demonstration performs a simulated multi-DUT test and writes separate CSV fi
 Example output:
 
 ```text
-runs/demo_run_001/
+webapp/runs/demo_run_001/
   run_demo_run_001_DUT_DUT-0001.csv
   run_demo_run_001_DUT_DUT-0002.csv
   run_demo_run_001_DUT_unassigned.csv
@@ -445,3 +445,11 @@ https://polyformproject.org/licenses/noncommercial/1.0.0
 - [Repository Refactor v1](docs/project/REPOSITORY-REFACTOR-v1.md)
 - [Release checklist](docs/release/RELEASE-CHECKLIST.md)
 - [Changelog](CHANGELOG.md)
+
+
+## Repository cleanup
+
+The release-candidate cleanup is documented in
+[`docs/project/REPOSITORY-CLEANUP-v2.md`](docs/project/REPOSITORY-CLEANUP-v2.md).
+Runtime output is standardised under `webapp/runs/` and saved Blockly
+sequences under `webapp/sequences/`.

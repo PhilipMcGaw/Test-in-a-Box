@@ -5,5 +5,7 @@
   "updater_version": "2.0",
   "release_stage": "alpha",
   "repository_layout": "refactor-v1",
-  "version_information": "1.0"
+  "version_information": "1.0",
+  "repository_cleanup": "v2",
+  "reporting_format": "1.1"
 }

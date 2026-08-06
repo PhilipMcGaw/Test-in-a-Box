@@ -30,6 +30,7 @@
 - [Feature requests](FEATURE_REQUESTS.md)
 - [Development status](project/DEVELOPMENT-STATUS.md)
 - [Repository Refactor v1](project/REPOSITORY-REFACTOR-v1.md)
+- [Repository Cleanup v2](project/REPOSITORY-CLEANUP-v2.md)
 - [Release checklist](release/RELEASE-CHECKLIST.md)
 - [v0.1.0-alpha release notes](release/RELEASE-NOTES-v0.1.0-alpha.md)
 

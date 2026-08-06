@@ -43,12 +43,15 @@ import tiab.drivers.serial.ea_ps2000b  # noqa: F401
 import tiab.drivers.serial.seeit_relay  # noqa: F401
 import tiab.drivers.usb.seeit_relay  # noqa: F401
 
+_PICO_DRIVER_ERROR: str | None = None
+
 try:
     import tiab.drivers.pico_adc  # noqa: F401
     import tiab.drivers.pico_tc08  # noqa: F401
 except Exception as exc:
-    # PicoSDK is optional. The rest of the application can still run.
-    print(f"[startup] Pico drivers not fully available: {exc}")
+    # Pico support is optional. Report it once in the startup summary rather
+    # than emitting a traceback-like message during module import.
+    _PICO_DRIVER_ERROR = str(exc)
 
 from tiab.drivers.catalog import DEVICE_CATALOG
 from tiab.drivers.registry import create_driver, discover_instruments
@@ -579,13 +582,27 @@ def _print_startup_version() -> None:
     print("=" * 60)
     print(f"Test in a Box {info.get('version', 'unknown')}")
     print("=" * 60)
-    print(f"Repository layout: {info.get('repository_layout', 'unknown')}")
-    print(f"Bootstrap:         {info.get('bootstrap_version', 'unknown')}")
-    print(f"Updater:           {info.get('updater_version', 'unknown')}")
-    print(f"Python:            {info.get('python_version', 'unknown')}")
-    print(f"Update channel:    {info.get('update_channel', 'unmanaged')}")
-    print(f"Update ref:        {info.get('update_ref', 'unknown')}")
-    print(f"Commit:            {info.get('commit', 'unknown')}")
+    print(f"Repository layout : {info.get('repository_layout', 'unknown')}")
+    print(f"Bootstrap         : {info.get('bootstrap_version', 'unknown')}")
+    print(f"Updater           : {info.get('updater_version', 'unknown')}")
+    print(f"Python            : {info.get('python_version', 'unknown')}")
+    print("")
+    print(f"Update channel    : {info.get('update_channel', 'unmanaged')}")
+    print(f"Update ref        : {info.get('update_ref', 'unknown')}")
+    print(f"Commit            : {info.get('commit', 'unknown')}")
+    print("")
+    print(f"Configuration     : {CONFIG_PATH}")
+    print(f"Run output        : {RUNS_DIR}")
+    print(f"Sequences         : {SEQUENCES_DIR}")
+    print("")
+    if _PICO_DRIVER_ERROR is None:
+        print("Pico support      : available")
+    else:
+        print("Pico support      : optional runtime not installed")
+        print("                    Run bootstrap.bat to download the")
+        print("                    official PicoSDK installer.")
+    print("")
+    print("Server            : http://127.0.0.1:8765")
     print("=" * 60)
     print("")
 
