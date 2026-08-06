@@ -193,16 +193,28 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
                 "default": True,
             },
             {
-                "name": "output_transition_delay",
-                "label": "Output Transition Delay (s)",
+                "name": "output_standby_delay",
+                "label": "Output Standby Dwell (s)",
                 "type": "number",
-                "default": 0.25,
+                "default": 2.0,
+            },
+            {
+                "name": "output_settle_delay",
+                "label": "Output Enable Settle Time (s)",
+                "type": "number",
+                "default": 1.0,
             },
             {
                 "name": "output_enable_attempts",
-                "label": "Output Enable Commands",
+                "label": "Output Enable Attempts",
                 "type": "number",
                 "default": 2,
+            },
+            {
+                "name": "verify_output_voltage",
+                "label": "Verify Physical Output Voltage",
+                "type": "boolean",
+                "default": True,
             },
         ],
         "description": (

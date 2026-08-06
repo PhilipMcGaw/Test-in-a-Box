@@ -62,8 +62,10 @@ class LabDch30665Driver(Driver):
         trace_serial: bool = True,
         select_ui_mode_on_enable: bool = True,
         verify_output_state: bool = True,
-        output_transition_delay: float = 0.25,
+        output_standby_delay: float = 2.0,
+        output_settle_delay: float = 1.0,
         output_enable_attempts: int = 2,
+        verify_output_voltage: bool = True,
     ) -> None:
         super().__init__(device_id, on_event)
 
@@ -77,14 +79,19 @@ class LabDch30665Driver(Driver):
         self._trace_serial = bool(trace_serial)
         self._select_ui_mode_on_enable = bool(select_ui_mode_on_enable)
         self._verify_output_state = bool(verify_output_state)
-        self._output_transition_delay = max(
+        self._output_standby_delay = max(
             0.0,
-            float(output_transition_delay),
+            float(output_standby_delay),
+        )
+        self._output_settle_delay = max(
+            0.0,
+            float(output_settle_delay),
         )
         self._output_enable_attempts = max(
             1,
             int(output_enable_attempts),
         )
+        self._verify_output_voltage = bool(verify_output_voltage)
 
         self._port = None
         self._io_lock = threading.RLock()
@@ -321,32 +328,18 @@ class LabDch30665Driver(Driver):
             enabled = _as_bool(value)
 
             if enabled:
-                if self._select_ui_mode_on_enable:
-                    self._write_raw("MODE,UI")
-
-                # Bench characterisation of the LAB-DCH 30-665 showed that
-                # SB,R can report enabled without energising the power stage.
-                # A deliberate standby transition followed by two enable
-                # commands reliably mirrors the physical front-panel action.
-                self._write_raw("SB,S")
-                self._wait_output_transition()
-
-                for attempt in range(self._output_enable_attempts):
-                    self._write_raw("SB,R")
-                    self._wait_output_transition()
+                self._enable_output_stage()
             else:
                 self._write_raw("SB,S")
-                self._wait_output_transition()
+                self._wait_seconds(self._output_settle_delay)
 
-            if self._verify_output_state:
-                actual = _parse_output_state(self._query_raw("SB"))
-                if actual != enabled:
-                    requested = "enabled" if enabled else "disabled"
-                    received = "enabled" if actual else "disabled"
-                    raise RuntimeError(
-                        f"{self.device_id}: output was requested {requested}, "
-                        f"but SB readback reports {received}"
-                    )
+                if self._verify_output_state:
+                    actual = _parse_output_state(self._query_raw("SB"))
+                    if actual:
+                        raise RuntimeError(
+                            f"{self.device_id}: output disable was requested, "
+                            "but SB readback still reports enabled"
+                        )
 
             self._emit(position_id, enabled, None, event_type="state")
             return
@@ -400,9 +393,94 @@ class LabDch30665Driver(Driver):
         self._require_connected()
         self._write_raw(raw_command)
 
-    def _wait_output_transition(self) -> None:
-        if self._output_transition_delay > 0:
-            time.sleep(self._output_transition_delay)
+    def _wait_seconds(self, seconds: float) -> None:
+        if seconds > 0:
+            time.sleep(seconds)
+
+    def _ensure_ui_mode(self) -> None:
+        if not self._select_ui_mode_on_enable:
+            return
+
+        current_mode = self._query_raw("MODE").strip().upper()
+        if current_mode == "MODE,UI":
+            return
+
+        self._write_raw("MODE,UI")
+        self._wait_seconds(self._output_settle_delay)
+
+        confirmed_mode = self._query_raw("MODE").strip().upper()
+        if confirmed_mode != "MODE,UI":
+            raise RuntimeError(
+                f"{self.device_id}: could not select UI mode; "
+                f"MODE readback was {confirmed_mode!r}"
+            )
+
+    def _enable_output_stage(self) -> None:
+        """
+        Energise the physical output and verify measured voltage.
+
+        On the bench-tested firmware, SB can report SB,R before the power stage
+        has energised. A standby dwell followed by one or more SB,R commands is
+        therefore verified against both SB and MU.
+        """
+        self._ensure_ui_mode()
+
+        target_voltage = _parse_numeric(
+            self._query_raw("UA"),
+            "UA",
+            "V",
+        )
+
+        self._write_raw("SB,S")
+        self._wait_seconds(self._output_standby_delay)
+
+        measured_voltage = 0.0
+        state_enabled = False
+
+        for _attempt in range(self._output_enable_attempts):
+            self._write_raw("SB,R")
+            self._wait_seconds(self._output_settle_delay)
+
+            state_enabled = _parse_output_state(self._query_raw("SB"))
+            measured_voltage = _parse_numeric(
+                self._query_raw("MU"),
+                "MU",
+                "V",
+            )
+
+            if self._output_is_energised(
+                target_voltage,
+                measured_voltage,
+                state_enabled,
+            ):
+                return
+
+        raise RuntimeError(
+            f"{self.device_id}: output-enable sequence completed but the "
+            f"power stage did not energise; target={target_voltage:g} V, "
+            f"measured={measured_voltage:g} V, SB="
+            f"{'R' if state_enabled else 'S'}"
+        )
+
+    def _output_is_energised(
+        self,
+        target_voltage: float,
+        measured_voltage: float,
+        state_enabled: bool,
+    ) -> bool:
+        if self._verify_output_state and not state_enabled:
+            return False
+
+        if not self._verify_output_voltage:
+            return True
+
+        # A zero-volt setpoint cannot be verified by MU. SB readback is the
+        # only meaningful check in that case.
+        if abs(target_voltage) < 0.05:
+            return state_enabled
+
+        minimum_expected = max(0.05, abs(target_voltage) * 0.5)
+        return abs(measured_voltage) >= minimum_expected
 
     # ------------------------------------------------------------------
     # Additional model-specific operations

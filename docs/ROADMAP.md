@@ -207,9 +207,17 @@ support.
 - ✅ Friendly catalogue-label default device names
 - ✅ Internal driver type kept separate from visible device name
 
-## Completed updater bootstrap cleanup
+## Completed validation sequence work
 
-- ✅ Bootstrap runs in the updater console
-- ✅ Updater waits for bootstrap completion
-- ✅ No duplicate application-launch prompt during managed updates
-- ✅ No orphaned bootstrap command window
+- ✅ LAB-DCH smoke-test workspace
+- ✅ LAB-DCH no-load driver-validation workspace
+- ✅ Voltage sweep and repeated output-cycle regression checks
+- ⬜ LAB-DCH current-limit validation with a suitable electronic load
+
+## LAB-DCH output-enable v2
+
+- ✅ Physical `MU` verification for LAB-DCH output enable
+- ✅ Adaptive repeated `SB,R` attempts
+- ✅ UI mode changed only when required
+- ✅ Correct OVP/current logging in validation workspace
+- ⬜ Re-run smoke and full validation procedures on physical hardware
