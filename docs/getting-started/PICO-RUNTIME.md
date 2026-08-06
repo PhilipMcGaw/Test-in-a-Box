@@ -15,15 +15,14 @@ bootstrap.bat
 
 When the Pico runtime is unavailable, bootstrap:
 
-1. downloads Pico Technology's small 64-bit SDK web bootstrapper;
-2. runs its `/layout` action to download the complete offline bundle;
-3. stores the full versioned installer under
-   `vendor/pico/installer/`;
-4. records SHA-256 hashes in
+1. resolves Pico Technology's current official 64-bit SDK installer;
+2. downloads it directly into `vendor/pico/installer/`;
+3. records its URL, size and SHA-256 in
    `vendor/pico/installer-manifest.json`;
+4. leaves the installer in place for an administrator;
 5. continues bootstrap without requiring elevation.
 
-Bootstrap never executes the Pico installer.
+Bootstrap never executes or deletes the Pico installer.
 
 ## One-time administrator step
 

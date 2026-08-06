@@ -99,8 +99,8 @@ rollback logic belongs in `updater/`.
 Pico Technology's Windows runtime requires a one-time administrator
 installation. Bootstrap does not elevate or execute the installer.
 
-When the runtime is missing, `bootstrap_pico.ps1` downloads the complete
-official offline PicoSDK installer into `vendor/pico/installer/` and reports
+When the runtime is missing, `bootstrap_pico.ps1` downloads the official PicoSDK installer directly into
+`vendor/pico/installer/` and reports
 its location. An administrator can install it later, after which rerunning
 bootstrap verifies the TC-08 and PicoHRDL runtimes.
 

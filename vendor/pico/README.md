@@ -1,13 +1,13 @@
 # Pico SDK Offline Installer
 
-Bootstrap downloads the complete official 64-bit PicoSDK offline installer
+Bootstrap downloads the official 64-bit PicoSDK installer
 into:
 
 ```text
 vendor/pico/installer/
 ```
 
-Bootstrap does not execute the installer.
+Bootstrap does not execute or delete the installer.
 
 Administrator rights are required once to install Pico Technology's
 Windows device drivers and native runtime for TC-08 and ADC-20/24 hardware.
