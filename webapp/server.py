@@ -34,6 +34,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+import serial
 from serial.tools import list_ports
 
 # Import every driver module so its registration decorator runs.
@@ -243,6 +244,23 @@ class SerialPortProbeRequest(BaseModel):
     kwargs: dict[str, Any] = Field(default_factory=dict)
 
 
+class ProtocolSendRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    mode: str = "device"
+    command: str
+    expect_response: bool = True
+    device_id: str | None = None
+    serial_port: str | None = None
+    baudrate: int = 9600
+    data_bits: int = 8
+    parity: str = "N"
+    stop_bits: float = 1.0
+    timeout: float = 1.0
+    command_terminator: str = "\\n"
+    reply_terminator: str = "\\n"
+
+
 class SetPositionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -347,6 +365,122 @@ def _safe_sequence_name(name: str) -> str:
             "hyphens and underscores."
         )
     return name
+
+
+def _decode_protocol_terminator(value: str) -> bytes:
+    aliases = {
+        "": b"",
+        "NONE": b"",
+        "CR": b"\r",
+        "LF": b"\n",
+        "CRLF": b"\r\n",
+        "\\R": b"\r",
+        "\\N": b"\n",
+        "\\R\\N": b"\r\n",
+    }
+
+    text = str(value)
+    key = text.upper()
+
+    if key in aliases:
+        return aliases[key]
+
+    return text.encode("ascii")
+
+
+def _protocol_device_inventory() -> list[dict[str, Any]]:
+    """Return connected drivers that expose a raw query operation."""
+    result: list[dict[str, Any]] = []
+
+    with _device_lock:
+        for device_id, driver in _devices.items():
+            query_method = getattr(driver, "query", None)
+            if not callable(query_method):
+                continue
+
+            try:
+                capabilities = driver.capabilities()
+                display_name = capabilities.display_name
+                device_type = capabilities.device_type
+            except Exception:
+                display_name = type(driver).__name__
+                device_type = "unknown"
+
+            result.append({
+                "device_id": device_id,
+                "device_type": device_type,
+                "display_name": display_name,
+            })
+
+    return sorted(result, key=lambda item: item["device_id"].lower())
+
+
+def _send_direct_serial(request: ProtocolSendRequest) -> str:
+    if not request.serial_port:
+        raise ValueError("A COM port must be selected.")
+
+    parity = request.parity.strip().upper()
+    parity_map = {
+        "N": serial.PARITY_NONE,
+        "E": serial.PARITY_EVEN,
+        "O": serial.PARITY_ODD,
+        "M": serial.PARITY_MARK,
+        "S": serial.PARITY_SPACE,
+    }
+
+    if parity not in parity_map:
+        raise ValueError("Parity must be N, E, O, M or S.")
+
+    byte_size_map = {
+        5: serial.FIVEBITS,
+        6: serial.SIXBITS,
+        7: serial.SEVENBITS,
+        8: serial.EIGHTBITS,
+    }
+    if request.data_bits not in byte_size_map:
+        raise ValueError("Data bits must be 5, 6, 7 or 8.")
+
+    stop_bits_map = {
+        1.0: serial.STOPBITS_ONE,
+        1.5: serial.STOPBITS_ONE_POINT_FIVE,
+        2.0: serial.STOPBITS_TWO,
+    }
+    if float(request.stop_bits) not in stop_bits_map:
+        raise ValueError("Stop bits must be 1, 1.5 or 2.")
+
+    command_terminator = _decode_protocol_terminator(
+        request.command_terminator
+    )
+    reply_terminator = _decode_protocol_terminator(
+        request.reply_terminator
+    )
+
+    with serial.Serial(
+        port=request.serial_port,
+        baudrate=int(request.baudrate),
+        bytesize=byte_size_map[request.data_bits],
+        parity=parity_map[parity],
+        stopbits=stop_bits_map[float(request.stop_bits)],
+        timeout=max(0.05, float(request.timeout)),
+        write_timeout=max(0.05, float(request.timeout)),
+        xonxoff=False,
+        rtscts=False,
+        dsrdtr=False,
+    ) as port:
+        port.reset_input_buffer()
+        payload = request.command.encode("ascii") + command_terminator
+        port.write(payload)
+        port.flush()
+
+        if not request.expect_response:
+            return ""
+
+        if reply_terminator:
+            response = port.read_until(reply_terminator)
+        else:
+            response = port.read(4096)
+
+        return response.decode("ascii", errors="replace").strip()
 
 
 def _serial_port_inventory() -> list[dict[str, Any]]:
@@ -750,6 +884,13 @@ def supported_devices_page() -> FileResponse:
     return FileResponse(str(BASE_DIR / "static" / "supported-devices.html"))
 
 
+@app.get("/engineering-tools/protocol-explorer")
+def protocol_explorer_page() -> FileResponse:
+    return FileResponse(
+        str(BASE_DIR / "static" / "protocol-explorer.html")
+    )
+
+
 @app.get("/api/version")
 def api_version() -> JSONResponse:
     """Return the same installed build identity used by run reports."""
@@ -810,6 +951,78 @@ def api_duts() -> JSONResponse:
             for entry in _config.get("mapping", [])
         })
     return JSONResponse(duts)
+
+
+@app.get("/api/protocol/devices")
+def api_protocol_devices() -> JSONResponse:
+    return JSONResponse(_protocol_device_inventory())
+
+
+@app.post("/api/protocol/send")
+def api_protocol_send(request: ProtocolSendRequest) -> JSONResponse:
+    if _run_is_active():
+        return JSONResponse(
+            {
+                "detail": (
+                    "Protocol Explorer is unavailable while a test run "
+                    "is active."
+                )
+            },
+            status_code=409,
+        )
+
+    command = request.command.strip()
+    if not command:
+        return JSONResponse(
+            {"detail": "Command must not be empty."},
+            status_code=422,
+        )
+
+    started = time.monotonic()
+
+    try:
+        if request.mode == "device":
+            if not request.device_id:
+                raise ValueError("A connected instrument must be selected.")
+
+            with _device_lock:
+                driver = _devices.get(request.device_id)
+                if driver is None:
+                    raise KeyError(
+                        f"Connected instrument {request.device_id!r} "
+                        "was not found."
+                    )
+
+                query_method = getattr(driver, "query", None)
+                if not callable(query_method):
+                    raise RuntimeError(
+                        f"{request.device_id}: raw query is not supported."
+                    )
+
+                response = query_method(command)
+
+        elif request.mode == "serial":
+            response = _send_direct_serial(request)
+        else:
+            raise ValueError("Mode must be 'device' or 'serial'.")
+
+        elapsed = time.monotonic() - started
+        return JSONResponse({
+            "command": command,
+            "response": response,
+            "elapsed_seconds": elapsed,
+            "mode": request.mode,
+        })
+
+    except Exception as exc:
+        return JSONResponse(
+            {
+                "detail": str(exc),
+                "command": command,
+                "mode": request.mode,
+            },
+            status_code=400,
+        )
 
 
 @app.get("/api/serial_ports")

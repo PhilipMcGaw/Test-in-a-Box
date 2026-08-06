@@ -91,7 +91,7 @@ commissioning. They should be available from a dedicated top-level
 test-builder workflow.
 
 #### Instrument Development
-- [ ] Protocol Explorer
+- [x] Protocol Explorer
 - [ ] Serial Terminal
 - [ ] Driver Tester
 - [ ] Instrument Identifier
@@ -206,3 +206,14 @@ support.
 - ✅ LAB-DCH `*IDN?` with `ID` fallback
 - ✅ Friendly catalogue-label default device names
 - ✅ Internal driver type kept separate from visible device name
+
+
+## Protocol Explorer v0.1
+
+- ✅ Connected-driver raw command mode
+- ✅ Direct serial-port command mode
+- ✅ Serial settings and terminators
+- ✅ TX/RX session history
+- ✅ Command history and LAB-DCH quick commands
+- ✅ Copy and save session log
+- ✅ Disabled during active test runs

@@ -7,5 +7,6 @@
   "repository_layout": "refactor-v1",
   "version_information": "1.0",
   "repository_cleanup": "v2",
-  "reporting_format": "1.1"
+  "reporting_format": "1.1",
+  "engineering_tools": "0.1"
 }
