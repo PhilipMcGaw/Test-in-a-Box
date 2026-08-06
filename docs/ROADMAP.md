@@ -217,3 +217,11 @@ support.
 - ✅ Command history and LAB-DCH quick commands
 - ✅ Copy and save session log
 - ✅ Disabled during active test runs
+
+## Completed LAB-DCH commissioning fixes
+
+- ✅ LAB-DCH characterised output transition
+- ✅ Standby-to-output sequence with configurable delay
+- ✅ Repeated enable command for physical output-stage activation
+- ✅ Protocol Explorer write-only connected-driver commands
+- ✅ Clear direct-COM-port ownership error

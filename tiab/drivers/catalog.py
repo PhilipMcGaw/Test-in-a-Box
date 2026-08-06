@@ -192,6 +192,18 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
                 "type": "boolean",
                 "default": True,
             },
+            {
+                "name": "output_transition_delay",
+                "label": "Output Transition Delay (s)",
+                "type": "number",
+                "default": 0.25,
+            },
+            {
+                "name": "output_enable_attempts",
+                "label": "Output Enable Commands",
+                "type": "number",
+                "default": 2,
+            },
         ],
         "description": (
             "LAB-DCH 30-665 programmable DC power supply over RS232. "

@@ -62,6 +62,8 @@ class LabDch30665Driver(Driver):
         trace_serial: bool = True,
         select_ui_mode_on_enable: bool = True,
         verify_output_state: bool = True,
+        output_transition_delay: float = 0.25,
+        output_enable_attempts: int = 2,
     ) -> None:
         super().__init__(device_id, on_event)
 
@@ -75,6 +77,14 @@ class LabDch30665Driver(Driver):
         self._trace_serial = bool(trace_serial)
         self._select_ui_mode_on_enable = bool(select_ui_mode_on_enable)
         self._verify_output_state = bool(verify_output_state)
+        self._output_transition_delay = max(
+            0.0,
+            float(output_transition_delay),
+        )
+        self._output_enable_attempts = max(
+            1,
+            int(output_enable_attempts),
+        )
 
         self._port = None
         self._io_lock = threading.RLock()
@@ -310,10 +320,23 @@ class LabDch30665Driver(Driver):
         if position_id == "output":
             enabled = _as_bool(value)
 
-            if enabled and self._select_ui_mode_on_enable:
-                self._write_raw("MODE,UI")
+            if enabled:
+                if self._select_ui_mode_on_enable:
+                    self._write_raw("MODE,UI")
 
-            self._write_raw("SB,R" if enabled else "SB,S")
+                # Bench characterisation of the LAB-DCH 30-665 showed that
+                # SB,R can report enabled without energising the power stage.
+                # A deliberate standby transition followed by two enable
+                # commands reliably mirrors the physical front-panel action.
+                self._write_raw("SB,S")
+                self._wait_output_transition()
+
+                for attempt in range(self._output_enable_attempts):
+                    self._write_raw("SB,R")
+                    self._wait_output_transition()
+            else:
+                self._write_raw("SB,S")
+                self._wait_output_transition()
 
             if self._verify_output_state:
                 actual = _parse_output_state(self._query_raw("SB"))
@@ -371,6 +394,15 @@ class LabDch30665Driver(Driver):
         """Send a raw query for diagnostics and commissioning."""
         self._require_connected()
         return self._query_raw(raw_command)
+
+    def write_command(self, raw_command: str) -> None:
+        """Send a raw write-only command without waiting for a response."""
+        self._require_connected()
+        self._write_raw(raw_command)
+
+    def _wait_output_transition(self) -> None:
+        if self._output_transition_delay > 0:
+            time.sleep(self._output_transition_delay)
 
     # ------------------------------------------------------------------
     # Additional model-specific operations
