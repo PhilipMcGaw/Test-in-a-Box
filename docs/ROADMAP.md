@@ -199,3 +199,10 @@ support.
 - ✅ Driver-specific identity filtering
 - ✅ `*IDN?`, `ID`, or equivalent selected by each driver
 - ✅ Serial probing blocked while a test run is active
+
+## Completed instrument discovery and naming work
+
+- ✅ Driver-owned LAB-DCH COM-port discovery
+- ✅ LAB-DCH `*IDN?` with `ID` fallback
+- ✅ Friendly catalogue-label default device names
+- ✅ Internal driver type kept separate from visible device name

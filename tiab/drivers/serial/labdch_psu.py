@@ -21,13 +21,21 @@ import threading
 import time
 from typing import Any
 
-from ..base import CapabilityDescriptor, Driver, Position, PositionKind
+from ..base import (
+    CapabilityDescriptor,
+    DiscoveredInstrument,
+    Driver,
+    Position,
+    PositionKind,
+)
 from ..registry import register_driver
 
 try:
     import serial
+    from serial.tools import list_ports
 except ImportError:  # pragma: no cover
     serial = None
+    list_ports = None
 
 
 _NUMERIC_RESPONSE = re.compile(
@@ -72,6 +80,83 @@ class LabDch30665Driver(Driver):
         self._io_lock = threading.RLock()
         self._last_command_time = 0.0
         self._identity: dict[str, str] = {}
+
+    @classmethod
+    def discover(cls, **kwargs: Any) -> list[DiscoveredInstrument]:
+        """
+        Find LAB-DCH supplies by probing the currently enumerated COM ports.
+
+        Protocol knowledge stays in the driver: each candidate is opened using
+        the configured serial settings, then identified with *IDN? and the
+        documented ID fallback.
+        """
+        if serial is None or list_ports is None:
+            return []
+
+        probe_kwargs = dict(kwargs)
+        probe_kwargs.pop("serial_port", None)
+        probe_kwargs["trace_serial"] = False
+        probe_kwargs["local_on_close"] = True
+
+        results: list[DiscoveredInstrument] = []
+
+        for port in sorted(
+            list_ports.comports(),
+            key=lambda item: item.device,
+        ):
+            probe = cls(
+                device_id=f"probe:{port.device}",
+                serial_port=port.device,
+                on_event=None,
+                **probe_kwargs,
+            )
+
+            try:
+                probe.connect()
+                identity = probe.identify()
+
+                model = identity.get("model", "").strip()
+                idn = identity.get("idn", "").strip().upper()
+
+                if "LAB-DCH" not in idn and "LAB-DCH" not in model.upper():
+                    continue
+
+                display_parts = [
+                    port.device,
+                    identity.get("manufacturer", "").strip(),
+                    model,
+                ]
+                display_name = " — ".join(
+                    part for part in display_parts if part
+                )
+
+                results.append(
+                    DiscoveredInstrument(
+                        driver_type="labdch_30_665",
+                        selector=port.device,
+                        display_name=display_name,
+                        manufacturer=identity.get("manufacturer", ""),
+                        model=model,
+                        serial=identity.get("serial", ""),
+                        transport="RS232",
+                        connection=port.device,
+                        metadata={
+                            "firmware": identity.get("firmware", ""),
+                            "idn": identity.get("idn", ""),
+                            "port_description": port.description or "",
+                            "hardware_id": port.hwid or "",
+                        },
+                    )
+                )
+            except Exception:
+                # A failed probe simply means that this port is busy,
+                # incompatible, or not responding with the LAB-DCH protocol.
+                continue
+            finally:
+                with contextlib.suppress(Exception):
+                    probe.close()
+
+        return results
 
     # ------------------------------------------------------------------
     # Lifecycle

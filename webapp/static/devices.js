@@ -12,6 +12,28 @@ function nextUid() {
 }
 
 
+function defaultDeviceId(deviceType) {
+  const info = deviceTypes[deviceType] || {};
+  const baseLabel = String(
+    info.label || info.default_role || deviceType
+  ).trim();
+
+  const existingNames = new Set(
+    cards.map(card => card.device_id.trim().toLowerCase())
+  );
+
+  let sequence = 1;
+  let candidate = `${baseLabel} ${sequence}`;
+
+  while (existingNames.has(candidate.toLowerCase())) {
+    sequence += 1;
+    candidate = `${baseLabel} ${sequence}`;
+  }
+
+  return candidate;
+}
+
+
 function defaultKwargs(deviceType) {
   const type = deviceTypes[deviceType];
   const kwargs = {};
@@ -1083,9 +1105,20 @@ function wireCardEvents(element, card) {
           select.selectedIndex = 0;
           card.kwargs[fieldName] = select.value;
 
+          const selected = compatible[0];
+          const identity = selected.identity || {};
+          const identityText = [
+            identity.manufacturer,
+            identity.model,
+            identity.serial
+              ? `S/N ${identity.serial}`
+              : '',
+          ].filter(Boolean).join(' ');
+
           status.textContent =
             `Identified ${compatible.length} compatible instrument` +
-            `${compatible.length === 1 ? '' : 's'}.`;
+            `${compatible.length === 1 ? '' : 's'}.` +
+            (identityText ? ` Selected: ${identityText}.` : '');
         } catch (error) {
           status.textContent =
             `Instrument scan failed: ${error.message || error}`;
@@ -1408,13 +1441,9 @@ function setupCanvasDropTarget() {
       canvasRect.top +
       wrap.scrollTop;
 
-    const existingOfType = cards.filter(
-      card => card.device_type === deviceType
-    ).length;
-
     const card = {
       uid: nextUid(),
-      device_id: `${deviceType}_${existingOfType + 1}`,
+      device_id: defaultDeviceId(deviceType),
       device_type: deviceType,
       kwargs: defaultKwargs(deviceType),
       channel_labels: {},

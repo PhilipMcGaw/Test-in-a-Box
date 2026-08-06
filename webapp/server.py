@@ -823,10 +823,11 @@ def api_probe_serial_ports(
     request: SerialPortProbeRequest,
 ) -> JSONResponse:
     """
-    Probe each serial port using the selected instrument driver.
+    Identify serial instruments using driver-owned discovery where available.
 
-    Ports that fail to identify are returned with their error so the Configure
-    Devices page can distinguish incompatible and busy ports.
+    Drivers know their own identification sequence and can use *IDN?, ID, or a
+    protocol-specific equivalent. The generic per-port connect/identify probe
+    remains as a fallback for drivers without discovery support.
     """
     if _run_is_active():
         return JSONResponse(
@@ -834,9 +835,47 @@ def api_probe_serial_ports(
             status_code=409,
         )
 
+    inventory = _serial_port_inventory()
+    metadata_by_port = {
+        item["device"]: item
+        for item in inventory
+    }
+
+    try:
+        discovered = discover_instruments(
+            request.device_type,
+            **request.kwargs,
+        )
+    except Exception:
+        discovered = []
+
+    if discovered:
+        return JSONResponse([
+            {
+                "compatible": True,
+                "port": item.selector,
+                "display_name": item.display_name,
+                "identity": {
+                    "manufacturer": item.manufacturer,
+                    "model": item.model,
+                    "serial": item.serial,
+                    **item.metadata,
+                },
+                "driver_type": item.driver_type,
+                "port_metadata": metadata_by_port.get(
+                    item.selector,
+                    {
+                        "device": item.selector,
+                        "display_name": item.selector,
+                    },
+                ),
+            }
+            for item in discovered
+        ])
+
     results: list[dict[str, Any]] = []
 
-    for port in _serial_port_inventory():
+    for port in inventory:
         port_name = port["device"]
 
         try:
