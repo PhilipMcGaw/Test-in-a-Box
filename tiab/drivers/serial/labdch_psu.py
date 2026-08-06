@@ -51,6 +51,9 @@ class LabDch30665Driver(Driver):
         remote_on_connect: bool = True,
         local_on_close: bool = True,
         command_terminator: str = "\\n",
+        trace_serial: bool = True,
+        select_ui_mode_on_enable: bool = True,
+        verify_output_state: bool = True,
     ) -> None:
         super().__init__(device_id, on_event)
 
@@ -61,6 +64,9 @@ class LabDch30665Driver(Driver):
         self._remote_on_connect = bool(remote_on_connect)
         self._local_on_close = bool(local_on_close)
         self._terminator = _decode_terminator(command_terminator)
+        self._trace_serial = bool(trace_serial)
+        self._select_ui_mode_on_enable = bool(select_ui_mode_on_enable)
+        self._verify_output_state = bool(verify_output_state)
 
         self._port = None
         self._io_lock = threading.RLock()
@@ -218,7 +224,22 @@ class LabDch30665Driver(Driver):
 
         if position_id == "output":
             enabled = _as_bool(value)
+
+            if enabled and self._select_ui_mode_on_enable:
+                self._write_raw("MODE,UI")
+
             self._write_raw("SB,R" if enabled else "SB,S")
+
+            if self._verify_output_state:
+                actual = _parse_output_state(self._query_raw("SB"))
+                if actual != enabled:
+                    requested = "enabled" if enabled else "disabled"
+                    received = "enabled" if actual else "disabled"
+                    raise RuntimeError(
+                        f"{self.device_id}: output was requested {requested}, "
+                        f"but SB readback reports {received}"
+                    )
+
             self._emit(position_id, enabled, None, event_type="state")
             return
 
@@ -318,11 +339,21 @@ class LabDch30665Driver(Driver):
         if remaining > 0:
             time.sleep(remaining)
 
+    def _trace(self, direction: str, payload: str) -> None:
+        if not self._trace_serial:
+            return
+
+        print(
+            f"[LAB-DCH:{self.device_id}] {direction}: {payload}",
+            flush=True,
+        )
+
     def _write_raw(self, command: str) -> None:
         with self._io_lock:
             self._require_port()
             self._wait_for_command_slot()
 
+            self._trace("TX", command)
             payload = command.encode("ascii") + self._terminator
             self._port.write(payload)
             self._port.flush()
@@ -334,6 +365,7 @@ class LabDch30665Driver(Driver):
             self._wait_for_command_slot()
 
             self._port.reset_input_buffer()
+            self._trace("TX", command)
             payload = command.encode("ascii") + self._terminator
             self._port.write(payload)
             self._port.flush()
@@ -343,6 +375,8 @@ class LabDch30665Driver(Driver):
                 "ascii",
                 errors="replace",
             ).strip()
+
+            self._trace("RX", response or "<timeout>")
 
             if not response:
                 raise TimeoutError(

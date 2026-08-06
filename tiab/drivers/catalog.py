@@ -174,6 +174,24 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
                 "type": "boolean",
                 "default": True,
             },
+            {
+                "name": "trace_serial",
+                "label": "Trace Serial TX/RX to Console",
+                "type": "boolean",
+                "default": True,
+            },
+            {
+                "name": "select_ui_mode_on_enable",
+                "label": "Select UI Mode Before Output Enable",
+                "type": "boolean",
+                "default": True,
+            },
+            {
+                "name": "verify_output_state",
+                "label": "Verify Output State After Command",
+                "type": "boolean",
+                "default": True,
+            },
         ],
         "description": (
             "LAB-DCH 30-665 programmable DC power supply over RS232. "

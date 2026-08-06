@@ -63,3 +63,29 @@ The driver also provides raw query support and model-specific methods for:
 
 The implementation is based on the supplied quick reference and remains
 unverified until tested against physical hardware.
+
+## Serial trace and output verification
+
+The driver can print every LAB-DCH command and response to the application
+console. This is enabled by default while the driver is being commissioned.
+
+Example:
+
+```text
+[LAB-DCH:Bench PSU] TX: GTR
+[LAB-DCH:Bench PSU] TX: MODE,UI
+[LAB-DCH:Bench PSU] TX: SB,R
+[LAB-DCH:Bench PSU] TX: SB
+[LAB-DCH:Bench PSU] RX: SB,R
+```
+
+When output enable is requested, the driver can:
+
+1. send `MODE,UI`;
+2. send `SB,R`;
+3. query `SB`;
+4. raise a clear error if the readback remains `SB,S`.
+
+Configure Devices exposes switches for serial tracing, UI-mode selection and
+output-state verification. These can be disabled after hardware commissioning
+if quieter console output is preferred.
