@@ -42,11 +42,50 @@ function Test-PicoRuntime {
     }
 }
 
+function Resolve-PicoInstallerUri {
+    param([string] $MetadataUri)
+
+    $Page = Invoke-WebRequest -Uri $MetadataUri -UseBasicParsing
+    $DownloadUri = $null
+
+    if ($Page.Links) {
+        $Link = $Page.Links |
+            Where-Object {
+                $_.href -match "PicoSDK_x64(?:_[0-9.]+)?\.exe(?:\?.*)?$"
+            } |
+            Select-Object -First 1
+
+        if ($null -ne $Link) {
+            $DownloadUri = [Uri]::new(
+                [Uri] $MetadataUri,
+                [string] $Link.href
+            ).AbsoluteUri
+        }
+    }
+
+    if (-not $DownloadUri) {
+        $Pattern = 'href=["'']([^"'']*PicoSDK_x64(?:_[0-9.]+)?\.exe(?:\?[^"'']*)?)["'']'
+        $Match = [regex]::Match(
+            [string] $Page.Content,
+            $Pattern,
+            [Text.RegularExpressions.RegexOptions]::IgnoreCase
+        )
+
+        if ($Match.Success) {
+            $DownloadUri = [Uri]::new(
+                [Uri] $MetadataUri,
+                $Match.Groups[1].Value
+            ).AbsoluteUri
+        }
+    }
+
+    return $DownloadUri
+}
+
 $PythonExe = Join-Path $ProjectRoot "python\python.exe"
 $VendorRoot = Join-Path $ProjectRoot "vendor\pico"
 $InstallerRoot = Join-Path $VendorRoot "installer"
 $ManifestPath = Join-Path $VendorRoot "installer-manifest.json"
-
 $MetadataUri = "https://www.picotech.com/downloads/_lightbox/pico-software-development-kit-64bit"
 
 New-Item -ItemType Directory -Path $InstallerRoot -Force | Out-Null
@@ -82,39 +121,7 @@ try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
     Write-Host "Finding the current official 64-bit PicoSDK installer..."
-    $Page = Invoke-WebRequest -Uri $MetadataUri -UseBasicParsing
-    $DownloadUri = $null
-
-    if ($Page.Links) {
-        $Link = $Page.Links |
-            Where-Object {
-                $_.href -match "PicoSDK_x64(?:_[0-9.]+)?\.exe(?:\?.*)?$"
-            } |
-            Select-Object -First 1
-
-        if ($null -ne $Link) {
-            $DownloadUri = [Uri]::new(
-                [Uri] $MetadataUri,
-                [string] $Link.href
-            ).AbsoluteUri
-        }
-    }
-
-    if (-not $DownloadUri) {
-        $Pattern = 'href=["'']([^"'']*PicoSDK_x64(?:_[0-9.]+)?\.exe(?:\?[^"'']*)?)["'']'
-        $Match = [regex]::Match(
-            [string] $Page.Content,
-            $Pattern,
-            [Text.RegularExpressions.RegexOptions]::IgnoreCase
-        )
-
-        if ($Match.Success) {
-            $DownloadUri = [Uri]::new(
-                [Uri] $MetadataUri,
-                $Match.Groups[1].Value
-            ).AbsoluteUri
-        }
-    }
+    $DownloadUri = Resolve-PicoInstallerUri -MetadataUri $MetadataUri
 
     if (-not $DownloadUri) {
         throw "The PicoSDK download link could not be found on the official page."
@@ -164,6 +171,7 @@ try {
         installation_required = $true
         administrator_required = $true
         executed_by_bootstrap = $false
+        deleted_by_bootstrap = $false
     }
 
     $Manifest |

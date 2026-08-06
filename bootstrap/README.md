@@ -94,14 +94,15 @@ The `bootstrap/` directory contains installation and environment
 preparation only. Engineering utilities belong in `tools/`; update and
 rollback logic belongs in `updater/`.
 
+
 ## Pico runtime support
 
-Pico Technology's Windows runtime requires a one-time administrator
-installation. Bootstrap does not elevate or execute the installer.
+When Pico runtime support is missing, `bootstrap_pico.ps1` downloads the
+current official PicoSDK installer directly into
+`vendor/pico/installer/`.
 
-When the runtime is missing, `bootstrap_pico.ps1` downloads the official PicoSDK installer directly into
-`vendor/pico/installer/` and reports
-its location. An administrator can install it later, after which rerunning
-bootstrap verifies the TC-08 and PicoHRDL runtimes.
+Bootstrap never runs or deletes the installer. An administrator can install
+it once, after which rerunning bootstrap verifies TC-08 and PicoHRDL
+support.
 
 See `docs/getting-started/PICO-RUNTIME.md`.
