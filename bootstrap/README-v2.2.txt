@@ -1,12 +1,17 @@
-Bootstrap v2.2 replaces all previous Pico download logic.
+Bootstrap v2.2 fixes WinPython release-asset resolution.
 
-Changes:
+The checksum manifest may name a newer asset than the GitHub release marked
+"latest". The previous bootstrap constructed:
 
-- no `/layout` command;
-- no `_bootstrap_pico` temporary directory;
-- no installer execution;
-- no installer deletion;
-- direct download to `vendor/pico/installer/`;
-- SHA-256 and source metadata recorded;
-- missing Pico support remains optional;
-- PowerShell 5.1 runtime probes no longer terminate bootstrap.
+  /releases/latest/download/<asset>
+
+which returned HTTP 404 when the selected file belonged to another release.
+
+The corrected bootstrap now:
+
+- selects the filename and SHA-256 from the official checksum manifest;
+- looks for that exact filename on the official WinPython download page;
+- falls back to recent tags from GitHub's public releases Atom feed;
+- tries only official download locations;
+- does not use the GitHub REST API;
+- verifies the downloaded file against the manifest SHA-256.

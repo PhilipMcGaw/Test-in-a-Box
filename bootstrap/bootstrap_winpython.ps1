@@ -93,40 +93,188 @@ if ($null -eq $SelectedName) {
 $Extension = [System.IO.Path]::GetExtension($SelectedName)
 $DownloadPath = $DownloadPath + $Extension
 
-# GitHub's normal release-download endpoint does not use the REST API and
-# therefore avoids unauthenticated API rate limits.
-$DownloadUri = (
-    "https://github.com/winpython/winpython/releases/latest/download/" +
-    $SelectedName
-)
+# The newest filename in WinPython's checksum manifest is not always attached
+# to the GitHub release marked "latest". Resolve the asset URL from official
+# WinPython pages instead of assuming /releases/latest/download/<filename>.
+$DownloadCandidates = New-Object System.Collections.Generic.List[string]
+$WinPythonHomeUri = "https://winpython.github.io/"
+$ReleaseFeedUri = "https://github.com/winpython/winpython/releases.atom"
 
-Write-Host "Asset:  $SelectedName"
-Write-Host "Source: $DownloadUri"
-Write-Host "Downloading the official WinPython release asset..."
+Write-Host "Resolving the official release containing the selected asset..."
 
+# First preference: use the exact link published on the official WinPython
+# download page. This may point to GitHub or another official mirror.
 try {
-    Invoke-WebRequest `
-        -Uri $DownloadUri `
-        -UseBasicParsing `
-        -OutFile $DownloadPath
+    $HomePage = Invoke-WebRequest `
+        -Uri $WinPythonHomeUri `
+        -UseBasicParsing
+
+    $EscapedName = [regex]::Escape($SelectedName)
+    $HrefPattern = (
+        'href=["'']([^"'']*' +
+        $EscapedName +
+        '(?:\?[^"'']*)?)["'']'
+    )
+
+    $Matches = [regex]::Matches(
+        [string] $HomePage.Content,
+        $HrefPattern,
+        [Text.RegularExpressions.RegexOptions]::IgnoreCase
+    )
+
+    foreach ($Match in $Matches) {
+        $Candidate = [Uri]::new(
+            [Uri] $WinPythonHomeUri,
+            $Match.Groups[1].Value
+        ).AbsoluteUri
+
+        if (-not $DownloadCandidates.Contains($Candidate)) {
+            $DownloadCandidates.Add($Candidate)
+        }
+    }
 }
 catch {
+    Write-Host "[INFO] Official WinPython download page lookup failed:"
+    Write-Host "       $($_.Exception.Message)"
+}
+
+# Fallback: read the public GitHub releases Atom feed (not the REST API), then
+# try the selected filename against each recent release tag. This avoids both
+# API rate limits and the incorrect assumption that the asset is on "latest".
+try {
+    [xml] $ReleaseFeed = (
+        Invoke-WebRequest `
+            -Uri $ReleaseFeedUri `
+            -UseBasicParsing
+    ).Content
+
+    $Namespace = New-Object System.Xml.XmlNamespaceManager(
+        $ReleaseFeed.NameTable
+    )
+    $Namespace.AddNamespace(
+        "atom",
+        "http://www.w3.org/2005/Atom"
+    )
+
+    $Entries = @(
+        $ReleaseFeed.SelectNodes(
+            "//atom:entry",
+            $Namespace
+        )
+    )
+
+    foreach ($Entry in $Entries) {
+        $LinkNode = $Entry.SelectSingleNode(
+            "atom:link[@rel='alternate']",
+            $Namespace
+        )
+
+        if ($null -eq $LinkNode) {
+            continue
+        }
+
+        $ReleaseUri = [string] $LinkNode.href
+
+        if ($ReleaseUri -match "/releases/tag/([^/?#]+)") {
+            $Tag = [Uri]::UnescapeDataString($Matches[1])
+            $Candidate = (
+                "https://github.com/winpython/winpython/releases/download/" +
+                [Uri]::EscapeDataString($Tag) +
+                "/" +
+                [Uri]::EscapeDataString($SelectedName)
+            )
+
+            if (-not $DownloadCandidates.Contains($Candidate)) {
+                $DownloadCandidates.Add($Candidate)
+            }
+        }
+    }
+}
+catch {
+    Write-Host "[INFO] GitHub release-feed lookup failed:"
+    Write-Host "       $($_.Exception.Message)"
+}
+
+if ($DownloadCandidates.Count -eq 0) {
+    Fail @"
+No official download candidates could be resolved for:
+
+  $SelectedName
+
+Checked:
+  $WinPythonHomeUri
+  $ReleaseFeedUri
+"@
+}
+
+Write-Host "Asset: $SelectedName"
+Write-Host "Trying official download locations..."
+
+$DownloadUri = $null
+$DownloadErrors = New-Object System.Collections.Generic.List[string]
+
+foreach ($Candidate in $DownloadCandidates) {
+    Write-Host "  $Candidate"
+
+    if (Test-Path -LiteralPath $DownloadPath) {
+        Remove-Item -LiteralPath $DownloadPath -Force
+    }
+
+    try {
+        Invoke-WebRequest `
+            -Uri $Candidate `
+            -UseBasicParsing `
+            -MaximumRedirection 10 `
+            -OutFile $DownloadPath
+
+        if (-not (Test-Path -LiteralPath $DownloadPath)) {
+            throw "No file was created."
+        }
+
+        $CandidateLength = (
+            Get-Item -LiteralPath $DownloadPath
+        ).Length
+
+        if ($CandidateLength -lt 1000000) {
+            throw (
+                "Downloaded file is unexpectedly small " +
+                "($CandidateLength bytes)."
+            )
+        }
+
+        $DownloadUri = $Candidate
+        break
+    }
+    catch {
+        $DownloadErrors.Add(
+            "$Candidate`n    $($_.Exception.Message)"
+        )
+
+        if (Test-Path -LiteralPath $DownloadPath) {
+            Remove-Item -LiteralPath $DownloadPath -Force
+        }
+    }
+}
+
+if (-not $DownloadUri) {
+    $ErrorText = $DownloadErrors -join "`n"
+
     Fail @"
 The WinPython release asset could not be downloaded.
 
 Asset:
   $SelectedName
 
-Source:
-  $DownloadUri
+Official locations tried:
+$ErrorText
 
-This method does not use the GitHub REST API. If it still fails, the network
-may be blocking github.com or objects.githubusercontent.com.
-
-Original error:
-  $($_.Exception.Message)
+The network may be blocking github.com, objects.githubusercontent.com, or the
+official WinPython mirror.
 "@
 }
+
+Write-Host "Selected source:"
+Write-Host "  $DownloadUri"
 
 if (-not (Test-Path -LiteralPath $DownloadPath)) {
     Fail "The WinPython download did not complete."

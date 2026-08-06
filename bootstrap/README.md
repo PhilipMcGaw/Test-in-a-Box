@@ -94,15 +94,25 @@ The `bootstrap/` directory contains installation and environment
 preparation only. Engineering utilities belong in `tools/`; update and
 rollback logic belongs in `updater/`.
 
-
 ## Pico runtime support
 
-When Pico runtime support is missing, `bootstrap_pico.ps1` downloads the
-current official PicoSDK installer directly into
-`vendor/pico/installer/`.
+Pico Technology's Windows runtime requires a one-time administrator
+installation. Bootstrap does not elevate or execute the installer.
 
-Bootstrap never runs or deletes the installer. An administrator can install
-it once, after which rerunning bootstrap verifies TC-08 and PicoHRDL
-support.
+When the runtime is missing, `bootstrap_pico.ps1` downloads the official PicoSDK installer directly into
+`vendor/pico/installer/` and reports
+its location. An administrator can install it later, after which rerunning
+bootstrap verifies the TC-08 and PicoHRDL runtimes.
 
 See `docs/getting-started/PICO-RUNTIME.md`.
+
+## WinPython release resolution
+
+Bootstrap selects a stable Dot build and SHA-256 from WinPython's official
+checksum manifest. It does not assume that this build belongs to GitHub's
+release marked `latest`.
+
+The selected asset is resolved from the official WinPython download page, with
+the public GitHub releases Atom feed used as a no-API fallback. This avoids both
+GitHub REST API rate limits and invalid
+`/releases/latest/download/<filename>` URLs.
