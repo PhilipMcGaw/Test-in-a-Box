@@ -182,3 +182,11 @@ support.
 - ✅ Machine-readable run manifest
 - ✅ Human-readable Markdown run summary
 - ✅ Configuration, mapping and procedure SHA-256 provenance
+
+
+## Completed Blockly usability work
+
+- ✅ Wait durations accept literals, variables and expressions
+- ✅ PSU setpoints accept literals, variables and expressions
+- ✅ PSU ramp parameters accept literals, variables and expressions
+- ✅ Existing fixed-field Wait and Ramp blocks migrate on load

@@ -186,21 +186,25 @@ Blockly.Blocks['hw_psu_ramp_voltage'] = {
         "POSITION"
       );
 
+    this.appendValueInput("START")
+      .setCheck("Number")
+      .appendField("from");
+    this.appendValueInput("END")
+      .setCheck("Number")
+      .appendField("V to");
     this.appendDummyInput()
-      .appendField("from")
-      .appendField(new Blockly.FieldNumber(0), "START")
-      .appendField("V to")
-      .appendField(new Blockly.FieldNumber(12), "END")
       .appendField("V");
 
+    this.appendValueInput("STEP")
+      .setCheck("Number")
+      .appendField("step");
     this.appendDummyInput()
-      .appendField("step")
-      .appendField(new Blockly.FieldNumber(0.1, 0.000001), "STEP")
       .appendField("V");
 
+    this.appendValueInput("DWELL")
+      .setCheck("Number")
+      .appendField("dwell");
     this.appendDummyInput()
-      .appendField("dwell")
-      .appendField(new Blockly.FieldNumber(100, 0), "DWELL")
       .appendField(
         new Blockly.FieldDropdown([
           ["ms", "MS"],
@@ -209,12 +213,14 @@ Blockly.Blocks['hw_psu_ramp_voltage'] = {
         "DWELL_UNIT"
       );
 
+    this.setInputsInline(false);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour(210);
     this.setTooltip(
-      "Ramp a PSU voltage up or down. Enter a positive step magnitude; " +
-      "the direction is determined automatically from the start and end values."
+      "Ramp a PSU voltage up or down. Start, end, step and dwell can each " +
+      "be a literal number, variable, or maths expression. Enter a positive " +
+      "step magnitude; direction is determined automatically."
     );
   }
 };
@@ -302,9 +308,14 @@ Blockly.Blocks['hw_wait'] = {
       .appendField("wait");
     this.appendDummyInput()
       .appendField("seconds");
+    this.setInputsInline(true);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour(65);
+    this.setTooltip(
+      "Wait for a number of seconds. The duration can be a literal number, " +
+      "variable, or maths expression."
+    );
   }
 };
 

@@ -113,43 +113,63 @@ Blockly.Python.forBlock['hw_psu_read_current'] = function (block) {
 Blockly.Python.forBlock['hw_psu_ramp_voltage'] = function (block) {
   const [deviceId, positionId] = splitPosition(block);
 
-  const start = Number(block.getFieldValue('START'));
-  const end = Number(block.getFieldValue('END'));
-  const stepMagnitude = Math.abs(
-    Number(block.getFieldValue('STEP'))
-  );
-  const dwellRaw = Number(block.getFieldValue('DWELL'));
+  const start = Blockly.Python.valueToCode(
+    block,
+    'START',
+    Blockly.Python.ORDER_NONE
+  ) || '0';
+  const end = Blockly.Python.valueToCode(
+    block,
+    'END',
+    Blockly.Python.ORDER_NONE
+  ) || '12';
+  const step = Blockly.Python.valueToCode(
+    block,
+    'STEP',
+    Blockly.Python.ORDER_NONE
+  ) || '0.1';
+  const dwell = Blockly.Python.valueToCode(
+    block,
+    'DWELL',
+    Blockly.Python.ORDER_NONE
+  ) || '100';
   const dwellUnit = block.getFieldValue('DWELL_UNIT');
 
-  const safeStep = (
-    Number.isFinite(stepMagnitude) && stepMagnitude > 0
-  ) ? stepMagnitude : 0.1;
-
-  const dwellSeconds = dwellUnit === 'MS'
-    ? dwellRaw / 1000
-    : dwellRaw;
-
-  const ascending = end >= start;
-  const signedStep = ascending ? safeStep : -safeStep;
-  const comparison = ascending ? '<=' : '>=';
-
-  // A block-specific variable avoids collisions when multiple ramps are used
-  // in the same procedure. Blockly block IDs may contain punctuation, so
-  // normalise them into a valid Python identifier.
   const blockSuffix = String(block.id || 'voltage')
     .replace(/[^A-Za-z0-9_]/g, '_');
-  const variable = `_tiab_ramp_voltage_${blockSuffix}`;
+
+  const startVar = `_tiab_ramp_start_${blockSuffix}`;
+  const endVar = `_tiab_ramp_end_${blockSuffix}`;
+  const stepVar = `_tiab_ramp_step_${blockSuffix}`;
+  const dwellVar = `_tiab_ramp_dwell_${blockSuffix}`;
+  const valueVar = `_tiab_ramp_voltage_${blockSuffix}`;
+
+  const dwellExpression = dwellUnit === 'MS'
+    ? `((${dwell}) / 1000)`
+    : `(${dwell})`;
 
   return (
-    `${variable} = ${start}\n` +
-    `while ${variable} ${comparison} ${end}:\n` +
-    `    set(${JSON.stringify(deviceId)}, ` +
-    `${JSON.stringify(positionId)}, ${variable})\n` +
-    `    wait(${dwellSeconds})\n` +
-    `    ${variable} += ${signedStep}\n`
+    `${startVar} = (${start})\n` +
+    `${endVar} = (${end})\n` +
+    `${stepVar} = abs((${step}))\n` +
+    `${dwellVar} = ${dwellExpression}\n` +
+    `if ${stepVar} <= 0:\n` +
+    `    ${stepVar} = 0.1\n` +
+    `${valueVar} = ${startVar}\n` +
+    `if ${endVar} >= ${startVar}:\n` +
+    `    while ${valueVar} <= ${endVar}:\n` +
+    `        set(${JSON.stringify(deviceId)}, ` +
+    `${JSON.stringify(positionId)}, ${valueVar})\n` +
+    `        wait(${dwellVar})\n` +
+    `        ${valueVar} += ${stepVar}\n` +
+    `else:\n` +
+    `    while ${valueVar} >= ${endVar}:\n` +
+    `        set(${JSON.stringify(deviceId)}, ` +
+    `${JSON.stringify(positionId)}, ${valueVar})\n` +
+    `        wait(${dwellVar})\n` +
+    `        ${valueVar} -= ${stepVar}\n`
   );
 };
-
 
 // ---------------------------------------------------------------------------
 // Relay blocks
@@ -203,12 +223,12 @@ Blockly.Python.forBlock['hw_relay_all'] = function (block) {
 // ---------------------------------------------------------------------------
 
 Blockly.Python.forBlock['hw_wait'] = function (block) {
-  const seconds =
-    Blockly.Python.valueToCode(
-      block,
-      'SECONDS',
-      Blockly.Python.ORDER_NONE
-    ) || '1';
+  const seconds = Blockly.Python.valueToCode(
+    block,
+    'SECONDS',
+    Blockly.Python.ORDER_NONE
+  ) || '1';
+
   return `wait(${seconds})\n`;
 };
 
