@@ -13,3 +13,5 @@ board.
 - [EA PS 2000 B (2020 TFT)](ea-ps2000b.md)
 
 - [PSU commissioning controls](commissioning-controls.md)
+
+- [LAB-DCH 30-665 RS232 power supply](labdch-30-665.md)

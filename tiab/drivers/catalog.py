@@ -125,6 +125,72 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
     ),
 },
 
+    "labdch_30_665": {
+        "label": "LAB-DCH 30-665 PSU",
+        "manufacturer": "LAB-DCH",
+        "instrument_category": "Power Supply",
+        "category": "psu",
+        "default_role": "Power Supply",
+        "fields": [
+            {
+                "name": "serial_port",
+                "label": "COM Port",
+                "type": "text",
+                "default": "COM5",
+            },
+            {
+                "name": "baudrate",
+                "label": "Baud Rate",
+                "type": "number",
+                "default": 9600,
+            },
+            {
+                "name": "timeout",
+                "label": "Serial Timeout (s)",
+                "type": "number",
+                "default": 2.0,
+            },
+            {
+                "name": "minimum_interval",
+                "label": "Minimum Command Interval (s)",
+                "type": "number",
+                "default": 0.05,
+            },
+            {
+                "name": "command_terminator",
+                "label": "Command Terminator",
+                "type": "text",
+                "default": "\\n",
+            },
+            {
+                "name": "remote_on_connect",
+                "label": "Enter Remote Mode on Connect",
+                "type": "boolean",
+                "default": True,
+            },
+            {
+                "name": "local_on_close",
+                "label": "Return to Local Mode on Close",
+                "type": "boolean",
+                "default": True,
+            },
+        ],
+        "description": (
+            "LAB-DCH 30-665 programmable DC power supply over RS232. "
+            "Supports voltage/current setpoints, measured voltage/current, "
+            "output control, OVP, identification and safe-state output off."
+        ),
+        "setup_note": (
+            "Use a null-modem RS232 cable. Default serial settings are "
+            "9600 baud, 8 data bits, no parity, 1 stop bit and no flow control."
+        ),
+        "status": "unverified",
+        "status_description": (
+            "Implemented from the supplied LAB-DCH 30-665 RS232 quick "
+            "reference and awaiting validation on physical hardware."
+        ),
+    },
+
     "scpi": {
         "label": "Generic SCPI Instrument",
         "manufacturer": "Generic",

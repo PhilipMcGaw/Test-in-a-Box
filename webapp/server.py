@@ -40,6 +40,7 @@ import tiab.drivers.aimtti_psu  # noqa: F401
 import tiab.drivers.mock  # noqa: F401
 import tiab.drivers.scpi_generic  # noqa: F401
 import tiab.drivers.serial.ea_ps2000b  # noqa: F401
+import tiab.drivers.serial.labdch_psu  # noqa: F401
 import tiab.drivers.serial.seeit_relay  # noqa: F401
 import tiab.drivers.usb.seeit_relay  # noqa: F401
 

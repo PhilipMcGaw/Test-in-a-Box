@@ -183,8 +183,10 @@ support.
 - ✅ Human-readable Markdown run summary
 - ✅ Configuration, mapping and procedure SHA-256 provenance
 
-## Completed Blockly usability work
 
-- ✅ Right-click block duplication
-- ✅ Ctrl+D / Command+D block duplication
-- ✅ Silent no-op when no block is selected
+## LAB-DCH 30-665 support
+
+- ✅ RS232 driver implemented from supplied protocol reference
+- ✅ Existing capability-based PSU Blockly blocks supported
+- ✅ Output-off safe state
+- ⬜ Physical hardware bench validation
