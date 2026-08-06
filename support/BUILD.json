@@ -1,8 +1,9 @@
 {
   "schema_version": 1,
   "version_file": "../VERSION",
-  "bootstrap_version": "2.2",
+  "bootstrap_version": "2.1.4",
   "updater_version": "2.0",
   "release_stage": "alpha",
-  "repository_layout": "refactor-v1"
+  "repository_layout": "refactor-v1",
+  "version_information": "1.0"
 }

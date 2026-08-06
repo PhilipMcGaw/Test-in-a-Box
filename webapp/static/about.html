@@ -8,18 +8,124 @@
 <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/icon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/apple-touch-icon.png">
 <style>
-  html, body { height: 100%; margin: 0; font-family: Segoe UI, Arial, sans-serif; color: #222; }
-  #top-bar { background: #23272f; color: white; padding: 10px 16px; display: flex; align-items: center; gap: 16px; }
-  #top-bar h1 { font-size: 16px; margin: 0; font-weight: 600; }
-  #top-bar a.nav-link { color: #9fb3c8; text-decoration: none; font-size: 13px; }
-  #top-bar a.nav-link:hover { text-decoration: underline; }
-  #content { max-width: 720px; margin: 0 auto; padding: 32px 24px 60px 24px; line-height: 1.55; }
-  #content h2 { font-size: 18px; margin-top: 32px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
-  #content h2:first-of-type { margin-top: 0; }
-  #content a { color: #2980b9; }
-  #content code { background: #f2f2f2; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
-  .support-box { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 6px; padding: 14px 18px; margin-top: 12px; }
-  footer { text-align: center; color: #999; font-size: 12px; margin-top: 40px; }
+  html, body {
+    min-height: 100%;
+    margin: 0;
+    font-family: Segoe UI, Arial, sans-serif;
+    color: #222;
+    background: #f4f6f8;
+  }
+
+  #top-bar {
+    background: #23272f;
+    color: white;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  #top-bar h1 {
+    font-size: 16px;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  #top-bar a.nav-link {
+    color: #9fb3c8;
+    text-decoration: none;
+    font-size: 13px;
+  }
+
+  #top-bar a.nav-link:hover {
+    text-decoration: underline;
+  }
+
+  #content {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 32px 24px 60px;
+    line-height: 1.55;
+  }
+
+  .version-card,
+  .support-box {
+    background: white;
+    border: 1px solid #dce2e8;
+    border-radius: 8px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 8px rgba(31, 45, 61, 0.06);
+  }
+
+  .version-card h2 {
+    margin: 0 0 16px;
+    border: 0;
+    padding: 0;
+  }
+
+  .version-grid {
+    display: grid;
+    grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
+    gap: 8px 18px;
+    margin: 0;
+  }
+
+  .version-grid dt {
+    color: #5d6a75;
+    font-weight: 600;
+  }
+
+  .version-grid dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-family: Consolas, "Courier New", monospace;
+  }
+
+  .status {
+    margin-top: 14px;
+    color: #66737f;
+    font-size: 13px;
+  }
+
+  .status.error {
+    color: #a02929;
+  }
+
+  #content h2 {
+    font-size: 18px;
+    margin-top: 32px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 6px;
+  }
+
+  #content a {
+    color: #2980b9;
+  }
+
+  #content code {
+    background: #eef1f4;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 13px;
+  }
+
+  footer {
+    text-align: center;
+    color: #7e8993;
+    font-size: 12px;
+    margin-top: 40px;
+  }
+
+  @media (max-width: 560px) {
+    .version-grid {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    .version-grid dd {
+      margin-bottom: 10px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -31,83 +137,101 @@
     <a class="nav-link" href="/supported-devices">Supported Devices</a>
   </div>
 
-  <div id="content">
+  <main id="content">
+    <section class="version-card" aria-labelledby="version-heading">
+      <h2 id="version-heading">Installed Version</h2>
+      <dl class="version-grid">
+        <dt>Test in a Box</dt>
+        <dd id="version">Loading…</dd>
+
+        <dt>Release stage</dt>
+        <dd id="release-stage">Loading…</dd>
+
+        <dt>Repository layout</dt>
+        <dd id="repository-layout">Loading…</dd>
+
+        <dt>Bootstrap</dt>
+        <dd id="bootstrap-version">Loading…</dd>
+
+        <dt>Updater</dt>
+        <dd id="updater-version">Loading…</dd>
+
+        <dt>Python</dt>
+        <dd id="python-version">Loading…</dd>
+
+        <dt>Update channel</dt>
+        <dd id="update-channel">Loading…</dd>
+
+        <dt>Update ref</dt>
+        <dd id="update-ref">Loading…</dd>
+
+        <dt>Commit</dt>
+        <dd id="commit">Loading…</dd>
+
+        <dt>Last managed update</dt>
+        <dd id="updated-at">Loading…</dd>
+
+        <dt>Source archive SHA-256</dt>
+        <dd id="archive-sha256">Loading…</dd>
+      </dl>
+      <div id="version-status" class="status" role="status">
+        Reading installed build information…
+      </div>
+    </section>
+
     <h2>What this is</h2>
     <p>
-      Test in a Box is a visual, Blockly-based tool for building and running
-      hardware test sequences — define your test equipment, drag blocks
-      together to write a test script without needing to write code, and get
-      live console output plus live console output and per-DUT CSV logs.
+      Test in a Box is a visual engineering test-automation platform for
+      building and running repeatable electrical and environmental validation
+      procedures.
+    </p>
+
+    <h2>Version sources</h2>
+    <p>
+      This page reads the same software identity used by run manifests and
+      Markdown reports:
+    </p>
+    <ul>
+      <li><code>VERSION</code> for the Test in a Box release version;</li>
+      <li><code>support/BUILD.json</code> for component and layout versions;</li>
+      <li><code>.update-state.json</code> for managed-update channel, ref,
+        commit, timestamp and archive hash.</li>
+    </ul>
+    <p>
+      An installation that has not yet been managed by Updater V2 is shown as
+      <code>unmanaged</code>.
     </p>
 
     <h2>Help</h2>
-    <p>A few quick pointers:</p>
     <ul>
-      <li><strong>Test Builder</strong> — drag blocks from the toolbox to write a
-        sequence. Use <strong>Run</strong>, <strong>Pause</strong>, <strong>Step</strong>,
-        and <strong>Stop</strong> to control execution. Save and reload sequences
-        using the bar just below the toolbar.</li>
-      <li><strong>Configure Devices</strong> — drag device types from the sidebar
-        onto the canvas to add PSUs, relays, and other instruments. Each device
-        gets a front-panel-style display; use <strong>Save &amp; Reconnect</strong>
-        to apply changes.</li>
-      <li><strong>Supported Devices</strong> — a running list of every device type
-        this app can talk to, and how confident we are in each driver.</li>
-      <li>Full setup and troubleshooting notes live in <code>SETUP_INSTRUCTIONS.md</code>
-        and <code>README.md</code> in the project folder.</li>
+      <li><strong>Test Builder</strong> creates and runs Blockly procedures.</li>
+      <li><strong>Configure Devices</strong> configures and commissions
+        instruments.</li>
+      <li><strong>Supported Devices</strong> records driver support and
+        validation status.</li>
+      <li>Setup guidance is under
+        <code>docs/getting-started/</code> in the project folder.</li>
     </ul>
-
-    <h2>Current Bench-Tested Milestone</h2>
-    <p>
-      Blockly-generated procedures have been used to control a physical
-      Thurlby Thandar QL355P power supply. Bench-tested operations include
-      instrument identification, voltage and current setpoints, output enable,
-      output disable, and timed execution.
-    </p>
-    <p>
-      Engineering examples are included in the repository's
-      <code>examples</code> directory. Automatic instrument-identity recording
-      and Markdown run summaries remain planned Version 0.1 work.
-    </p>
-
-    <h2>Seeit relay setup</h2>
-    <p>
-      Test in a Box supports the USB-RELAY08 virtual-COM-port version and the
-      USBB native-USB version that uses the vendor DLL. See the instrument
-      documentation for setup details and validation status.
-    </p>
-    <p>
-      Driver downloads are available from the
-      <a
-        href="https://seeit.fr/produits.php?produit_ref=USB-RELAY08"
-        target="_blank"
-        rel="noopener noreferrer">Seeit product page</a>.
-    </p>
-    <p>
-      For shared laboratories and education, an enclosed board with clearly
-      labelled, touch-safe breakout connectors is recommended.
-    </p>
 
     <h2>Copyright &amp; License</h2>
     <p>
       Test in a Box &copy; 2026 Philip McGaw. Licensed under the
       <strong>PolyForm Noncommercial License 1.0.0</strong>.
-      See the <code>LICENSE</code> file in the project root for the full terms.
+      See <code>LICENSE</code> for the full terms.
     </p>
 
     <h2>Author &amp; Support</h2>
     <div class="support-box">
-      <p>
-        Built by Philip McGaw — EMC and hardware test engineer.<br>
-        Website: <a href="https://philipmcgaw.com" target="_blank" rel="noopener">philipmcgaw.com</a>
-      </p>
-      <p>
-        For questions, support, or to report an issue with this tool, please
-        get in touch via the website above.
-      </p>
+      Built by Philip McGaw — EMC and hardware test engineer.<br>
+      Website:
+      <a href="https://philipmcgaw.com" target="_blank" rel="noopener">
+        philipmcgaw.com
+      </a>
     </div>
 
     <footer>Test in a Box</footer>
-  </div>
+  </main>
+
+  <script src="/static/about.js"></script>
 </body>
 </html>

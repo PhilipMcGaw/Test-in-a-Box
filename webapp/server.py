@@ -56,8 +56,10 @@ from tiab.run.control import RunControl, StopRequested
 from tiab.run.instrument import instrument_source
 from tiab.run.mapping import DutMapping
 from tiab.run.runner import AssertionFailure, TestRunner
+from tiab.run.provenance import collect_software_identity
 
 BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent
 CONFIG_PATH = BASE_DIR / "config.json"
 RUNS_DIR = BASE_DIR / "runs"
 SEQUENCES_DIR = BASE_DIR / "sequences"
@@ -565,6 +567,29 @@ def _validate_generated_code(tree: ast.AST) -> None:
     _GeneratedCodeValidator().visit(tree)
 
 
+def _version_information() -> dict[str, Any]:
+    """Return the installed build identity used by UI and reports."""
+    return collect_software_identity(PROJECT_ROOT)
+
+
+def _print_startup_version() -> None:
+    info = _version_information()
+
+    print("")
+    print("=" * 60)
+    print(f"Test in a Box {info.get('version', 'unknown')}")
+    print("=" * 60)
+    print(f"Repository layout: {info.get('repository_layout', 'unknown')}")
+    print(f"Bootstrap:         {info.get('bootstrap_version', 'unknown')}")
+    print(f"Updater:           {info.get('updater_version', 'unknown')}")
+    print(f"Python:            {info.get('python_version', 'unknown')}")
+    print(f"Update channel:    {info.get('update_channel', 'unmanaged')}")
+    print(f"Update ref:        {info.get('update_ref', 'unknown')}")
+    print(f"Commit:            {info.get('commit', 'unknown')}")
+    print("=" * 60)
+    print("")
+
+
 # ---------------------------------------------------------------------------
 # Application lifecycle
 # ---------------------------------------------------------------------------
@@ -572,6 +597,8 @@ def _validate_generated_code(tree: ast.AST) -> None:
 @app.on_event("startup")
 def startup() -> None:
     global _config, _devices
+
+    _print_startup_version()
 
     config = _load_config()
     devices = _connect_devices(config)
@@ -619,6 +646,12 @@ def about_page() -> FileResponse:
 @app.get("/supported-devices")
 def supported_devices_page() -> FileResponse:
     return FileResponse(str(BASE_DIR / "static" / "supported-devices.html"))
+
+
+@app.get("/api/version")
+def api_version() -> JSONResponse:
+    """Return the same installed build identity used by run reports."""
+    return JSONResponse(_version_information())
 
 
 # ---------------------------------------------------------------------------

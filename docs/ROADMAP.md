@@ -164,3 +164,11 @@ support.
 ## Completed usability improvements
 
 - ✅ Relay channel naming and Blockly labels
+
+## Completed version information work
+
+- ✅ Shared `/api/version` endpoint
+- ✅ Dynamic About page
+- ✅ Startup version banner
+- ✅ VERSION, BUILD.json and update-state integration
+- ✅ Run reports and About page use the same software identity
