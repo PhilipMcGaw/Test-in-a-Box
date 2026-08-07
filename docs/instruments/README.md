@@ -15,3 +15,7 @@ board.
 - [PSU commissioning controls](commissioning-controls.md)
 
 - [LAB-DCH 30-665 RS232 power supply](labdch-30-665.md)
+
+- [Pico TC-08](pico-tc08.md)
+
+- [Pico ADC-20 / ADC-24](pico-adc-20-24.md)

@@ -211,7 +211,7 @@ The repository currently includes support for:
 - Aim-TTi programmable power supplies.
 - [Seeit USB and USBB relay controllers](instruments/seeit-usb-relay08.md).
 - [Pico TC-08](instruments/pico-tc08.md).
-- Pico ADC-20/24.
+- [Pico ADC-20/24](instruments/pico-adc-20-24.md).
 - Mock hardware.
 
 Additional drivers will be added as real engineering projects require them.

@@ -9,10 +9,14 @@ unit.
 
 from __future__ import annotations
 
+from ctypes import c_int16, c_int32, byref
 from typing import Any
 
 from .base import CapabilityDescriptor, Driver, Position, PositionKind
 from .registry import register_driver
+from ..runtime import prepare_vendor_runtime
+
+prepare_vendor_runtime("pico")
 
 try:
     from picosdk.picohrdl import picohrdl as hrdl
@@ -22,9 +26,22 @@ except ImportError:  # pragma: no cover
 
 @register_driver("pico_adc")
 class PicoAdcDriver(Driver):
-    def __init__(self, device_id: str, on_event=None, num_channels: int = 8):
+    def __init__(
+        self,
+        device_id: str,
+        on_event=None,
+        model: str = "adc20",
+        num_channels: int = 8,
+        voltage_range: int = 0,
+        conversion_time: int = 0,
+    ):
         super().__init__(device_id, on_event)
+        self._model = str(model).strip().lower()
+        if self._model not in {"adc20", "adc24"}:
+            raise ValueError("model must be 'adc20' or 'adc24'")
         self._num_channels = num_channels
+        self._voltage_range = int(voltage_range)
+        self._conversion_time = int(conversion_time)
         self._handle = None
 
     def connect(self) -> None:
@@ -35,16 +52,32 @@ class PicoAdcDriver(Driver):
                 "the offline PicoSDK installer, then have an administrator "
                 "install it once on this machine."
             )
-        self._handle = hrdl.usb_hrdl_open_unit()
+        self._handle = hrdl._openUnit_()
         if self._handle <= 0:
             raise RuntimeError(f"{self.device_id}: failed to open ADC unit")
         for ch in range(1, self._num_channels + 1):
-            hrdl.usb_hrdl_set_analog_in_channel(self._handle, ch, enabled=1)
+            status = hrdl._setAnalogInChannel_(
+                self._handle,
+                ch,
+                1,
+                self._voltage_range,
+                1,
+            )
+            if status != 1:
+                raise RuntimeError(
+                    f"{self.device_id}: failed to enable ADC channel {ch}"
+                )
+        if self._model == "adc24":
+            status = hrdl._setDigitalIOChannel_(self._handle, 0, 0, 15)
+            if status != 1:
+                raise RuntimeError(
+                    f"{self.device_id}: failed to enable ADC-24 digital inputs"
+                )
         self._connected = True
 
     def close(self) -> None:
         if self._handle:
-            hrdl.usb_hrdl_close_unit(self._handle)
+            hrdl._closeUnit_(self._handle)
         self._connected = False
 
     def capabilities(self) -> CapabilityDescriptor:
@@ -53,15 +86,73 @@ class PicoAdcDriver(Driver):
                      kind=PositionKind.INPUT_ANALOG, unit="V")
             for i in range(1, self._num_channels + 1)
         ]
+        if self._model == "adc24":
+            positions.extend(
+                Position(
+                    id=f"d{i}",
+                    label=f"Digital Input {i}",
+                    kind=PositionKind.INPUT_DIGITAL,
+                )
+                for i in range(1, 5)
+            )
         return CapabilityDescriptor(
             device_type="pico_adc",
             device_id=self.device_id,
-            display_name="Pico ADC-20/24",
+            display_name=f"Pico {self._model.upper()}",
             positions=positions,
         )
 
     def read(self, position_id: str) -> Any:
+        if position_id.startswith("d"):
+            if self._model != "adc24":
+                raise ValueError(
+                    f"{self.device_id}: digital inputs are only available on ADC-24"
+                )
+            pin = int(position_id[1:])
+            if pin not in range(1, 5):
+                raise ValueError(f"{self.device_id}: invalid digital input {pin}")
+            digital_value = self.read_digital_port()
+            value = bool(digital_value & (1 << (pin - 1)))
+            self._emit(position_id, value, None, event_type="measurement")
+            return value
+
+        if not position_id.startswith("ch"):
+            raise ValueError(f"{self.device_id}: invalid ADC position {position_id!r}")
         ch = int(position_id[len("ch"):])
-        value = hrdl.usb_hrdl_get_single_value(self._handle, ch)
+        overflow = c_int16()
+        raw_millivolts = c_int32()
+        status = hrdl._getSingleValue_(
+            self._handle,
+            ch,
+            self._voltage_range,
+            self._conversion_time,
+            1,
+            byref(overflow),
+            byref(raw_millivolts),
+        )
+        if status != 1:
+            raise RuntimeError(
+                f"{self.device_id}: ADC read failed for channel {ch}"
+            )
+        value = raw_millivolts.value / 1000.0
         self._emit(position_id, value, "V", event_type="measurement")
         return value
+
+    def read_digital_port(self) -> int:
+        """Read the ADC-24 four-bit digital input port."""
+        if self._model != "adc24":
+            raise RuntimeError("digital inputs are only available on ADC-24")
+        overflow = c_int16()
+        raw_value = c_int32()
+        status = hrdl._getSingleValue_(
+            self._handle,
+            0,
+            self._voltage_range,
+            self._conversion_time,
+            1,
+            byref(overflow),
+            byref(raw_value),
+        )
+        if status != 1:
+            raise RuntimeError(f"{self.device_id}: ADC-24 digital read failed")
+        return raw_value.value & 0x0F

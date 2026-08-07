@@ -54,6 +54,13 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "default_role": "Power Supply",
         "fields": [
             {
+                "name": "model",
+                "label": "Pico model",
+                "type": "select",
+                "options": ["adc20", "adc24"],
+                "default": "adc20",
+            },
+            {
                 "name": "serial_port",
                 "label": "COM Port",
                 "type": "serial_port",
@@ -423,7 +430,8 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         ],
         "description": (
             "Pico Technology ADC-20 and ADC-24 high-resolution data loggers "
-            "using the official PicoSDK PicoHRDL wrapper."
+            "using the official PicoSDK PicoHRDL wrapper. ADC-24 exposes four "
+            "digital input positions in addition to analogue channels."
         ),
         "status": "unverified",
         "status_description": VALIDATION_STATUSES["unverified"],
