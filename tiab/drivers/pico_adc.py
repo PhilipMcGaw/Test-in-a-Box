@@ -9,7 +9,7 @@ unit.
 
 from __future__ import annotations
 
-from ctypes import c_int16, c_int32, byref
+from ctypes import c_int16, c_int32, byref, create_string_buffer
 from typing import Any
 
 from .base import CapabilityDescriptor, Driver, Position, PositionKind
@@ -79,6 +79,27 @@ class PicoAdcDriver(Driver):
         if self._handle:
             hrdl._closeUnit_(self._handle)
         self._connected = False
+
+    def identify(self) -> dict[str, str]:
+        """Return the Pico batch/serial identity for this connected unit."""
+        if not self._handle:
+            return {}
+        buffer = create_string_buffer(256)
+        length = hrdl._getUnitInfo_(
+            self._handle,
+            buffer,
+            len(buffer),
+            hrdl.PICO_INFO["PICO_BATCH_AND_SERIAL"],
+        )
+        if length <= 0:
+            return {}
+        serial = buffer.value.decode("ascii", errors="replace").strip()
+        return {
+            "manufacturer": "Pico Technology",
+            "model": self._model.upper(),
+            "serial": serial,
+            "idn": f"Pico Technology,{self._model.upper()},{serial}",
+        }
 
     def capabilities(self) -> CapabilityDescriptor:
         positions = [

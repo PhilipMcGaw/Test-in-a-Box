@@ -10,6 +10,10 @@ pico_adc
 
 Select the model explicitly with `adc20` or `adc24`.
 
+When a unit is connected, the driver captures the Pico batch/serial identity.
+That identity is written to run metadata and the run manifest, allowing
+multiple configured ADC units to be distinguished in reports.
+
 ## Analogue inputs
 
 Analogue positions are exposed as `ch1` onward and return volts. The number
@@ -58,3 +62,13 @@ d4 = False
 
 This confirms the read path and input configuration. Further validation with
 each input driven high and low remains required.
+
+## Current identity probe
+
+The connected Pico unit returned batch/serial identity:
+
+```text
+13198/046
+```
+
+The identity was read through PicoSDK and is not a manually assigned label.

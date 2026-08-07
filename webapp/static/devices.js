@@ -621,18 +621,65 @@ function renderRelayBody(card, capabilities) {
     `;
   }
 
+  const digitalPositions = capabilities
+    ? capabilities.positions.filter(
+        position => position.kind === 'input_digital'
+      )
+    : [];
+
+  for (const position of digitalPositions) {
+    const value = getLive(card.device_id, position.id);
+    html += `
+      <div class="readout-row">
+        <span class="readout-label">${escapeHtml(position.label)}</span>
+        <span
+          class="readout-value plain"
+          data-readout="${escapeHtml(position.id)}">
+          ${value === undefined || value === null ? '—' : (value ? 'HIGH' : 'LOW')}
+        </span>
+      </div>
+    `;
+  }
+
   return `<div class="relay-grid">${cells}</div>`;
 }
 
 
 function renderDaqBody(card, capabilities) {
-  const numChannels = capabilities
+  const analogPositions = capabilities
     ? capabilities.positions.filter(
-        position => position.id.startsWith('ch')
-      ).length
+        position => position.kind === 'input_analog'
+      )
+    : [];
+  const channelPositions = analogPositions.filter(
+    position => position.id.startsWith('ch')
+  );
+  const additionalAnalogPositions = analogPositions.filter(
+    position => !position.id.startsWith('ch')
+  );
+  const numChannels = capabilities
+    ? channelPositions.length
     : parseInt(card.kwargs.num_channels || 8, 10);
 
   let html = '';
+
+  for (const position of additionalAnalogPositions) {
+    const value = getLive(card.device_id, position.id);
+    html += `
+      <div class="readout-row">
+        <span class="readout-label">${escapeHtml(position.label)}</span>
+        <span
+          class="readout-value plain"
+          data-readout="${escapeHtml(position.id)}">
+          ${fmt(value, 2)}${
+            value !== undefined && value !== null && position.unit
+              ? ` ${escapeHtml(position.unit)}`
+              : ''
+          }
+        </span>
+      </div>
+    `;
+  }
 
   for (let channel = 1; channel <= numChannels; channel += 1) {
     const positionId = `ch${channel}`;
@@ -965,6 +1012,15 @@ function wireCardEvents(element, card) {
           control.type === 'number'
             ? Number(control.value)
             : control.value;
+
+        if (
+          card.device_type === 'pico_adc' &&
+          control.dataset.kwarg === 'model'
+        ) {
+          card.kwargs.num_channels =
+            control.value === 'adc24' ? 16 : 8;
+          renderCanvas();
+        }
       });
 
       control.addEventListener('mousedown', event => {

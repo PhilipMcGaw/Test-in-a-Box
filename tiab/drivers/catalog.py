@@ -54,13 +54,6 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "default_role": "Power Supply",
         "fields": [
             {
-                "name": "model",
-                "label": "Pico model",
-                "type": "select",
-                "options": ["adc20", "adc24"],
-                "default": "adc20",
-            },
-            {
                 "name": "serial_port",
                 "label": "COM Port",
                 "type": "serial_port",
@@ -422,10 +415,18 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "default_role": "Data Acquisition",
         "fields": [
             {
+                "name": "model",
+                "label": "Pico model",
+                "type": "select",
+                "options": ["adc20", "adc24"],
+                "default": "adc20",
+            },
+            {
                 "name": "num_channels",
                 "label": "Channels",
                 "type": "number",
                 "default": 8,
+                "help": "Use 8 for ADC-20 or 16 for ADC-24.",
             },
         ],
         "description": (

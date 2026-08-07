@@ -1,26 +1,12 @@
 {
   "devices": [
     {
-      "device_type": "seeit_usbb_native",
-      "device_id": "seeit_usbb_native_1",
-      "kwargs": {
-        "dll_path": "usb_relay_device.dll",
-        "device_path": "index:1",
-        "safe_state": "close_all"
-      },
-      "x": 99.0,
-      "y": 249.0
-    },
-    {
-      "device_type": "seeit_usbb_native",
-      "device_id": "seeit_usbb_native_2",
-      "kwargs": {
-        "dll_path": "usb_relay_device.dll",
-        "device_path": "index:2",
-        "safe_state": "close_all"
-      },
-      "x": 431.0,
-      "y": 244.0
+      "device_type": "pico_tc08",
+      "device_id": "Pico TC-08 1",
+      "kwargs": {},
+      "channel_labels": {},
+      "x": 87.0,
+      "y": 222.0
     }
   ],
   "mapping": []
