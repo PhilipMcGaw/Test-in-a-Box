@@ -574,7 +574,12 @@ async function saveSequence(saveAs = false) {
   }
   nameInput.value = name;
   const state = Blockly.serialization.workspaces.save(workspace);
-  const previewPng = await workspacePreviewPng();
+  let previewPng = null;
+  try {
+    previewPng = await workspacePreviewPng();
+  } catch (error) {
+    console.warn('Could not generate sequence preview:', error);
+  }
   try {
     const res = await fetch(`/api/sequences/${encodeURIComponent(name)}`, {
       method: 'POST',
@@ -597,6 +602,18 @@ async function saveSequence(saveAs = false) {
 
 function workspacePreviewPng() {
   return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    const timeout = setTimeout(() => finish(null), 1000);
+    if (!workspace || !workspace.getCanvas) {
+      clearTimeout(timeout);
+      finish(null);
+      return;
+    }
     const canvas = workspace.getCanvas();
     const box = canvas.getBBox();
     const padding = 24;
@@ -616,9 +633,13 @@ function workspacePreviewPng() {
       output.height = height;
       const context = output.getContext('2d');
       context.drawImage(image, 0, 0);
-      resolve(output.toDataURL('image/png'));
+      clearTimeout(timeout);
+      finish(output.toDataURL('image/png'));
     };
-    image.onerror = () => resolve(null);
+    image.onerror = () => {
+      clearTimeout(timeout);
+      finish(null);
+    };
     image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`;
   });
 }
