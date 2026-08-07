@@ -1,12 +1,34 @@
 {
   "devices": [
     {
-      "device_type": "pico_tc08",
-      "device_id": "Pico TC-08 1",
-      "kwargs": {},
+      "device_type": "labdch_30_665",
+      "device_id": "LAB-DCH 30-665 PSU 1",
+      "kwargs": {
+        "serial_port": "COM16",
+        "baudrate": 9600,
+        "timeout": 2,
+        "minimum_interval": 0.05,
+        "command_terminator": "\\n",
+        "remote_on_connect": true,
+        "local_on_close": true,
+        "trace_serial": true,
+        "select_ui_mode_on_enable": true,
+        "verify_output_state": true,
+        "output_standby_delay": 5,
+        "output_settle_delay": 2,
+        "output_enable_attempts": 2,
+        "verify_output_voltage": true,
+        "output_verify_timeout": 4,
+        "output_verify_interval": 0.25,
+        "output_verify_ratio": 0.8,
+        "output_second_enable_delay": 2,
+        "enable_trace": true,
+        "enable_trace_path": "logs/labdch_trace.log",
+        "trace_status_registers": true
+      },
       "channel_labels": {},
-      "x": 87.0,
-      "y": 222.0
+      "x": 62.0,
+      "y": 76.0
     }
   ],
   "mapping": []

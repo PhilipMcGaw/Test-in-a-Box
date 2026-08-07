@@ -30,15 +30,15 @@ class PicoAdcDriver(Driver):
         self,
         device_id: str,
         on_event=None,
-        model: str = "adc20",
+        model: str = "auto",
         num_channels: int = 8,
         voltage_range: int = 0,
         conversion_time: int = 0,
     ):
         super().__init__(device_id, on_event)
         self._model = str(model).strip().lower()
-        if self._model not in {"adc20", "adc24"}:
-            raise ValueError("model must be 'adc20' or 'adc24'")
+        if self._model not in {"auto", "adc20", "adc24"}:
+            raise ValueError("model must be 'auto', 'adc20' or 'adc24'")
         self._num_channels = num_channels
         self._voltage_range = int(voltage_range)
         self._conversion_time = int(conversion_time)
@@ -55,6 +55,23 @@ class PicoAdcDriver(Driver):
         self._handle = hrdl._openUnit_()
         if self._handle <= 0:
             raise RuntimeError(f"{self.device_id}: failed to open ADC unit")
+        if self._model == "auto":
+            variant = self._read_unit_info(
+                hrdl.PICO_INFO["PICO_VARIANT_INFO"]
+            ).upper().replace("-", "")
+            if "ADC24" in variant or variant == "24":
+                self._model = "adc24"
+                if self._num_channels == 8:
+                    self._num_channels = 16
+            elif "ADC20" in variant or variant == "20":
+                self._model = "adc20"
+                if self._num_channels == 8:
+                    self._num_channels = 8
+            else:
+                raise RuntimeError(
+                    f"{self.device_id}: unable to identify Pico ADC variant "
+                    f"({variant or 'unknown'})"
+                )
         for ch in range(1, self._num_channels + 1):
             status = hrdl._setAnalogInChannel_(
                 self._handle,
@@ -84,22 +101,29 @@ class PicoAdcDriver(Driver):
         """Return the Pico batch/serial identity for this connected unit."""
         if not self._handle:
             return {}
-        buffer = create_string_buffer(256)
-        length = hrdl._getUnitInfo_(
-            self._handle,
-            buffer,
-            len(buffer),
-            hrdl.PICO_INFO["PICO_BATCH_AND_SERIAL"],
+        serial = self._read_unit_info(
+            hrdl.PICO_INFO["PICO_BATCH_AND_SERIAL"]
         )
-        if length <= 0:
+        if not serial:
             return {}
-        serial = buffer.value.decode("ascii", errors="replace").strip()
         return {
             "manufacturer": "Pico Technology",
             "model": self._model.upper(),
             "serial": serial,
             "idn": f"Pico Technology,{self._model.upper()},{serial}",
         }
+
+    def _read_unit_info(self, info_type: int) -> str:
+        buffer = create_string_buffer(256)
+        length = hrdl._getUnitInfo_(
+            self._handle,
+            buffer,
+            len(buffer),
+            info_type,
+        )
+        if length <= 0:
+            return ""
+        return buffer.value.decode("ascii", errors="replace").strip()
 
     def capabilities(self) -> CapabilityDescriptor:
         positions = [

@@ -1,0 +1,17 @@
+timestamp,device_id,position,channel,value,unit,event_type
+2026-08-07T12:05:21.554938+00:00,LAB-DCH 30-665 PSU 1,output,output,False,,state
+2026-08-07T12:05:21.595770+00:00,LAB-DCH 30-665 PSU 1,voltage_set,voltage_set,36.0,V,state
+2026-08-07T12:05:21.646465+00:00,LAB-DCH 30-665 PSU 1,voltage_set,voltage_set,1.0,V,state
+2026-08-07T12:05:21.697298+00:00,LAB-DCH 30-665 PSU 1,voltage_set,voltage_set,12.0,V,state
+2026-08-07T12:05:31.136597+00:00,LAB-DCH 30-665 PSU 1,output,output,True,,state
+2026-08-07T12:05:32.152463+00:00,LAB-DCH 30-665 PSU 1,voltage_actual,voltage_actual,11.98,V,measurement
+2026-08-07T12:05:32.152574+00:00,11.98,,,LAB-DCH measured voltage at 12 V setpoint,,log
+2026-08-07T12:05:32.199290+00:00,LAB-DCH 30-665 PSU 1,current_actual,current_actual,0.0,A,measurement
+2026-08-07T12:05:32.199398+00:00,script,,,LAB-DCH measured current with no load,,log
+2026-08-07T12:05:32.254347+00:00,LAB-DCH 30-665 PSU 1,voltage_actual,voltage_actual,11.98,V,measurement
+2026-08-07T12:05:32.254473+00:00,script,,,PASS: LAB-DCH measured voltage outside 12 V ± 0.3 V,,assert
+2026-08-07T12:05:34.300650+00:00,LAB-DCH 30-665 PSU 1,output,output,False,,state
+2026-08-07T12:05:34.816457+00:00,LAB-DCH 30-665 PSU 1,voltage_actual,voltage_actual,0.0,V,measurement
+2026-08-07T12:05:34.816613+00:00,script,,,PASS: LAB-DCH output did not fall below 0.3 V after disable,,assert
+2026-08-07T12:05:34.816655+00:00,1,,,LAB-DCH smoke test complete,,log
+2026-08-07T12:05:34.852444+00:00,LAB-DCH 30-665 PSU 1,output,output,False,,state

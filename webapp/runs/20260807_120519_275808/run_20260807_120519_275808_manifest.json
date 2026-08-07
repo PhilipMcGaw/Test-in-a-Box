@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "run": {
+    "run_id": "20260807_120519_275808",
+    "status": "finished",
+    "start_utc": "2026-08-07T12:05:19.277740+00:00",
+    "finish_utc": "2026-08-07T12:05:34.852594+00:00",
+    "duration_seconds": 15.574854
+  },
+  "test_in_a_box": {
+    "version": "0.1.0-alpha",
+    "release_stage": "alpha",
+    "repository_layout": "refactor-v1",
+    "bootstrap_version": "2.1.4",
+    "update_channel": "unmanaged",
+    "update_ref": "unknown",
+    "commit": "unknown",
+    "archive_sha256": "unknown",
+    "updated_at": "unknown",
+    "updater_version": "2.2",
+    "python_version": "3.13.13"
+  },
+  "configuration": {
+    "sha256": "b391d73844aab1f6938ec736cabad0315805c5a44ecd6269b3af54dff767d2a5",
+    "snapshot": {
+      "devices": [
+        {
+          "device_type": "labdch_30_665",
+          "device_id": "LAB-DCH 30-665 PSU 1",
+          "kwargs": {
+            "serial_port": "COM15",
+            "baudrate": 9600,
+            "timeout": 2,
+            "minimum_interval": 0.05,
+            "command_terminator": "\\n",
+            "remote_on_connect": true,
+            "local_on_close": true,
+            "trace_serial": true,
+            "select_ui_mode_on_enable": true,
+            "verify_output_state": true,
+            "output_standby_delay": 5,
+            "output_settle_delay": 2,
+            "output_enable_attempts": 2,
+            "verify_output_voltage": true,
+            "output_verify_timeout": 4,
+            "output_verify_interval": 0.25,
+            "output_verify_ratio": 0.8,
+            "output_second_enable_delay": 2,
+            "enable_trace": true,
+            "enable_trace_path": "logs/labdch_trace.log",
+            "trace_status_registers": true
+          },
+          "channel_labels": {},
+          "x": 62.0,
+          "y": 76.0
+        }
+      ],
+      "mapping": []
+    }
+  },
+  "dut_mapping": {
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "snapshot": {}
+  },
+  "procedure": {
+    "format": "generated_python",
+    "sha256": "99e5e10c74291336d035280b64766a235e012160393f2a7392228ec7d2843746",
+    "source": "set(\"LAB-DCH 30-665 PSU 1\", \"output\", False)\nset(\"LAB-DCH 30-665 PSU 1\", \"voltage_set\", 36)\nset(\"LAB-DCH 30-665 PSU 1\", \"voltage_set\", 1)\nset(\"LAB-DCH 30-665 PSU 1\", \"voltage_set\", 12)\nset(\"LAB-DCH 30-665 PSU 1\", \"output\", True)\nwait(1)\nlog(\"LAB-DCH measured voltage at 12 V setpoint\", get(\"LAB-DCH 30-665 PSU 1\", \"voltage_actual\"))\nlog(\"LAB-DCH measured current with no load\", get(\"LAB-DCH 30-665 PSU 1\", \"current_actual\"))\nassert_that((abs((get(\"LAB-DCH 30-665 PSU 1\", \"voltage_actual\")) - (12)) <= (0.3)), \"LAB-DCH measured voltage outside 12 V ± 0.3 V\")\nset(\"LAB-DCH 30-665 PSU 1\", \"output\", False)\nwait(0.5)\nassert_that((abs((get(\"LAB-DCH 30-665 PSU 1\", \"voltage_actual\")) - (0)) <= (0.3)), \"LAB-DCH output did not fall below 0.3 V after disable\")\nlog(\"LAB-DCH smoke test complete\", 1)\n"
+  },
+  "configured_instruments": [
+    {
+      "device_id": "LAB-DCH 30-665 PSU 1",
+      "device_type": "labdch_30_665",
+      "connection": {
+        "serial_port": "COM15",
+        "baudrate": 9600,
+        "timeout": 2,
+        "minimum_interval": 0.05,
+        "command_terminator": "\\n",
+        "remote_on_connect": true,
+        "local_on_close": true,
+        "trace_serial": true,
+        "select_ui_mode_on_enable": true,
+        "verify_output_state": true,
+        "output_standby_delay": 5,
+        "output_settle_delay": 2,
+        "output_enable_attempts": 2,
+        "verify_output_voltage": true,
+        "output_verify_timeout": 4,
+        "output_verify_interval": 0.25,
+        "output_verify_ratio": 0.8,
+        "output_second_enable_delay": 2,
+        "enable_trace": true,
+        "enable_trace_path": "logs/labdch_trace.log",
+        "trace_status_registers": true
+      },
+      "channel_labels": {},
+      "identity": {
+        "manufacturer": "LAB-DCH",
+        "model": "LAB-DCH30-665",
+        "serial": "16.06.1042",
+        "firmware": "14.01.2016 V109-HP",
+        "idn": "LAB-DCH30-665 S.No.: 16.06.1042",
+        "transport": "RS232",
+        "connection": "9600 8-N-1, null modem",
+        "driver": "labdch_30_665"
+      },
+      "identity_captured": true
+    }
+  ],
+  "instrument_identities": {
+    "LAB-DCH 30-665 PSU 1": {
+      "manufacturer": "LAB-DCH",
+      "model": "LAB-DCH30-665",
+      "serial": "16.06.1042",
+      "firmware": "14.01.2016 V109-HP",
+      "idn": "LAB-DCH30-665 S.No.: 16.06.1042",
+      "transport": "RS232",
+      "connection": "9600 8-N-1, null modem",
+      "driver": "labdch_30_665"
+    }
+  }
+}

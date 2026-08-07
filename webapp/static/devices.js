@@ -1795,7 +1795,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     setStatus('Loading instrument library…');
 
     await loadDeviceTypes();
+    setStatus('Loading saved configuration...');
     await loadExistingConfig();
+    setStatus('Checking connected instruments...');
     await loadCapabilities();
 
     renderCanvas();

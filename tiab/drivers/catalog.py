@@ -418,8 +418,8 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
                 "name": "model",
                 "label": "Pico model",
                 "type": "select",
-                "options": ["adc20", "adc24"],
-                "default": "adc20",
+                "options": ["auto", "adc20", "adc24"],
+                "default": "auto",
             },
             {
                 "name": "num_channels",
