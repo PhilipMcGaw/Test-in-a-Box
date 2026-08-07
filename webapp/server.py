@@ -610,29 +610,44 @@ def _close_devices(devices: dict[str, Any]) -> None:
             print(f"[shutdown] failed to close {device_id}: {exc}")
 
 
-def _return_devices_to_safe_state(devices: dict[str, Any]) -> None:
+def _return_devices_to_safe_state(devices: dict[str, Any]) -> list[dict[str, str]]:
     """
-    Call an optional safe_state() hook on every driver.
+    Call safe_state() on every driver and return structured outcomes.
 
-    Drivers that control hazardous or energised equipment should implement
-    safe_state(). A future driver-interface update should make this method
-    mandatory for applicable instruments.
+    ``None`` remains accepted for existing drivers and is interpreted as an
+    applied result for compatibility. Exceptions are converted to failed
+    results so every device is attempted and the caller can report whether
+    the bench was fully returned to a known safe state.
     """
+    results: list[dict[str, str]] = []
     for device_id, driver in devices.items():
         safe_state = getattr(driver, "safe_state", None)
         if not callable(safe_state):
-            _broadcast_console(
-                f"[safety] {device_id}: driver has no safe_state() hook"
-            )
+            result = {"device_id": device_id, "status": "unsupported", "message": "driver has no safe_state() hook"}
+            results.append(result)
+            _broadcast_console(f"[safety] {device_id}: {result['message']}")
             continue
 
         try:
-            safe_state()
-            _broadcast_console(f"[safety] {device_id}: safe state applied")
+            outcome = safe_state()
+            if outcome is None:
+                result = {"device_id": device_id, "status": "applied", "message": "safe state applied"}
+            else:
+                result = {
+                    "device_id": device_id,
+                    "status": str(getattr(outcome, "status", "failed")),
+                    "message": str(getattr(outcome, "message", "")),
+                }
         except Exception as exc:
-            _broadcast_console(
-                f"[safety] {device_id}: safe-state command failed: {exc!r}"
-            )
+            result = {"device_id": device_id, "status": "failed", "message": repr(exc)}
+
+        results.append(result)
+        _broadcast_console(
+            f"[safety] {device_id}: {result['status']}"
+            + (f" — {result['message']}" if result["message"] else "")
+        )
+
+    return results
 
 
 def _build_mapping(config: dict[str, Any]) -> DutMapping:

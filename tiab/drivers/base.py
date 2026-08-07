@@ -111,6 +111,24 @@ class LogEvent:
         return datetime.now(timezone.utc).isoformat()
 
 
+@dataclass(frozen=True)
+class SafeStateResult:
+    """Outcome of attempting to return a device to its defined safe state."""
+
+    device_id: str
+    status: str
+    message: str = ""
+
+    VALID_STATUSES = frozenset({"applied", "unsupported", "failed"})
+
+    def __post_init__(self) -> None:
+        if self.status not in self.VALID_STATUSES:
+            raise ValueError(
+                f"invalid safe-state status {self.status!r}; "
+                f"expected one of {sorted(self.VALID_STATUSES)}"
+            )
+
+
 class Driver(ABC):
     """
     Common interface for every item of test equipment.
@@ -148,7 +166,7 @@ class Driver(ABC):
         """Return True when the driver considers itself connected."""
         return self._connected
 
-    def safe_state(self) -> None:
+    def safe_state(self) -> SafeStateResult:
         """
         Return the instrument to its defined safe condition.
 
@@ -156,9 +174,16 @@ class Driver(ABC):
         controls an output. Drivers for power supplies, relay controllers,
         chambers and similar equipment should override this method.
 
-        Safe-state implementations should be best-effort and should avoid
-        raising merely because one individual output could not be changed.
+        Safe-state implementations should be best-effort and should return a
+        failed result when the device cannot be confirmed safe. Existing
+        drivers may continue returning ``None``; callers treat that as an
+        applied result during the compatibility transition.
         """
+        return SafeStateResult(
+            device_id=self.device_id,
+            status="unsupported",
+            message="driver does not define a safe state",
+        )
 
     def set_event_sink(
         self,
