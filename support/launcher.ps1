@@ -7,12 +7,24 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$ProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
+$ProjectRoot = [string] $ProjectRoot
+$ProjectRoot = $ProjectRoot.Trim()
+$ProjectRoot = $ProjectRoot.Trim('"')
+
+if (-not (Test-Path -LiteralPath $ProjectRoot -PathType Container)) {
+    Write-Host ""
+    Write-Host "ERROR: Project directory was not found:"
+    Write-Host "  $ProjectRoot"
+    exit 1
+}
+
+$ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).Path
+
 $PythonExe = Join-Path $ProjectRoot "python\python.exe"
 $ReadyUrl = "http://127.0.0.1:8765/api/version"
 $BrowserUrl = "http://127.0.0.1:8765"
 
-if (-not (Test-Path -LiteralPath $PythonExe)) {
+if (-not (Test-Path -LiteralPath $PythonExe -PathType Leaf)) {
     Write-Host ""
     Write-Host "Could not find python.exe at:"
     Write-Host "  $PythonExe"
@@ -28,7 +40,6 @@ Write-Host "Keep this window open while you're using the app."
 Write-Host "Close this window to stop the app."
 Write-Host ""
 
-# Start exactly one server process and keep it attached to this console.
 $Server = Start-Process `
     -FilePath $PythonExe `
     -ArgumentList @("-m", "webapp.server") `
@@ -63,7 +74,6 @@ while ((Get-Date) -lt $Deadline) {
         }
     }
     catch {
-        # Normal while Uvicorn is still starting.
     }
 
     Start-Sleep -Milliseconds 250
@@ -86,7 +96,5 @@ if (-not $Ready) {
 Write-Host "Server ready. Opening browser..."
 Start-Process $BrowserUrl
 
-# Keep this launcher alive for the lifetime of the one server process so the
-# original command window remains the application's console.
 $Server.WaitForExit()
 exit $Server.ExitCode
