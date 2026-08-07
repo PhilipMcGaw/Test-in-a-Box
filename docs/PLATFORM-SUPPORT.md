@@ -21,7 +21,7 @@ every listed combination has been bench tested.
 | Aim-TTi serial driver | Bench tested on Windows | Expected; not yet bench tested | Expected; not yet bench tested |
 | Seeit USB-RELAY08 serial driver | Available; not yet bench tested | Expected; not yet bench tested | Expected; not yet bench tested |
 | Seeit USBB native USB driver | Bench tested | Not supported | Not supported |
-| Pico TC-08 / ADC-20/24 | Depends on PicoSDK installation | Depends on PicoSDK installation | Depends on PicoSDK installation |
+| Pico TC-08 / ADC-20/24 | TC-08 driver bench-probed; ADC support depends on PicoSDK installation | Depends on PicoSDK installation; not bench-tested | Depends on PicoSDK installation; not bench-tested |
 
 ## Seeit USBB native USB limitation
 

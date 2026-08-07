@@ -603,9 +603,19 @@ Current bench validation is required/outstanding.
 
 ### Pico TC-08 / ADC-20/24
 
-Driver implementations exist and depend on PicoSDK.
+The Pico TC-08 driver uses the official `picosdk` wrapper and `usbtc08.dll`.
+It exposes the internal temperature transducer plus external thermocouple
+channels 1–8, with Celsius measurements and configurable external channel
+types.
 
-Physical/integration status must be checked before making a strong support claim.
+The TC-08 driver has been bench-probed on a connected physical unit using a
+locally supplied PicoSDK DLL. The unit opened successfully and returned
+values for the internal transducer and channels 1–8. This is an initial bench
+probe, not production-proven status. Full Blockly workflow and robustness
+validation remain outstanding.
+
+The Pico ADC-20/24 driver implementation remains dependent on PicoSDK and
+requires separate validation.
 
 ### LAB-DCH 30-665
 
@@ -752,7 +762,7 @@ Nearer-term engineering workflow work includes:
 - EA PS 2000 B output-on validation;
 - Korad/Tenma bench test;
 - KEL103 bench test;
-- Pico TC-08 integration;
+- Full Pico TC-08 Blockly and robustness validation;
 - electronic-load blocks;
 - more PSU blocks;
 - temperature blocks;

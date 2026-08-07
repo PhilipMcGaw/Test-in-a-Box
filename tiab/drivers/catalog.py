@@ -399,7 +399,8 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "default_role": "Temperature Logger",
         "fields": [],
         "description": (
-            "Pico Technology TC-08 eight-channel thermocouple data logger using "
+            "Pico Technology TC-08 eight-channel thermocouple data logger with "
+            "an internal temperature transducer, using "
             "the official PicoSDK Python wrapper. Requires PicoSDK to be "
             "installed."
         ),

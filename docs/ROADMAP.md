@@ -68,7 +68,7 @@ Possible longer-term work includes:
 - [ ] Complete EA PS 2000 B output-on validation
 - [ ] Bench test Korad/Tenma PSU driver
 - [ ] Bench test KEL103 electronic load driver
-- [ ] Pico TC-08 integration
+- [x] Pico TC-08 driver integration and initial bench probe
 
 ### Blockly
 - [x] Relay blocks

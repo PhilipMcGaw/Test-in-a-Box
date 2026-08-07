@@ -13,10 +13,14 @@ per-DUT CSV instead of round-tripping through a broker.
 
 from __future__ import annotations
 
+from ctypes import c_float, c_int16
 from typing import Any
 
 from .base import CapabilityDescriptor, Driver, Position, PositionKind
 from .registry import register_driver
+from ..runtime import prepare_vendor_runtime
+
+prepare_vendor_runtime("pico")
 
 try:
     from picosdk.usbtc08 import usbtc08 as tc08
@@ -59,6 +63,13 @@ class PicoTC08Driver(Driver):
 
     def capabilities(self) -> CapabilityDescriptor:
         positions = [
+            Position(
+                id="internal_temperature",
+                label="Internal Temperature",
+                kind=PositionKind.INPUT_ANALOG,
+                unit="degC",
+            )
+        ] + [
             Position(id=f"ch{i}", label=f"TC Channel {i}",
                      kind=PositionKind.INPUT_ANALOG, unit="degC")
             for i in range(1, NUM_CHANNELS + 1)
@@ -70,16 +81,49 @@ class PicoTC08Driver(Driver):
             positions=positions,
         )
 
+    def _read_temperatures(self) -> list[float]:
+        """Read the TC-08's channels using the PicoSDK pointer API."""
+        temperatures = (c_float * (NUM_CHANNELS + 1))()
+        overflow = (c_int16 * (NUM_CHANNELS + 1))()
+        status = tc08.usb_tc08_get_single(
+            self._handle,
+            temperatures,
+            overflow,
+            tc08.USBTC08_UNITS["USBTC08_UNITS_CENTIGRADE"],
+        )
+        if status != 1:
+            raise RuntimeError(
+                f"{self.device_id}: TC-08 read failed with status {status}"
+            )
+        return [float(value) for value in temperatures]
+
     def read(self, position_id: str) -> Any:
+        temps = self._read_temperatures()
+        if position_id == "internal_temperature":
+            value = temps[0]
+            self._emit(position_id, value, "degC", event_type="measurement")
+            return value
+
+        if not position_id.startswith("ch"):
+            raise ValueError(
+                f"{self.device_id}: invalid TC-08 position {position_id!r}"
+            )
         ch = int(position_id[len("ch"):])
-        temps = tc08.usb_tc08_get_single(self._handle)
+        if ch not in range(1, NUM_CHANNELS + 1):
+            raise ValueError(f"{self.device_id}: invalid TC-08 channel {ch}")
         value = temps[ch]
         self._emit(position_id, value, "degC", event_type="measurement")
         return value
 
     def read_all(self) -> dict[str, float]:
-        temps = tc08.usb_tc08_get_single(self._handle)
-        result = {}
+        temps = self._read_temperatures()
+        result = {"internal_temperature": temps[0]}
+        self._emit(
+            "internal_temperature",
+            temps[0],
+            "degC",
+            event_type="measurement",
+        )
         for ch in self._tc_types:
             pos = f"ch{ch}"
             value = temps[ch]
