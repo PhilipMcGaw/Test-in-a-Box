@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import base64
 import contextlib
 import json
 import queue
@@ -286,6 +287,7 @@ class SequenceSaveRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     workspace: dict[str, Any]
+    preview_png: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -1627,6 +1629,11 @@ def api_sequences_save(
 
     path = SEQUENCES_DIR / f"{safe_name}.json"
     _atomic_write_json(path, req.workspace)
+    if req.preview_png:
+        if not req.preview_png.startswith("data:image/png;base64,"):
+            return JSONResponse({"detail": "preview must be a PNG data URL"}, status_code=400)
+        preview_path = SEQUENCES_DIR / f"{safe_name}.png"
+        preview_path.write_bytes(base64.b64decode(req.preview_png.split(",", 1)[1]))
 
     return JSONResponse({
         "status": "ok",
