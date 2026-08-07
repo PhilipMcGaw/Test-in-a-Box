@@ -279,5 +279,15 @@
         "y": 40
       }
     ]
-  }
+  },
+  "variables": [
+    {
+      "name": "decay_voltage",
+      "id": "var_decay_voltage"
+    },
+    {
+      "name": "decay_checks",
+      "id": "var_decay_checks"
+    }
+  ]
 }

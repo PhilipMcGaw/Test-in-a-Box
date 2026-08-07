@@ -221,3 +221,11 @@ support.
 - ✅ Configurable target-voltage ratio
 - ✅ Retry enable only after polling window expires
 - ⬜ Re-run LAB-DCH smoke and full validation procedures
+
+## LAB-DCH discharge polling
+
+- ✅ Output-off validation polls measured voltage
+- ✅ 250 ms poll interval
+- ✅ 5 second discharge timeout
+- ✅ 0.3 V pass threshold
+- ⬜ Re-run LAB-DCH smoke and full validation procedures
