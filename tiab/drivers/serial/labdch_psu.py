@@ -63,14 +63,14 @@ class LabDch30665Driver(Driver):
         trace_serial: bool = True,
         select_ui_mode_on_enable: bool = True,
         verify_output_state: bool = True,
-        output_standby_delay: float = 2.0,
-        output_settle_delay: float = 1.0,
+        output_standby_delay: float = 5.0,
+        output_settle_delay: float = 2.0,
         output_enable_attempts: int = 2,
         verify_output_voltage: bool = True,
         output_verify_timeout: float = 4.0,
         output_verify_interval: float = 0.25,
         output_verify_ratio: float = 0.8,
-        output_second_enable_delay: float = 1.0,
+        output_second_enable_delay: float = 2.0,
         enable_trace: bool = True,
         enable_trace_path: str = "logs/labdch_trace.log",
         trace_status_registers: bool = True,
@@ -446,12 +446,18 @@ class LabDch30665Driver(Driver):
 
     def _enable_output_stage(self) -> None:
         """
-        Energise the physical output and verify measured voltage.
+        Energise the physical output using the timing observed to work manually.
 
-        This diagnostic version also captures STATUS and *STB? before enable,
-        immediately after the second SB,R, and during each MU verification
-        poll. That lets us correlate a voltage collapse with a protection or
-        operating-state bit transition.
+        The primary sequence is:
+            SB,S
+            long standby dwell
+            SB,R
+            settle
+            verify SB + MU
+
+        A second SB,R is sent only when the first enable did not produce a
+        physical output. This mirrors the successful manual commissioning
+        sequence while avoiding unnecessary duplicate enables.
         """
         self._start_enable_trace()
 
@@ -479,93 +485,97 @@ class LabDch30665Driver(Driver):
 
             self._trace_status_snapshot("after-standby")
 
-            self._trace_enable_event(
-                "INFO",
-                "first enable command",
-            )
-            self._write_raw("SB,R")
-
-            self._trace_enable_event(
-                "WAIT",
-                f"between-enable delay {self._output_second_enable_delay:.3f} s",
-            )
-            self._wait_seconds(self._output_second_enable_delay)
-
-            self._trace_status_snapshot("after-first-enable")
-
-            self._trace_enable_event(
-                "INFO",
-                "second enable command",
-            )
-            self._write_raw("SB,R")
-
-            self._trace_enable_event(
-                "WAIT",
-                f"initial settle {self._output_settle_delay:.3f} s",
-            )
-            self._wait_seconds(self._output_settle_delay)
-
-            self._trace_status_snapshot("after-second-enable")
-
             measured_voltage = 0.0
             state_enabled = False
-            deadline = time.monotonic() + self._output_verify_timeout
-            poll_number = 0
 
-            while True:
-                poll_number += 1
-
-                state_enabled = _parse_output_state(
-                    self._query_raw("SB")
-                )
-                measured_voltage = _parse_numeric(
-                    self._query_raw("MU"),
-                    "MU",
-                    "V",
-                )
-
-                status = ""
-                stb = ""
-                if self._trace_status_registers:
-                    status, stb = self._trace_status_snapshot(
-                        f"poll={poll_number}"
-                    )
-
+            for attempt in range(1, self._output_enable_attempts + 1):
                 self._trace_enable_event(
-                    "STATE",
-                    (
-                        f"poll={poll_number} "
-                        f"SB={'R' if state_enabled else 'S'} "
-                        f"MU={measured_voltage:g} V"
-                        + (f" {status} {stb}" if status or stb else "")
-                    ),
+                    "INFO",
+                    f"enable attempt {attempt}/{self._output_enable_attempts}",
                 )
+                self._write_raw("SB,R")
 
-                if self._output_is_energised(
-                    target_voltage,
-                    measured_voltage,
-                    state_enabled,
-                ):
-                    self._stop_enable_trace(
-                        (
-                            f"success target={target_voltage:g} V "
-                            f"measured={measured_voltage:g} V "
-                            f"SB={'R' if state_enabled else 'S'}"
-                        )
-                    )
-                    return
-
-                if time.monotonic() >= deadline:
-                    break
+                settle = (
+                    self._output_settle_delay
+                    if attempt == 1
+                    else self._output_second_enable_delay
+                )
 
                 self._trace_enable_event(
                     "WAIT",
-                    (
-                        f"verify poll interval "
-                        f"{self._output_verify_interval:.3f} s"
-                    ),
+                    f"enable settle {settle:.3f} s",
                 )
-                self._wait_seconds(self._output_verify_interval)
+                self._wait_seconds(settle)
+
+                self._trace_status_snapshot(
+                    f"after-enable-attempt-{attempt}"
+                )
+
+                deadline = time.monotonic() + self._output_verify_timeout
+                poll_number = 0
+
+                while True:
+                    poll_number += 1
+
+                    state_enabled = _parse_output_state(
+                        self._query_raw("SB")
+                    )
+                    measured_voltage = _parse_numeric(
+                        self._query_raw("MU"),
+                        "MU",
+                        "V",
+                    )
+
+                    status = ""
+                    stb = ""
+                    if self._trace_status_registers:
+                        status, stb = self._trace_status_snapshot(
+                            f"attempt={attempt} poll={poll_number}"
+                        )
+
+                    self._trace_enable_event(
+                        "STATE",
+                        (
+                            f"attempt={attempt} "
+                            f"poll={poll_number} "
+                            f"SB={'R' if state_enabled else 'S'} "
+                            f"MU={measured_voltage:g} V"
+                            + (f" {status} {stb}" if status or stb else "")
+                        ),
+                    )
+
+                    if self._output_is_energised(
+                        target_voltage,
+                        measured_voltage,
+                        state_enabled,
+                    ):
+                        self._stop_enable_trace(
+                            (
+                                f"success attempt={attempt} "
+                                f"target={target_voltage:g} V "
+                                f"measured={measured_voltage:g} V "
+                                f"SB={'R' if state_enabled else 'S'}"
+                            )
+                        )
+                        return
+
+                    if time.monotonic() >= deadline:
+                        break
+
+                    self._trace_enable_event(
+                        "WAIT",
+                        (
+                            f"verify poll interval "
+                            f"{self._output_verify_interval:.3f} s"
+                        ),
+                    )
+                    self._wait_seconds(self._output_verify_interval)
+
+                if attempt < self._output_enable_attempts:
+                    self._trace_enable_event(
+                        "INFO",
+                        "first enable did not energise output; retrying SB,R",
+                    )
 
             message = (
                 f"{self.device_id}: output-enable sequence completed but the "

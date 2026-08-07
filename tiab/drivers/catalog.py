@@ -196,13 +196,13 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
                 "name": "output_standby_delay",
                 "label": "Output Standby Dwell (s)",
                 "type": "number",
-                "default": 2.0,
+                "default": 5.0,
             },
             {
                 "name": "output_settle_delay",
-                "label": "Output Enable Settle Time (s)",
+                "label": "First Enable Settle Time (s)",
                 "type": "number",
-                "default": 1.0,
+                "default": 2.0,
             },
             {
                 "name": "output_enable_attempts",
@@ -236,9 +236,9 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
             },
             {
                 "name": "output_second_enable_delay",
-                "label": "Delay Between Enable Commands (s)",
+                "label": "Retry Enable Settle Time (s)",
                 "type": "number",
-                "default": 1.0,
+                "default": 2.0,
             },
             {
                 "name": "enable_trace",

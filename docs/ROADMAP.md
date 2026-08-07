@@ -230,9 +230,10 @@ support.
 - ✅ 0.3 V pass threshold
 - ⬜ Re-run LAB-DCH smoke and full validation procedures
 
-## LAB-DCH STATUS/STB trace
+## LAB-DCH enable timing v4
 
-- ✅ STATUS snapshots around output-enable transitions
-- ✅ STB snapshots around output-enable transitions
-- ✅ STATUS/STB captured alongside each MU poll
-- ⬜ Identify bit transition associated with output collapse
+- ✅ 5 second standby dwell based on successful manual sequence
+- ✅ First `SB,R` treated as primary enable
+- ✅ Physical SB/MU verification after first enable
+- ✅ Second `SB,R` only used as fallback
+- ⬜ Re-run smoke and full validation on bench hardware
