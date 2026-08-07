@@ -1,0 +1,5 @@
+timestamp,device_id,position,channel,value,unit,event_type
+2026-08-07T16:13:32.326549+00:00,DUT set 2,,,False,,state
+2026-08-07T16:13:32.329561+00:00,Support Relays PSU,output1,output1,False,,state
+2026-08-07T16:13:32.330148+00:00,Coil PSU 1,output1,output1,False,,state
+2026-08-07T16:13:32.330756+00:00,Coil PSU 2,output1,output1,False,,state

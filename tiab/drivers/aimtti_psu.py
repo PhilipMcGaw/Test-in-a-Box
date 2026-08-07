@@ -25,18 +25,86 @@ from __future__ import annotations
 import contextlib
 from typing import Any, Optional
 
-from .base import CapabilityDescriptor, Driver, Position, PositionKind
+from .base import (
+    CapabilityDescriptor,
+    DiscoveredInstrument,
+    Driver,
+    Position,
+    PositionKind,
+)
 from .registry import register_driver
 
 try:
     import serial
+    from serial.tools import list_ports
 except ImportError:  # pragma: no cover
     serial = None
+    list_ports = None
 
 
 @register_driver("aimtti_psu")
 class AimTtiPsuDriver(Driver):
     """Driver for Aim-TTi programmable bench power supplies."""
+
+    @classmethod
+    def discover(cls, **kwargs) -> list[DiscoveredInstrument]:
+        """Find ports whose ``*IDN?`` response identifies an Aim-TTi PSU."""
+        if serial is None or list_ports is None:
+            return []
+
+        probe_kwargs = dict(kwargs)
+        probe_kwargs.pop("serial_port", None)
+        results: list[DiscoveredInstrument] = []
+
+        for port in sorted(list_ports.comports(), key=lambda item: item.device):
+            probe = cls(
+                device_id=f"probe:{port.device}",
+                serial_port=port.device,
+                on_event=None,
+                **probe_kwargs,
+            )
+            try:
+                probe.connect()
+                identity = probe.identify()
+                manufacturer = identity.get("manufacturer", "").strip()
+                model = identity.get("model", "").strip()
+                idn = identity.get("idn", "").strip()
+                identity_text = f"{manufacturer} {model} {idn}".upper()
+                if not (
+                    "AIM-TTI" in identity_text
+                    or "AIM TTI" in identity_text
+                    or "THURLBY THANDAR" in identity_text
+                ):
+                    continue
+
+                display_name = " — ".join(
+                    part for part in (port.device, manufacturer, model) if part
+                )
+                results.append(
+                    DiscoveredInstrument(
+                        driver_type="aimtti_psu",
+                        selector=port.device,
+                        display_name=display_name,
+                        manufacturer=manufacturer,
+                        model=model,
+                        serial=identity.get("serial", ""),
+                        transport="RS232/USB serial",
+                        connection=port.device,
+                        metadata={
+                            "firmware": identity.get("firmware", ""),
+                            "idn": idn,
+                            "port_description": port.description or "",
+                            "hardware_id": port.hwid or "",
+                        },
+                    )
+                )
+            except Exception:
+                continue
+            finally:
+                with contextlib.suppress(Exception):
+                    probe.close()
+
+        return results
 
     def __init__(
         self,

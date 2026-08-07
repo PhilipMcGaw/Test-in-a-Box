@@ -195,15 +195,9 @@ Blockly.Blocks['hw_psu_ramp_voltage'] = {
     this.appendDummyInput()
       .appendField("V");
 
-    this.appendValueInput("STEP")
-      .setCheck("Number")
-      .appendField("step");
-    this.appendDummyInput()
-      .appendField("V");
-
     this.appendValueInput("DWELL")
       .setCheck("Number")
-      .appendField("dwell");
+      .appendField("over");
     this.appendDummyInput()
       .appendField(
         new Blockly.FieldDropdown([
@@ -213,14 +207,15 @@ Blockly.Blocks['hw_psu_ramp_voltage'] = {
         "DWELL_UNIT"
       );
 
-    this.setInputsInline(false);
+    this.setInputsInline(true);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
     this.setColour(210);
     this.setTooltip(
-      "Ramp a PSU voltage up or down. Start, end, step and dwell can each " +
-      "be a literal number, variable, or maths expression. Enter a positive " +
-      "step magnitude; direction is determined automatically."
+      "Ramps the selected PSU output from the start voltage to the end voltage " +
+      "over the specified total time. The advanced increment defaults to 100 mV " +
+      "and the interval between updates is calculated automatically. Start, end " +
+      "and duration may be numbers, variables or maths expressions."
     );
   }
 };

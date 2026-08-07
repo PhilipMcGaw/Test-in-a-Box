@@ -1,0 +1,48 @@
+timestamp,key,value
+2026-08-07T15:54:57.771629+00:00,run_id,20260807_155457_768845
+2026-08-07T15:54:57.771696+00:00,run_start_utc,2026-08-07T15:54:57.770464+00:00
+2026-08-07T15:54:57.771747+00:00,hostname,L22937
+2026-08-07T15:54:57.771792+00:00,logged_in_user,philip.mcgaw
+2026-08-07T15:54:57.771836+00:00,operating_system,Windows
+2026-08-07T15:54:57.771878+00:00,os_release,11
+2026-08-07T15:54:57.771920+00:00,os_version,10.0.26100
+2026-08-07T15:54:57.771963+00:00,os_build,10.0.26100
+2026-08-07T15:54:57.772006+00:00,os_machine,AMD64
+2026-08-07T15:54:57.772058+00:00,os_platform_string,Windows-11-10.0.26100-SP0
+2026-08-07T15:54:57.773281+00:00,python_version,3.13.13
+2026-08-07T15:54:57.773372+00:00,instrument.Seeit USBB Relay (Native USB) 1.manufacturer,Seeit
+2026-08-07T15:54:57.773429+00:00,instrument.Seeit USBB Relay (Native USB) 1.model,USBB-RELAY08
+2026-08-07T15:54:57.773481+00:00,instrument.Seeit USBB Relay (Native USB) 1.serial,6QMBS
+2026-08-07T15:54:57.773530+00:00,instrument.Seeit USBB Relay (Native USB) 1.firmware,
+2026-08-07T15:54:57.773579+00:00,instrument.Seeit USBB Relay (Native USB) 1.idn,"SEEIT,USBB-RELAY08,6QMBS,USB-DLL"
+2026-08-07T15:54:57.773627+00:00,instrument.Seeit USBB Relay (Native USB) 1.transport,native_usb
+2026-08-07T15:54:57.773676+00:00,instrument.Seeit USBB Relay (Native USB) 1.selector,index:1
+2026-08-07T15:54:57.773722+00:00,instrument.Seeit USBB Relay (Native USB) 1.enumeration_index,1
+2026-08-07T15:54:57.773769+00:00,instrument.Seeit USBB Relay (Native USB) 1.device_path,NOTHING
+2026-08-07T15:54:57.773815+00:00,instrument.Seeit USBB Relay (Native USB) 1.driver,seeit_usbb_native
+2026-08-07T15:54:57.773871+00:00,instrument.Seeit USBB Relay (Native USB) 2.manufacturer,Seeit
+2026-08-07T15:54:57.773919+00:00,instrument.Seeit USBB Relay (Native USB) 2.model,USBB-RELAY08
+2026-08-07T15:54:57.773966+00:00,instrument.Seeit USBB Relay (Native USB) 2.serial,6QMBS
+2026-08-07T15:54:57.774011+00:00,instrument.Seeit USBB Relay (Native USB) 2.firmware,
+2026-08-07T15:54:57.774058+00:00,instrument.Seeit USBB Relay (Native USB) 2.idn,"SEEIT,USBB-RELAY08,6QMBS,USB-DLL"
+2026-08-07T15:54:57.774105+00:00,instrument.Seeit USBB Relay (Native USB) 2.transport,native_usb
+2026-08-07T15:54:57.774152+00:00,instrument.Seeit USBB Relay (Native USB) 2.selector,index:2
+2026-08-07T15:54:57.774199+00:00,instrument.Seeit USBB Relay (Native USB) 2.enumeration_index,2
+2026-08-07T15:54:57.774247+00:00,instrument.Seeit USBB Relay (Native USB) 2.device_path,NOTHING
+2026-08-07T15:54:57.774295+00:00,instrument.Seeit USBB Relay (Native USB) 2.driver,seeit_usbb_native
+2026-08-07T15:54:57.779906+00:00,instrument.Support Relays PSU.manufacturer,THURLBY THANDAR
+2026-08-07T15:54:57.780058+00:00,instrument.Support Relays PSU.model,QL355P
+2026-08-07T15:54:57.780142+00:00,instrument.Support Relays PSU.serial,528951
+2026-08-07T15:54:57.780210+00:00,instrument.Support Relays PSU.firmware,2.05-2.06
+2026-08-07T15:54:57.780274+00:00,instrument.Support Relays PSU.idn,"THURLBY THANDAR, QL355P, 528951, 2.05-2.06"
+2026-08-07T15:54:57.783026+00:00,tiab.version,0.1.0-alpha
+2026-08-07T15:54:57.783098+00:00,tiab.update_channel,unmanaged
+2026-08-07T15:54:57.783149+00:00,tiab.update_ref,unknown
+2026-08-07T15:54:57.783196+00:00,tiab.commit,unknown
+2026-08-07T15:54:57.783241+00:00,tiab.archive_sha256,unknown
+2026-08-07T15:54:57.783286+00:00,tiab.updater_version,2.2
+2026-08-07T15:54:57.783331+00:00,configuration.sha256,3b9bd00d092defead5beeab5eaec85382cd8481f2e6e3b417b21bdb44806ba62
+2026-08-07T15:54:57.783376+00:00,dut_mapping.sha256,44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+2026-08-07T15:54:57.783422+00:00,procedure.sha256,0b89cfb14f04a61bfe42629f52a38f9ac95554bcaac646288a0670238e0d7e72
+2026-08-07T15:54:57.794839+00:00,run_finish_utc,2026-08-07T15:54:57.794820+00:00
+2026-08-07T15:54:57.794956+00:00,run_status,finished

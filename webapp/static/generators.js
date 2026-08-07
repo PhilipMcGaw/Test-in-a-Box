@@ -123,12 +123,7 @@ Blockly.Python.forBlock['hw_psu_ramp_voltage'] = function (block) {
     'END',
     Blockly.Python.ORDER_NONE
   ) || '12';
-  const step = Blockly.Python.valueToCode(
-    block,
-    'STEP',
-    Blockly.Python.ORDER_NONE
-  ) || '0.1';
-  const dwell = Blockly.Python.valueToCode(
+  const duration = Blockly.Python.valueToCode(
     block,
     'DWELL',
     Blockly.Python.ORDER_NONE
@@ -140,34 +135,36 @@ Blockly.Python.forBlock['hw_psu_ramp_voltage'] = function (block) {
 
   const startVar = `_tiab_ramp_start_${blockSuffix}`;
   const endVar = `_tiab_ramp_end_${blockSuffix}`;
+  const intervalsVar = `_tiab_ramp_intervals_${blockSuffix}`;
+  const distanceVar = `_tiab_ramp_distance_${blockSuffix}`;
   const stepVar = `_tiab_ramp_step_${blockSuffix}`;
-  const dwellVar = `_tiab_ramp_dwell_${blockSuffix}`;
+  const intervalVar = `_tiab_ramp_interval_${blockSuffix}`;
   const valueVar = `_tiab_ramp_voltage_${blockSuffix}`;
+  const indexVar = `_tiab_ramp_index_${blockSuffix}`;
 
-  const dwellExpression = dwellUnit === 'MS'
-    ? `((${dwell}) / 1000)`
-    : `(${dwell})`;
+  const durationExpression = dwellUnit === 'MS'
+    ? `((${duration}) / 1000)`
+    : `(${duration})`;
 
   return (
     `${startVar} = (${start})\n` +
     `${endVar} = (${end})\n` +
-    `${stepVar} = abs((${step}))\n` +
-    `${dwellVar} = ${dwellExpression}\n` +
-    `if ${stepVar} <= 0:\n` +
-    `    ${stepVar} = 0.1\n` +
+    `${distanceVar} = abs(${endVar} - ${startVar})\n` +
+    `${intervalsVar} = 1\n` +
+    `while ${intervalsVar} * 0.1 < ${distanceVar}:\n` +
+    `    ${intervalsVar} += 1\n` +
+    `${stepVar} = (${endVar} - ${startVar}) / ${intervalsVar}\n` +
+    `${intervalVar} = ${durationExpression}\n` +
+    `if ${intervalVar} < 0:\n` +
+    `    ${intervalVar} = 0\n` +
+    `${intervalVar} = ${intervalVar} / ${intervalsVar}\n` +
     `${valueVar} = ${startVar}\n` +
-    `if ${endVar} >= ${startVar}:\n` +
-    `    while ${valueVar} <= ${endVar}:\n` +
-    `        set(${JSON.stringify(deviceId)}, ` +
+    `for ${indexVar} in range(${intervalsVar} + 1):\n` +
+    `    set(${JSON.stringify(deviceId)}, ` +
     `${JSON.stringify(positionId)}, ${valueVar})\n` +
-    `        wait(${dwellVar})\n` +
-    `        ${valueVar} += ${stepVar}\n` +
-    `else:\n` +
-    `    while ${valueVar} >= ${endVar}:\n` +
-    `        set(${JSON.stringify(deviceId)}, ` +
-    `${JSON.stringify(positionId)}, ${valueVar})\n` +
-    `        wait(${dwellVar})\n` +
-    `        ${valueVar} -= ${stepVar}\n`
+    `    if ${indexVar} < ${intervalsVar}:\n` +
+    `        wait(${intervalVar})\n` +
+    `        ${valueVar} += ${stepVar}\n`
   );
 };
 

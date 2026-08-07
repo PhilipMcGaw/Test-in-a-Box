@@ -1,0 +1,58 @@
+timestamp,key,value
+2026-08-07T16:00:56.326455+00:00,run_id,20260807_160056_323004
+2026-08-07T16:00:56.326602+00:00,run_start_utc,2026-08-07T16:00:56.324407+00:00
+2026-08-07T16:00:56.326710+00:00,hostname,L22937
+2026-08-07T16:00:56.326807+00:00,logged_in_user,philip.mcgaw
+2026-08-07T16:00:56.326899+00:00,operating_system,Windows
+2026-08-07T16:00:56.326990+00:00,os_release,11
+2026-08-07T16:00:56.327081+00:00,os_version,10.0.26100
+2026-08-07T16:00:56.327172+00:00,os_build,10.0.26100
+2026-08-07T16:00:56.327262+00:00,os_machine,AMD64
+2026-08-07T16:00:56.327350+00:00,os_platform_string,Windows-11-10.0.26100-SP0
+2026-08-07T16:00:56.328976+00:00,python_version,3.13.13
+2026-08-07T16:00:56.329090+00:00,instrument.DUT set 1.manufacturer,Seeit
+2026-08-07T16:00:56.329146+00:00,instrument.DUT set 1.model,USBB-RELAY08
+2026-08-07T16:00:56.329203+00:00,instrument.DUT set 1.serial,6QMBS
+2026-08-07T16:00:56.329263+00:00,instrument.DUT set 1.firmware,
+2026-08-07T16:00:56.329322+00:00,instrument.DUT set 1.idn,"SEEIT,USBB-RELAY08,6QMBS,USB-DLL"
+2026-08-07T16:00:56.329381+00:00,instrument.DUT set 1.transport,native_usb
+2026-08-07T16:00:56.329439+00:00,instrument.DUT set 1.selector,index:1
+2026-08-07T16:00:56.329621+00:00,instrument.DUT set 1.enumeration_index,1
+2026-08-07T16:00:56.329686+00:00,instrument.DUT set 1.device_path,NOTHING
+2026-08-07T16:00:56.329744+00:00,instrument.DUT set 1.driver,seeit_usbb_native
+2026-08-07T16:00:56.329814+00:00,instrument.DUT set 2.manufacturer,Seeit
+2026-08-07T16:00:56.329874+00:00,instrument.DUT set 2.model,USBB-RELAY08
+2026-08-07T16:00:56.329933+00:00,instrument.DUT set 2.serial,6QMBS
+2026-08-07T16:00:56.329991+00:00,instrument.DUT set 2.firmware,
+2026-08-07T16:00:56.330047+00:00,instrument.DUT set 2.idn,"SEEIT,USBB-RELAY08,6QMBS,USB-DLL"
+2026-08-07T16:00:56.330105+00:00,instrument.DUT set 2.transport,native_usb
+2026-08-07T16:00:56.330161+00:00,instrument.DUT set 2.selector,index:2
+2026-08-07T16:00:56.330217+00:00,instrument.DUT set 2.enumeration_index,2
+2026-08-07T16:00:56.330278+00:00,instrument.DUT set 2.device_path,NOTHING
+2026-08-07T16:00:56.330334+00:00,instrument.DUT set 2.driver,seeit_usbb_native
+2026-08-07T16:00:56.336559+00:00,instrument.Support Relays PSU.manufacturer,THURLBY THANDAR
+2026-08-07T16:00:56.336704+00:00,instrument.Support Relays PSU.model,QL355P
+2026-08-07T16:00:56.336777+00:00,instrument.Support Relays PSU.serial,528951
+2026-08-07T16:00:56.336818+00:00,instrument.Support Relays PSU.firmware,2.05-2.06
+2026-08-07T16:00:56.336857+00:00,instrument.Support Relays PSU.idn,"THURLBY THANDAR, QL355P, 528951, 2.05-2.06"
+2026-08-07T16:00:56.342190+00:00,instrument.Coil PSU 1.manufacturer,THURLBY THANDAR
+2026-08-07T16:00:56.342374+00:00,instrument.Coil PSU 1.model,QL355P
+2026-08-07T16:00:56.342460+00:00,instrument.Coil PSU 1.serial,545531
+2026-08-07T16:00:56.342534+00:00,instrument.Coil PSU 1.firmware,2.05-2.06
+2026-08-07T16:00:56.342598+00:00,instrument.Coil PSU 1.idn,"THURLBY THANDAR, QL355P, 545531, 2.05-2.06"
+2026-08-07T16:00:56.348230+00:00,instrument.Coil PSU 2.manufacturer,THURLBY THANDAR
+2026-08-07T16:00:56.348389+00:00,instrument.Coil PSU 2.model,QL355P
+2026-08-07T16:00:56.348464+00:00,instrument.Coil PSU 2.serial,545529
+2026-08-07T16:00:56.348529+00:00,instrument.Coil PSU 2.firmware,2.05-2.06
+2026-08-07T16:00:56.348590+00:00,instrument.Coil PSU 2.idn,"THURLBY THANDAR, QL355P, 545529, 2.05-2.06"
+2026-08-07T16:00:56.351609+00:00,tiab.version,0.1.0-alpha
+2026-08-07T16:00:56.351703+00:00,tiab.update_channel,unmanaged
+2026-08-07T16:00:56.351770+00:00,tiab.update_ref,unknown
+2026-08-07T16:00:56.351831+00:00,tiab.commit,unknown
+2026-08-07T16:00:56.351889+00:00,tiab.archive_sha256,unknown
+2026-08-07T16:00:56.351947+00:00,tiab.updater_version,2.2
+2026-08-07T16:00:56.352006+00:00,configuration.sha256,799508c8c78d66d785cd3d9194f9295c62da6cdb630d0f9d9334c097d28c74cf
+2026-08-07T16:00:56.352096+00:00,dut_mapping.sha256,44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+2026-08-07T16:00:56.352157+00:00,procedure.sha256,feec37f7f7d280ec132f7c48909911d1efa2bf3ec67eda1825ac945e8025e8c3
+2026-08-07T16:01:06.381322+00:00,run_finish_utc,2026-08-07T16:01:06.381316+00:00
+2026-08-07T16:01:06.381381+00:00,run_status,finished

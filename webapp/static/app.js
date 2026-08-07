@@ -559,8 +559,13 @@ async function refreshSequenceList() {
   }
 }
 
-async function saveSequence() {
+async function saveSequence(saveAs = false) {
   const nameInput = document.getElementById('sequence-name');
+  if (saveAs) {
+    nameInput.value = '';
+    nameInput.focus();
+    return;
+  }
   const name = nameInput.value.trim();
   if (!name) {
     alert('Enter a name for this sequence first.');
@@ -578,8 +583,10 @@ async function saveSequence() {
       alert(`Could not save: ${data.detail || 'unknown error'}`);
       return;
     }
-    nameInput.value = '';
+    nameInput.value = data.name || name;
     await refreshSequenceList();
+    const select = document.getElementById('sequence-select');
+    select.value = nameInput.value;
   } catch (e) {
     alert(`Could not save: ${e}`);
   }
@@ -598,6 +605,7 @@ async function loadSequence() {
     }
     workspace.clear();
     Blockly.serialization.workspaces.load(data, workspace);
+    document.getElementById('sequence-name').value = name;
   } catch (e) {
     alert(`Could not load: ${e}`);
   }
@@ -620,5 +628,18 @@ window.addEventListener('DOMContentLoaded', async () => {
     await loadDuts();
   });
   document.getElementById('save-sequence-btn').addEventListener('click', saveSequence);
+  document.getElementById('save-sequence-as-btn').addEventListener('click', () => saveSequence(true));
   document.getElementById('load-sequence-btn').addEventListener('click', loadSequence);
+  document.getElementById('sequence-name').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      saveSequence();
+    }
+  });
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault();
+      saveSequence();
+    }
+  });
 });

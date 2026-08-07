@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "run": {
+    "run_id": "20260807_160027_220720",
+    "status": "finished",
+    "start_utc": "2026-08-07T16:00:27.222611+00:00",
+    "finish_utc": "2026-08-07T16:00:27.272665+00:00",
+    "duration_seconds": 0.050054
+  },
+  "test_in_a_box": {
+    "version": "0.1.0-alpha",
+    "release_stage": "alpha",
+    "repository_layout": "refactor-v1",
+    "bootstrap_version": "2.1.4",
+    "update_channel": "unmanaged",
+    "update_ref": "unknown",
+    "commit": "unknown",
+    "archive_sha256": "unknown",
+    "updated_at": "unknown",
+    "updater_version": "2.2",
+    "python_version": "3.13.13"
+  },
+  "configuration": {
+    "sha256": "799508c8c78d66d785cd3d9194f9295c62da6cdb630d0f9d9334c097d28c74cf",
+    "snapshot": {
+      "devices": [
+        {
+          "device_type": "seeit_usbb_native",
+          "device_id": "DUT set 1",
+          "kwargs": {
+            "dll_path": "usb_relay_device.dll",
+            "device_path": "index:1",
+            "safe_state": "close_all"
+          },
+          "channel_labels": {
+            "relay1": "DUT 1",
+            "relay2": "DUT 2",
+            "relay3": "DUT 3",
+            "relay4": "DUT 4",
+            "relay5": "DUT 5"
+          },
+          "x": 165.0,
+          "y": 0.0
+        },
+        {
+          "device_type": "seeit_usbb_native",
+          "device_id": "DUT set 2",
+          "kwargs": {
+            "dll_path": "usb_relay_device.dll",
+            "device_path": "index:2",
+            "safe_state": "close_all"
+          },
+          "channel_labels": {
+            "relay1": "DUT 6",
+            "relay2": "DUT 7",
+            "relay3": "DUT 8",
+            "relay4": "DUT 9",
+            "relay5": "DUT 10",
+            "relay6": "Coil Drive Relay"
+          },
+          "x": 470.0,
+          "y": 0.0
+        },
+        {
+          "device_type": "aimtti_psu",
+          "device_id": "Support Relays PSU",
+          "kwargs": {
+            "serial_port": "COM6",
+            "num_channels": 1
+          },
+          "channel_labels": {},
+          "x": 709.0,
+          "y": 8.0
+        },
+        {
+          "device_type": "aimtti_psu",
+          "device_id": "Coil PSU 1",
+          "kwargs": {
+            "serial_port": "COM5",
+            "num_channels": 1
+          },
+          "channel_labels": {},
+          "x": 953.0,
+          "y": 17.0
+        },
+        {
+          "device_type": "aimtti_psu",
+          "device_id": "Coil PSU 2",
+          "kwargs": {
+            "serial_port": "COM7",
+            "num_channels": 1
+          },
+          "channel_labels": {},
+          "x": 1181.0,
+          "y": 8.0
+        }
+      ],
+      "mapping": []
+    }
+  },
+  "dut_mapping": {
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "snapshot": {}
+  },
+  "procedure": {
+    "format": "generated_python",
+    "sha256": "3050a84cfbd292c962bca549be23e3416a68dcfcc7ccbc58b4d7859d15b13ea0",
+    "source": "set(\"Support Relays PSU\", \"output1\", False)\nset(\"Coil PSU 1\", \"output1\", False)\nset(\"Coil PSU 2\", \"output1\", False)\nset(\"Support Relays PSU\", \"v1\", 12)\nset(\"Coil PSU 1\", \"v1\", 12)\nset(\"Coil PSU 2\", \"v1\", 12)\nset(\"Support Relays PSU\", \"output1\", True)\nset(\"Coil PSU 1\", \"output1\", True)\nset(\"Coil PSU 2\", \"output1\", True)\nset(\"DUT set 2\", \"relay6\", True)\n"
+  },
+  "configured_instruments": [
+    {
+      "device_id": "DUT set 1",
+      "device_type": "seeit_usbb_native",
+      "connection": {
+        "dll_path": "usb_relay_device.dll",
+        "device_path": "index:1",
+        "safe_state": "close_all"
+      },
+      "channel_labels": {
+        "relay1": "DUT 1",
+        "relay2": "DUT 2",
+        "relay3": "DUT 3",
+        "relay4": "DUT 4",
+        "relay5": "DUT 5"
+      },
+      "identity": {
+        "manufacturer": "Seeit",
+        "model": "USBB-RELAY08",
+        "serial": "6QMBS",
+        "firmware": "",
+        "idn": "SEEIT,USBB-RELAY08,6QMBS,USB-DLL",
+        "transport": "native_usb",
+        "selector": "index:1",
+        "enumeration_index": "1",
+        "device_path": "NOTHING",
+        "driver": "seeit_usbb_native"
+      },
+      "identity_captured": true
+    },
+    {
+      "device_id": "DUT set 2",
+      "device_type": "seeit_usbb_native",
+      "connection": {
+        "dll_path": "usb_relay_device.dll",
+        "device_path": "index:2",
+        "safe_state": "close_all"
+      },
+      "channel_labels": {
+        "relay1": "DUT 6",
+        "relay2": "DUT 7",
+        "relay3": "DUT 8",
+        "relay4": "DUT 9",
+        "relay5": "DUT 10",
+        "relay6": "Coil Drive Relay"
+      },
+      "identity": {
+        "manufacturer": "Seeit",
+        "model": "USBB-RELAY08",
+        "serial": "6QMBS",
+        "firmware": "",
+        "idn": "SEEIT,USBB-RELAY08,6QMBS,USB-DLL",
+        "transport": "native_usb",
+        "selector": "index:2",
+        "enumeration_index": "2",
+        "device_path": "NOTHING",
+        "driver": "seeit_usbb_native"
+      },
+      "identity_captured": true
+    },
+    {
+      "device_id": "Support Relays PSU",
+      "device_type": "aimtti_psu",
+      "connection": {
+        "serial_port": "COM6",
+        "num_channels": 1
+      },
+      "channel_labels": {},
+      "identity": {
+        "manufacturer": "THURLBY THANDAR",
+        "model": "QL355P",
+        "serial": "528951",
+        "firmware": "2.05-2.06",
+        "idn": "THURLBY THANDAR, QL355P, 528951, 2.05-2.06"
+      },
+      "identity_captured": true
+    },
+    {
+      "device_id": "Coil PSU 1",
+      "device_type": "aimtti_psu",
+      "connection": {
+        "serial_port": "COM5",
+        "num_channels": 1
+      },
+      "channel_labels": {},
+      "identity": {
+        "manufacturer": "THURLBY THANDAR",
+        "model": "QL355P",
+        "serial": "545531",
+        "firmware": "2.05-2.06",
+        "idn": "THURLBY THANDAR, QL355P, 545531, 2.05-2.06"
+      },
+      "identity_captured": true
+    },
+    {
+      "device_id": "Coil PSU 2",
+      "device_type": "aimtti_psu",
+      "connection": {
+        "serial_port": "COM7",
+        "num_channels": 1
+      },
+      "channel_labels": {},
+      "identity": {
+        "manufacturer": "THURLBY THANDAR",
+        "model": "QL355P",
+        "serial": "545529",
+        "firmware": "2.05-2.06",
+        "idn": "THURLBY THANDAR, QL355P, 545529, 2.05-2.06"
+      },
+      "identity_captured": true
+    }
+  ],
+  "instrument_identities": {
+    "DUT set 1": {
+      "manufacturer": "Seeit",
+      "model": "USBB-RELAY08",
+      "serial": "6QMBS",
+      "firmware": "",
+      "idn": "SEEIT,USBB-RELAY08,6QMBS,USB-DLL",
+      "transport": "native_usb",
+      "selector": "index:1",
+      "enumeration_index": "1",
+      "device_path": "NOTHING",
+      "driver": "seeit_usbb_native"
+    },
+    "DUT set 2": {
+      "manufacturer": "Seeit",
+      "model": "USBB-RELAY08",
+      "serial": "6QMBS",
+      "firmware": "",
+      "idn": "SEEIT,USBB-RELAY08,6QMBS,USB-DLL",
+      "transport": "native_usb",
+      "selector": "index:2",
+      "enumeration_index": "2",
+      "device_path": "NOTHING",
+      "driver": "seeit_usbb_native"
+    },
+    "Support Relays PSU": {
+      "manufacturer": "THURLBY THANDAR",
+      "model": "QL355P",
+      "serial": "528951",
+      "firmware": "2.05-2.06",
+      "idn": "THURLBY THANDAR, QL355P, 528951, 2.05-2.06"
+    },
+    "Coil PSU 1": {
+      "manufacturer": "THURLBY THANDAR",
+      "model": "QL355P",
+      "serial": "545531",
+      "firmware": "2.05-2.06",
+      "idn": "THURLBY THANDAR, QL355P, 545531, 2.05-2.06"
+    },
+    "Coil PSU 2": {
+      "manufacturer": "THURLBY THANDAR",
+      "model": "QL355P",
+      "serial": "545529",
+      "firmware": "2.05-2.06",
+      "idn": "THURLBY THANDAR, QL355P, 545529, 2.05-2.06"
+    }
+  }
+}

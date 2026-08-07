@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "run": {
+    "run_id": "20260807_155519_924115",
+    "status": "finished",
+    "start_utc": "2026-08-07T15:55:19.926140+00:00",
+    "finish_utc": "2026-08-07T15:55:19.951152+00:00",
+    "duration_seconds": 0.025012
+  },
+  "test_in_a_box": {
+    "version": "0.1.0-alpha",
+    "release_stage": "alpha",
+    "repository_layout": "refactor-v1",
+    "bootstrap_version": "2.1.4",
+    "update_channel": "unmanaged",
+    "update_ref": "unknown",
+    "commit": "unknown",
+    "archive_sha256": "unknown",
+    "updated_at": "unknown",
+    "updater_version": "2.2",
+    "python_version": "3.13.13"
+  },
+  "configuration": {
+    "sha256": "3b9bd00d092defead5beeab5eaec85382cd8481f2e6e3b417b21bdb44806ba62",
+    "snapshot": {
+      "devices": [
+        {
+          "device_type": "seeit_usbb_native",
+          "device_id": "Seeit USBB Relay (Native USB) 1",
+          "kwargs": {
+            "dll_path": "usb_relay_device.dll",
+            "device_path": "index:1",
+            "safe_state": "close_all"
+          },
+          "channel_labels": {
+            "relay1": "DUT 1",
+            "relay2": "DUT 2",
+            "relay3": "DUT 3",
+            "relay4": "DUT 4",
+            "relay5": "DUT 5"
+          },
+          "x": 165.0,
+          "y": 0.0
+        },
+        {
+          "device_type": "seeit_usbb_native",
+          "device_id": "Seeit USBB Relay (Native USB) 2",
+          "kwargs": {
+            "dll_path": "usb_relay_device.dll",
+            "device_path": "index:2",
+            "safe_state": "close_all"
+          },
+          "channel_labels": {
+            "relay1": "DUT 6",
+            "relay2": "DUT 7",
+            "relay3": "DUT 8",
+            "relay4": "DUT 9",
+            "relay5": "DUT 10",
+            "relay6": "Coil Drive Relay"
+          },
+          "x": 470.0,
+          "y": 0.0
+        },
+        {
+          "device_type": "aimtti_psu",
+          "device_id": "Support Relays PSU",
+          "kwargs": {
+            "serial_port": "COM6",
+            "num_channels": 1
+          },
+          "channel_labels": {},
+          "x": 948.0,
+          "y": 117.0
+        }
+      ],
+      "mapping": []
+    }
+  },
+  "dut_mapping": {
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "snapshot": {}
+  },
+  "procedure": {
+    "format": "generated_python",
+    "sha256": "813fcdad7d67be5a515f31d1274ea280c5a1448ebba760e82d9b28d9440fd144",
+    "source": "set(\"Support Relays PSU\", \"output1\", False)\nset(\"Support Relays PSU\", \"v1\", 12)\nset(\"Support Relays PSU\", \"output1\", True)\n"
+  },
+  "configured_instruments": [
+    {
+      "device_id": "Seeit USBB Relay (Native USB) 1",
+      "device_type": "seeit_usbb_native",
+      "connection": {
+        "dll_path": "usb_relay_device.dll",
+        "device_path": "index:1",
+        "safe_state": "close_all"
+      },
+      "channel_labels": {
+        "relay1": "DUT 1",
+        "relay2": "DUT 2",
+        "relay3": "DUT 3",
+        "relay4": "DUT 4",
+        "relay5": "DUT 5"
+      },
+      "identity": {
+        "manufacturer": "Seeit",
+        "model": "USBB-RELAY08",
+        "serial": "6QMBS",
+        "firmware": "",
+        "idn": "SEEIT,USBB-RELAY08,6QMBS,USB-DLL",
+        "transport": "native_usb",
+        "selector": "index:1",
+        "enumeration_index": "1",
+        "device_path": "NOTHING",
+        "driver": "seeit_usbb_native"
+      },
+      "identity_captured": true
+    },
+    {
+      "device_id": "Seeit USBB Relay (Native USB) 2",
+      "device_type": "seeit_usbb_native",
+      "connection": {
+        "dll_path": "usb_relay_device.dll",
+        "device_path": "index:2",
+        "safe_state": "close_all"
+      },
+      "channel_labels": {
+        "relay1": "DUT 6",
+        "relay2": "DUT 7",
+        "relay3": "DUT 8",
+        "relay4": "DUT 9",
+        "relay5": "DUT 10",
+        "relay6": "Coil Drive Relay"
+      },
+      "identity": {
+        "manufacturer": "Seeit",
+        "model": "USBB-RELAY08",
+        "serial": "6QMBS",
+        "firmware": "",
+        "idn": "SEEIT,USBB-RELAY08,6QMBS,USB-DLL",
+        "transport": "native_usb",
+        "selector": "index:2",
+        "enumeration_index": "2",
+        "device_path": "NOTHING",
+        "driver": "seeit_usbb_native"
+      },
+      "identity_captured": true
+    },
+    {
+      "device_id": "Support Relays PSU",
+      "device_type": "aimtti_psu",
+      "connection": {
+        "serial_port": "COM6",
+        "num_channels": 1
+      },
+      "channel_labels": {},
+      "identity": {
+        "manufacturer": "THURLBY THANDAR",
+        "model": "QL355P",
+        "serial": "528951",
+        "firmware": "2.05-2.06",
+        "idn": "THURLBY THANDAR, QL355P, 528951, 2.05-2.06"
+      },
+      "identity_captured": true
+    }
+  ],
+  "instrument_identities": {
+    "Seeit USBB Relay (Native USB) 1": {
+      "manufacturer": "Seeit",
+      "model": "USBB-RELAY08",
+      "serial": "6QMBS",
+      "firmware": "",
+      "idn": "SEEIT,USBB-RELAY08,6QMBS,USB-DLL",
+      "transport": "native_usb",
+      "selector": "index:1",
+      "enumeration_index": "1",
+      "device_path": "NOTHING",
+      "driver": "seeit_usbb_native"
+    },
+    "Seeit USBB Relay (Native USB) 2": {
+      "manufacturer": "Seeit",
+      "model": "USBB-RELAY08",
+      "serial": "6QMBS",
+      "firmware": "",
+      "idn": "SEEIT,USBB-RELAY08,6QMBS,USB-DLL",
+      "transport": "native_usb",
+      "selector": "index:2",
+      "enumeration_index": "2",
+      "device_path": "NOTHING",
+      "driver": "seeit_usbb_native"
+    },
+    "Support Relays PSU": {
+      "manufacturer": "THURLBY THANDAR",
+      "model": "QL355P",
+      "serial": "528951",
+      "firmware": "2.05-2.06",
+      "idn": "THURLBY THANDAR, QL355P, 528951, 2.05-2.06"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+timestamp,device_id,position,channel,value,unit,event_type
+2026-08-07T16:00:42.105783+00:00,Support Relays PSU,output1,output1,False,,state
+2026-08-07T16:00:42.107338+00:00,Coil PSU 1,output1,output1,False,,state
+2026-08-07T16:00:42.107896+00:00,Coil PSU 2,output1,output1,False,,state
+2026-08-07T16:00:42.108315+00:00,Support Relays PSU,v1,v1,12.0,V,state
+2026-08-07T16:00:42.108780+00:00,Coil PSU 1,v1,v1,12.0,V,state
+2026-08-07T16:00:42.109392+00:00,Coil PSU 2,v1,v1,12.0,V,state
+2026-08-07T16:00:42.109985+00:00,Support Relays PSU,output1,output1,True,,state
+2026-08-07T16:00:42.111086+00:00,Coil PSU 1,output1,output1,True,,state
+2026-08-07T16:00:42.111669+00:00,Coil PSU 2,output1,output1,True,,state
+2026-08-07T16:00:52.113873+00:00,DUT set 2,relay6,relay6,True,,state
+2026-08-07T16:00:52.115629+00:00,DUT set 1,,,False,,state
+2026-08-07T16:00:52.117218+00:00,DUT set 2,,,False,,state
+2026-08-07T16:00:52.117706+00:00,Support Relays PSU,output1,output1,False,,state
+2026-08-07T16:00:52.118067+00:00,Coil PSU 1,output1,output1,False,,state
+2026-08-07T16:00:52.118423+00:00,Coil PSU 2,output1,output1,False,,state
