@@ -73,6 +73,7 @@ class LabDch30665Driver(Driver):
         output_second_enable_delay: float = 1.0,
         enable_trace: bool = True,
         enable_trace_path: str = "logs/labdch_trace.log",
+        trace_status_registers: bool = True,
     ) -> None:
         super().__init__(device_id, on_event)
 
@@ -117,6 +118,7 @@ class LabDch30665Driver(Driver):
         )
         self._enable_trace = bool(enable_trace)
         self._enable_trace_path = str(enable_trace_path)
+        self._trace_status_registers = bool(trace_status_registers)
         self._enable_trace_started = 0.0
         self._enable_trace_previous = 0.0
 
@@ -446,11 +448,10 @@ class LabDch30665Driver(Driver):
         """
         Energise the physical output and verify measured voltage.
 
-        Bench testing showed that this firmware needs a deliberate
-        standby -> enable -> enable sequence. SB can report SB,R after the
-        first enable command while the power stage is still off, so the
-        second SB,R is treated as part of the normal sequence rather than
-        only as a retry after failure.
+        This diagnostic version also captures STATUS and *STB? before enable,
+        immediately after the second SB,R, and during each MU verification
+        poll. That lets us correlate a voltage collapse with a protection or
+        operating-state bit transition.
         """
         self._start_enable_trace()
 
@@ -467,12 +468,16 @@ class LabDch30665Driver(Driver):
                 f"target_voltage={target_voltage:g} V",
             )
 
+            self._trace_status_snapshot("before-standby")
+
             self._write_raw("SB,S")
             self._trace_enable_event(
                 "WAIT",
                 f"standby dwell {self._output_standby_delay:.3f} s",
             )
             self._wait_seconds(self._output_standby_delay)
+
+            self._trace_status_snapshot("after-standby")
 
             self._trace_enable_event(
                 "INFO",
@@ -486,6 +491,8 @@ class LabDch30665Driver(Driver):
             )
             self._wait_seconds(self._output_second_enable_delay)
 
+            self._trace_status_snapshot("after-first-enable")
+
             self._trace_enable_event(
                 "INFO",
                 "second enable command",
@@ -497,6 +504,8 @@ class LabDch30665Driver(Driver):
                 f"initial settle {self._output_settle_delay:.3f} s",
             )
             self._wait_seconds(self._output_settle_delay)
+
+            self._trace_status_snapshot("after-second-enable")
 
             measured_voltage = 0.0
             state_enabled = False
@@ -515,12 +524,20 @@ class LabDch30665Driver(Driver):
                     "V",
                 )
 
+                status = ""
+                stb = ""
+                if self._trace_status_registers:
+                    status, stb = self._trace_status_snapshot(
+                        f"poll={poll_number}"
+                    )
+
                 self._trace_enable_event(
                     "STATE",
                     (
                         f"poll={poll_number} "
                         f"SB={'R' if state_enabled else 'S'} "
                         f"MU={measured_voltage:g} V"
+                        + (f" {status} {stb}" if status or stb else "")
                     ),
                 )
 
@@ -696,6 +713,18 @@ class LabDch30665Driver(Driver):
                 f"trace-file write failed: {exc}",
                 flush=True,
             )
+
+    def _trace_status_snapshot(self, label: str) -> tuple[str, str]:
+        if not self._trace_status_registers:
+            return "", ""
+
+        status = self._query_raw("STATUS")
+        stb = self._query_raw("*STB?")
+        self._trace_enable_event(
+            "REGS",
+            f"{label} {status} {stb}",
+        )
+        return status, stb
 
     def _start_enable_trace(self) -> None:
         if not self._enable_trace:

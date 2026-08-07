@@ -252,6 +252,12 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
                 "type": "text",
                 "default": "logs/labdch_trace.log",
             },
+            {
+                "name": "trace_status_registers",
+                "label": "Trace STATUS and STB During Enable",
+                "type": "boolean",
+                "default": True,
+            },
         ],
         "description": (
             "LAB-DCH 30-665 programmable DC power supply over RS232. "
