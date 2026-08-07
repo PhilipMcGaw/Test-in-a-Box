@@ -80,6 +80,12 @@ Possible longer-term work includes:
 - [ ] Multi-board native USB relay support
 - [ ] Improved COM-port discovery
 - [ ] Automatic instrument identification
+- [ ] Pico serial-number discovery and stable unit selection
+
+Pico serial-number selection should allow multiple ADC-20/24 and TC-08
+devices to be discovered, identified by model and serial number, selected in
+the configuration, and reconnected to reliably. The selected identity should
+remain part of run provenance.
 
 ## Future Releases
 

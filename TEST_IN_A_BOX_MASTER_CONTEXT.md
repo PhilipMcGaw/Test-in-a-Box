@@ -614,8 +614,11 @@ values for the internal transducer and channels 1–8. This is an initial bench
 probe, not production-proven status. Full Blockly workflow and robustness
 validation remain outstanding.
 
-The Pico ADC-20/24 driver implementation remains dependent on PicoSDK and
-requires separate validation.
+The Pico ADC-20/24 driver uses PicoSDK hardware identification to select the
+ADC-20 or ADC-24 channel layout automatically. ADC-20 exposes 8 analogue
+channels; ADC-24 exposes 16 analogue channels and 4 digital inputs. The
+connected ADC-24 digital-input read path has returned all four inputs low in
+an initial probe. Full analogue/digital robustness validation remains open.
 
 ### LAB-DCH 30-665
 
@@ -659,7 +662,14 @@ Still-planned work includes:
 
 - stronger multi-board native USB relay handling;
 - improved COM discovery;
-- more automatic instrument identification.
+- more automatic instrument identification;
+- Pico serial-number discovery and stable selection for multiple ADC-20/24
+  and TC-08 units.
+
+For the Pico devices, this should build on the existing serial capture: the
+configuration should discover model/serial pairs, let the operator select a
+specific unit, reconnect by serial, and preserve that selected identity in
+run provenance. The current driver still opens the first discovered unit.
 
 ---
 
@@ -977,3 +987,33 @@ If any of these are recovered or remembered, add them explicitly with their stat
 If this file is supplied to a fresh AI conversation, the working assumption should be:
 
 > We are developing **Test in a Box v0.1.0-alpha**, an engineering validation platform whose immediate goal is to prove an end-to-end real electrical/environmental validation workflow using Blockly-authored procedures and reusable hardware drivers. Reliability, traceability and repeatability outrank feature breadth. Current code already includes the FastAPI/Blockly application, device configuration, Instrument Library work, execution controls, per-DUT CSV results, software/config/procedure provenance, run manifest/Markdown summary, discovery, updater/bootstrap infrastructure, physical QL355P control and physical Windows Seeit USBB relay control. The major remaining milestone is a fully validated real multi-instrument engineering test, together with progress/ETA, workflow completion, safe-state validation and outstanding driver bench validation. Do not confuse implemented drivers with physically validated hardware.
+
+---
+
+## 35. Author and project-update context
+
+The project author is **Philip McGaw**, who also writes the project updates on
+[philipmcgaw.com](https://philipmcgaw.com/). Future TIAB blog drafts should use
+the established first-person engineering-progress voice used on the project
+pages and related technical posts.
+
+The preferred style is:
+
+- practical first-person reporting of what was built and tried;
+- plain engineering language with useful implementation detail;
+- explicit separation of implemented, simulated, bench-probed, validated and
+  planned work;
+- honest limitations and next steps;
+- readable headings, descriptive links and terminology that search engines and
+  AI systems can associate with Test in a Box, Blockly, instrument drivers,
+  Pico TC-08, ADC-20/24, CSV results and run provenance;
+- no invented architecture, technologies, features, measurements or validation
+  claims.
+
+The project update history includes:
+
+- [Test in a Box project overview](https://philipmcgaw.com/projects/test-in-a-box/)
+- [Earlier Test in a Box progress post](https://philipmcgaw.com/tiab-test-in-a-box/)
+
+These pages are style and history references, not authority over the current
+repository. Current code and physical bench evidence remain authoritative.

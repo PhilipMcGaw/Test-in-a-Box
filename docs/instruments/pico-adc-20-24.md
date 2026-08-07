@@ -18,8 +18,11 @@ multiple configured ADC units to be distinguished in reports.
 
 ## Analogue inputs
 
-Analogue positions are exposed as `ch1` onward and return volts. The number
-of analogue channels is controlled by `num_channels`.
+Analogue positions are exposed as `ch1` onward and return volts. The driver
+selects the channel count from the detected hardware: 8 channels for ADC-20
+and 16 channels for ADC-24.
+
+The Configure Devices page does not require a model or channel-count setting.
 
 ## ADC-24 digital inputs
 
@@ -74,3 +77,7 @@ The connected Pico unit returned batch/serial identity:
 ```
 
 The identity was read through PicoSDK and is not a manually assigned label.
+
+Selecting a specific Pico unit by serial number when multiple units are
+connected remains planned work. The current driver captures the identity but
+opens the first unit returned by the PicoSDK.
