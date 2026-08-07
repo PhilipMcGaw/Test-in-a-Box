@@ -24,6 +24,14 @@ except ImportError:  # pragma: no cover
     hrdl = None
 
 
+def decode_digital_inputs(value: int) -> dict[str, bool]:
+    """Decode the ADC-24 four-bit digital port, least-significant bit first."""
+    return {
+        f"d{pin}": bool(int(value) & (1 << (pin - 1)))
+        for pin in range(1, 5)
+    }
+
+
 @register_driver("pico_adc")
 class PicoAdcDriver(Driver):
     def __init__(
@@ -157,7 +165,7 @@ class PicoAdcDriver(Driver):
             if pin not in range(1, 5):
                 raise ValueError(f"{self.device_id}: invalid digital input {pin}")
             digital_value = self.read_digital_port()
-            value = bool(digital_value & (1 << (pin - 1)))
+            value = decode_digital_inputs(digital_value)[f"d{pin}"]
             self._emit(position_id, value, None, event_type="measurement")
             return value
 

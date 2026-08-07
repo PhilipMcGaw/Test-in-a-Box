@@ -1,0 +1,3 @@
+timestamp,device_id,position,channel,value,unit,event_type
+2026-08-07T13:59:48.810040+00:00,LAB-DCH 30-665 PSU 1,output,output,False,,state
+2026-08-07T13:59:48.850415+00:00,LAB-DCH 30-665 PSU 1,output,output,False,,state
