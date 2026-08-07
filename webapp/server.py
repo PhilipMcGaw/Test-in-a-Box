@@ -286,6 +286,9 @@ class SequenceSaveRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     workspace: dict[str, Any]
+    # Kept for compatibility with a browser tab running the removed preview
+    # generator. Previews are no longer written.
+    preview_png: str | None = None
 
 
 # ---------------------------------------------------------------------------
