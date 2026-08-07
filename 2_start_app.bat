@@ -1,6 +1,6 @@
 @echo off
-setlocal
-set SCRIPT_DIR=%~dp0
+setlocal EnableExtensions
+set "SCRIPT_DIR=%~dp0"
 
 if "%SCRIPT_DIR:~0,2%"=="\\" (
     echo.
@@ -9,44 +9,22 @@ if "%SCRIPT_DIR:~0,2%"=="\\" (
     echo.
     echo Please either:
     echo   1. Copy this whole folder to a local drive on this PC ^(e.g. C:\...^), or
-    echo   2. Map this network location to a drive letter first - in File
-    echo      Explorer, right-click the network folder and choose
-    echo      "Map network drive...", then run this .bat file from there.
+    echo   2. Map this network location to a drive letter first.
     echo.
     pause
     exit /b 1
 )
 
-cd /d "%SCRIPT_DIR%"
-set PYTHON=%SCRIPT_DIR%python\python.exe
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass ^
+    -File "%SCRIPT_DIR%support\launcher.ps1" ^
+    -ProjectRoot "%SCRIPT_DIR%"
 
-if not exist "%PYTHON%" (
-    echo Could not find python.exe at:
-    echo   %PYTHON%
+set "EXIT_CODE=%ERRORLEVEL%"
+
+if not "%EXIT_CODE%"=="0" (
     echo.
-    echo Run bootstrap.bat, or see docs\getting-started\WINDOWS.md.
+    echo Test in a Box stopped with exit code %EXIT_CODE%.
     pause
-    exit /b 1
 )
 
-echo Starting Test in a Box...
-echo Keep this window open while you're using the app.
-echo Close this window to stop the app.
-echo.
-
-REM browser launch deferred
-
-start "" "%PYTHON%" -m webapp.server
-
-echo Waiting for server...
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "$d=(Get-Date).AddSeconds(30);while((Get-Date)-lt $d){try{$r=Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/api/version -TimeoutSec 2;if($r.StatusCode -eq 200){exit 0}}catch{};Start-Sleep -Milliseconds 250};exit 1"
-if errorlevel 1 (
- echo ERROR: Server did not become ready.
-) else (
- start "" http://127.0.0.1:8765
-)
-
-"%PYTHON%" -m webapp.server
-
-
-pause
+exit /b %EXIT_CODE%
