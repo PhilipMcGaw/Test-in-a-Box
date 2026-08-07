@@ -96,8 +96,10 @@ In addition to measurement data, the current alpha creates a separate
 - Python version.
 - Instrument identity returned by each connected driver, where available.
 
-Project, test-case, DUT, end-time, duration and software-version fields remain
-areas for further result-summary work.
+The run manifest and Markdown summary record the run start and finish times,
+duration, final status, software identity, configuration, DUT mapping,
+generated procedure and configured instruments. Project and test-case fields
+remain areas for further result-summary work.
 
 This information should describe the test rather than the individual
 measurements.
@@ -179,20 +181,18 @@ This makes it easier to:
 
 # Markdown Summary
 
-In addition to CSV data, Version 0.1 is intended to generate a simple Markdown summary
+In addition to CSV data, the current alpha generates a simple Markdown summary
 containing:
 
-- Project.
-- Test case.
-- DUT.
-- Start time.
-- Finish time.
-- Duration.
-- Instrument identity.
-- Generated result files.
+- Run identifier, status, start time, finish time and duration.
+- Test in a Box and updater identity.
+- Configuration, DUT mapping and procedure SHA-256 hashes.
+- Configured instruments and captured identity, where available.
+- Manifest and run-metadata file names.
 
-The Markdown summary is intended to provide a human-readable overview of the
-run.
+The Markdown summary provides a human-readable overview of the run. The
+reporting workflow still requires validation and acceptance as part of the
+Version 0.1 release milestone.
 
 ---
 

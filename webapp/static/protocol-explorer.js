@@ -67,16 +67,13 @@
       const option = document.createElement('option');
       option.value = port.device;
       option.textContent = port.display_name || port.device;
-      if (port.device.toUpperCase() === 'COM15') {
-        option.selected = true;
-      }
       portSelect.appendChild(option);
     }
 
     if (!ports.length) {
       const option = document.createElement('option');
       option.value = '';
-      option.textContent = 'No COM ports found';
+      option.textContent = 'No serial ports found';
       portSelect.appendChild(option);
     }
   }

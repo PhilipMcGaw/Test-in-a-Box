@@ -18,7 +18,7 @@ A visual engineering test automation platform for electrical and environmental R
   </a>
 </p>
 
-> **Development status:** Test in a Box is currently **v0.1.0-alpha**. Blockly-generated procedures have successfully controlled a physical Thurlby Thandar QL355P, and the native Windows Seeit USBB relay driver has been bench tested on physical hardware. Version 0.1 work remains, including Markdown summaries, progress estimation and a complete multi-instrument validation procedure.
+> **Development status:** Test in a Box is currently **v0.1.0-alpha**. Blockly-generated procedures have successfully controlled a physical Thurlby Thandar QL355P, and the native Windows Seeit USBB relay driver has been bench tested on physical hardware. The current alpha writes run manifests and Markdown summaries. Version 0.1 work remains, including validation of the reporting workflow, progress estimation and a complete multi-instrument validation procedure.
 
 ## What is Test in a Box?
 
@@ -86,6 +86,7 @@ The repository currently includes:
 - DUT-to-position mapping;
 - per-DUT CSV logging;
 - run metadata containing hostname, logged-in user, OS version, Python version and instrument identity;
+- machine-readable run manifests and human-readable Markdown summaries, including software, configuration, mapping and procedure provenance;
 - instrument discovery for supported drivers;
 - mock PSU and relay drivers for development without physical hardware.
 
@@ -113,7 +114,7 @@ The agreed v0.1 scope also includes:
 - estimated finish time;
 - current DUT and current test step;
 - CSV result files;
-- a Markdown run summary;
+- validated acceptance of the Markdown run-summary workflow;
 - defined safe shutdown behaviour;
 - an end-to-end electrical or environmental validation test.
 

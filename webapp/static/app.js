@@ -91,6 +91,10 @@ const TOOLBOX = {
 };
 
 let workspace;
+let activeSequenceName = '';
+let sequenceDirty = false;
+let sequenceLoadInProgress = false;
+let saveAsRequested = false;
 
 async function loadDevices() {
   const res = await fetch('/api/devices');
@@ -358,9 +362,23 @@ function initWorkspace() {
     }
   }
 
-  workspace.addChangeListener(() => {
+  workspace.addChangeListener(event => {
+    if (event.isUiEvent) {
+      return;
+    }
+
     const state = Blockly.serialization.workspaces.save(workspace);
     safeStorage.set('tiab_workspace', JSON.stringify(state));
+
+    if (!sequenceLoadInProgress) {
+      sequenceDirty = true;
+      setSequenceStatus(
+        activeSequenceName
+          ? `${activeSequenceName} has unsaved changes.`
+          : 'Workspace has unsaved changes.',
+        'dirty'
+      );
+    }
   });
 
   installBlocklyKeyboardShortcuts();
@@ -546,34 +564,81 @@ async function syncStatus() {
 
 // ---- sequences (save/load workspaces to/from the server's sequences/ folder) ----
 
-async function refreshSequenceList() {
+function setSequenceStatus(message = '', state = '') {
+  const status = document.getElementById('sequence-status');
+  status.textContent = message;
+  status.className = state;
+}
+
+function sequenceNames() {
+  return Array.from(
+    document.getElementById('sequence-select').options,
+    option => option.value
+  ).filter(Boolean);
+}
+
+async function refreshSequenceList(selectedName = activeSequenceName) {
   const select = document.getElementById('sequence-select');
   try {
     const res = await fetch('/api/sequences');
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
     const names = await res.json();
-    select.innerHTML = names.length
-      ? names.map(n => `<option value="${n}">${n}</option>`).join('')
-      : '<option value="">(no saved sequences)</option>';
+    select.replaceChildren();
+
+    if (!names.length) {
+      const option = new Option('(no saved sequences)', '');
+      select.add(option);
+      return;
+    }
+
+    for (const name of names) {
+      select.add(new Option(name, name));
+    }
+
+    if (names.includes(selectedName)) {
+      select.value = selectedName;
+    }
   } catch (e) {
-    select.innerHTML = '<option value="">(could not load list)</option>';
+    select.replaceChildren(new Option('(could not load list)', ''));
+    setSequenceStatus('Could not refresh the saved sequence list.', 'error');
   }
 }
 
-async function saveSequence(saveAs = false) {
+function startSaveAs() {
   const nameInput = document.getElementById('sequence-name');
-  if (saveAs) {
-    nameInput.value = '';
-    nameInput.focus();
-    return;
-  }
-  const selectedName = document.getElementById('sequence-select').value;
-  const name = nameInput.value.trim() || selectedName;
+  saveAsRequested = true;
+  nameInput.value = '';
+  nameInput.focus();
+  setSequenceStatus('Enter a new sequence name, then save.');
+}
+
+async function saveSequence() {
+  const nameInput = document.getElementById('sequence-name');
+  const requestedName = nameInput.value.trim();
+  const name = requestedName || (saveAsRequested ? '' : activeSequenceName);
+
   if (!name) {
     alert('Enter a name for this sequence first.');
     return;
   }
+
+  const existingNames = sequenceNames();
+  const isDifferentSequence = activeSequenceName && name !== activeSequenceName;
+  if (
+    (saveAsRequested || isDifferentSequence) &&
+    existingNames.includes(name) &&
+    !confirm(`Replace the existing sequence “${name}”?`)
+  ) {
+    return;
+  }
+
   nameInput.value = name;
   const state = Blockly.serialization.workspaces.save(workspace);
+  setSequenceStatus(`Saving ${name}…`);
+
   try {
     const res = await fetch(`/api/sequences/${encodeURIComponent(name)}`, {
       method: 'POST',
@@ -585,11 +650,14 @@ async function saveSequence(saveAs = false) {
       alert(`Could not save: ${data.detail || 'unknown error'}`);
       return;
     }
-    nameInput.value = data.name || name;
-    await refreshSequenceList();
-    const select = document.getElementById('sequence-select');
-    select.value = nameInput.value;
+    activeSequenceName = data.name || name;
+    nameInput.value = activeSequenceName;
+    sequenceDirty = false;
+    saveAsRequested = false;
+    await refreshSequenceList(activeSequenceName);
+    setSequenceStatus(`Saved ${activeSequenceName}.`);
   } catch (e) {
+    setSequenceStatus('Sequence was not saved.', 'error');
     alert(`Could not save: ${e}`);
   }
 }
@@ -598,6 +666,22 @@ async function loadSequence() {
   const select = document.getElementById('sequence-select');
   const name = select.value;
   if (!name) return;
+
+  if (
+    sequenceDirty &&
+    !confirm(
+      'Load this sequence and discard the current unsaved workspace changes?'
+    )
+  ) {
+    return;
+  }
+
+  setSequenceStatus(`Loading ${name}…`);
+
+  const previousState = Blockly.serialization.workspaces.save(workspace);
+  const previousSequenceName = activeSequenceName;
+  const previousDirtyState = sequenceDirty;
+
   try {
     const res = await fetch(`/api/sequences/${encodeURIComponent(name)}`);
     const data = await res.json();
@@ -605,11 +689,35 @@ async function loadSequence() {
       alert(`Could not load: ${data.detail || 'unknown error'}`);
       return;
     }
+    sequenceLoadInProgress = true;
     workspace.clear();
     Blockly.serialization.workspaces.load(data, workspace);
+    safeStorage.set(
+      'tiab_workspace',
+      JSON.stringify(Blockly.serialization.workspaces.save(workspace))
+    );
+    activeSequenceName = name;
+    sequenceDirty = false;
+    saveAsRequested = false;
     document.getElementById('sequence-name').value = name;
+    setSequenceStatus(`Loaded ${name}.`);
   } catch (e) {
+    if (sequenceLoadInProgress) {
+      try {
+        workspace.clear();
+        Blockly.serialization.workspaces.load(previousState, workspace);
+        safeStorage.set('tiab_workspace', JSON.stringify(previousState));
+        activeSequenceName = previousSequenceName;
+        sequenceDirty = previousDirtyState;
+      } catch (restoreError) {
+        console.error('could not restore workspace after failed load', restoreError);
+      }
+    }
+
+    setSequenceStatus('Sequence was not loaded.', 'error');
     alert(`Could not load: ${e}`);
+  } finally {
+    sequenceLoadInProgress = false;
   }
 }
 
@@ -630,7 +738,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     await loadDuts();
   });
   document.getElementById('save-sequence-btn').addEventListener('click', saveSequence);
-  document.getElementById('save-sequence-as-btn').addEventListener('click', () => saveSequence(true));
+  document.getElementById('save-sequence-as-btn').addEventListener('click', startSaveAs);
   document.getElementById('load-sequence-btn').addEventListener('click', loadSequence);
   document.getElementById('sequence-name').addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {

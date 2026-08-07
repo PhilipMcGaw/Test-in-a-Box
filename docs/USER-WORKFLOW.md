@@ -152,10 +152,11 @@ literal values.
 Once the procedure has been completed:
 
 - Start the test.
-- Monitor progress.
-- Observe the current DUT.
-- Observe the current test step.
-- Check the estimated finish time.
+- Monitor the execution console and current run state.
+- Use Pause, Resume, Step and Stop where required.
+
+The complete progress display, current-DUT/current-step presentation and
+estimated finish time remain Version 0.1 work.
 
 Where operator interaction is required, Test in a Box pauses the procedure and
 requests the required input.
@@ -168,12 +169,15 @@ The current alpha records:
 
 - CSV measurement and event data;
 - separate result files per mapped DUT where practical.
+- run metadata containing host and instrument identity where available;
+- a machine-readable run manifest;
+- a human-readable Markdown summary.
 
-Version 0.1 is intended to add:
+Version 0.1 still requires validation and acceptance of:
 
-- structured run metadata;
-- automatic instrument identity recording;
-- a human-readable Markdown run summary.
+- the complete reporting workflow;
+- the remaining progress and execution-status experience;
+- a complete real multi-instrument engineering validation procedure.
 
 Some tests simply record engineering information.
 

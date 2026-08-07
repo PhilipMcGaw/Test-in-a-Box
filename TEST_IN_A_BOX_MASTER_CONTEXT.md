@@ -1,6 +1,6 @@
 # Test in a Box — Master Context
 
-> **Role of this file:** Compact, persistent project context for humans and AI assistants working on Test in a Box (TIAB).
+> **Role of this file:** Compact, persistent project context for humans and AI assistants working on Test in a Box (TiaB).
 >
 > **Verified against:** GitHub repository ZIP supplied by the user on 7 August 2026.
 >
@@ -14,15 +14,15 @@
 
 ## 1. One-paragraph project definition
 
-**Test in a Box (TIAB)** is an engineering validation platform for rapidly automating one-off and evolving electrical and environmental laboratory tests while retaining enough structure for those tests to be repeatable, traceable, maintainable and understandable.
+**Test in a Box (TiaB)** is an engineering validation platform for rapidly automating one-off and evolving electrical and environmental laboratory tests while retaining enough structure for those tests to be repeatable, traceable, maintainable and understandable.
 
-The initial target is R&D/engineering validation rather than production test. Engineers create procedures visually using Blockly; TIAB executes them through hardware-abstraction drivers, maps results to DUTs, and preserves measurement, instrument, configuration, procedure and software provenance.
+The initial target is R&D/engineering validation rather than production test. Engineers create procedures visually using Blockly; TiaB executes them through hardware-abstraction drivers, maps results to DUTs, and preserves measurement, instrument, configuration, procedure and software provenance.
 
 The project is intended to reduce bespoke test-control applications without trying to replace engineering judgement.
 
 ---
 
-## 2. The problem TIAB solves
+## 2. The problem TiaB solves
 
 Engineering validation benches commonly become combinations of:
 
@@ -35,7 +35,7 @@ Engineering validation benches commonly become combinations of:
 
 These can work, but become difficult to reproduce, maintain, extend and hand to another engineer.
 
-TIAB provides a common framework for:
+TiaB provides a common framework for:
 
 - repeatable automated procedures;
 - multiple DUTs using the same procedure;
@@ -68,9 +68,9 @@ Practical implications:
 
 ---
 
-## 4. What TIAB is — and is not
+## 4. What TiaB is — and is not
 
-### TIAB is
+### TiaB is
 
 - an engineering validation platform;
 - a laboratory test automation framework;
@@ -79,7 +79,7 @@ Practical implications:
 - a repeatability and traceability tool;
 - initially focused on electrical and environmental validation.
 
-### For v0.1, TIAB is deliberately not
+### For v0.1, TiaB is deliberately not
 
 - a replacement for engineering judgement;
 - a requirements-management tool;
@@ -337,7 +337,7 @@ Blockly must remain focused on engineering actions rather than raw serial/SCPI p
 
 ## 12. Generated-code execution and run control
 
-Blockly produces Python that executes against the TIAB runner rather than directly touching hardware.
+Blockly produces Python that executes against the TiaB runner rather than directly touching hardware.
 
 The execution source is instrumented with checkpoints before generated statements. This enables:
 
@@ -357,7 +357,7 @@ Progress reporting exists in the runner/instrumentation architecture, but the v0
 
 ## 13. DUT mapping
 
-TIAB supports mapping instrument positions/channels to DUT identities.
+TiaB supports mapping instrument positions/channels to DUT identities.
 
 This is fundamental to multi-DUT testing.
 
@@ -392,7 +392,7 @@ unit
 event_type
 ```
 
-TIAB also now implements run-level provenance.
+TiaB also now implements run-level provenance.
 
 A run can create:
 
@@ -405,7 +405,7 @@ run_<run_id>_summary.md
 The manifest records information including:
 
 - run ID/status/times/duration;
-- TIAB software identity;
+- TiaB software identity;
 - updater channel/ref/commit where available;
 - downloaded archive SHA-256 where managed by Updater V2;
 - Python version;
@@ -427,7 +427,7 @@ What remains is validation/completion of the desired end-to-end v0.1 reporting w
 
 ## 15. Instrument identity
 
-Where practical, TIAB records instrument identity automatically.
+Where practical, TiaB records instrument identity automatically.
 
 For SCPI equipment this is commonly `*IDN?`; other drivers can use the appropriate equivalent.
 
@@ -465,7 +465,7 @@ Principles:
 
 ## 17. Deployment philosophy
 
-TIAB is local-first.
+TiaB is local-first.
 
 The application is a local FastAPI web application, normally served on:
 
@@ -564,7 +564,7 @@ Important constraints:
 
 Some boards can expose identical factory serial numbers and `NOTHING` as DLL device path.
 
-TIAB can select the live enumeration node using selectors such as:
+TiaB can select the live enumeration node using selectors such as:
 
 ```text
 index:1
@@ -861,20 +861,20 @@ Unless explicitly changed by a recorded decision:
 13. **Do not silently swallow safety failures.**
 14. **Avoid premature cloud/database/plugin infrastructure.**
 15. **Engineering Tools must not clutter the normal test-authoring workflow.**
-16. **Do not turn TIAB into a general-purpose visual language.**
+16. **Do not turn TiaB into a general-purpose visual language.**
 17. **Prioritise the complete real validation milestone over feature accumulation.**
 
 ---
 
 ## 29. Terminology
 
-**TIAB** — Test in a Box.
+**TiaB** — Test in a Box.
 
 **DUT** — Device Under Test.
 
 **EUT** — Equipment Under Test.
 
-**Driver** — device-specific implementation behind the common TIAB hardware abstraction.
+**Driver** — device-specific implementation behind the common TiaB hardware abstraction.
 
 **Capability** — an engineering function exposed by a driver.
 
@@ -993,7 +993,7 @@ If this file is supplied to a fresh AI conversation, the working assumption shou
 ## 35. Author and project-update context
 
 The project author is **Philip McGaw**, who also writes the project updates on
-[philipmcgaw.com](https://philipmcgaw.com/). Future TIAB blog drafts should use
+[philipmcgaw.com](https://philipmcgaw.com/). Future TiaB blog drafts should use
 the established first-person engineering-progress voice used on the project
 pages and related technical posts.
 

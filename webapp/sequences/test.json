@@ -3,80 +3,70 @@
     "languageVersion": 0,
     "blocks": [
       {
-        "type": "variables_set",
-        "id": ",e9U8VbL9]?5X+L2e^`i",
-        "x": 197,
-        "y": -9,
+        "type": "hw_prompt",
+        "id": "-F1oxjVm:uuz]gi=/@=t",
+        "x": 198,
+        "y": -44,
         "fields": {
-          "VAR": {
-            "id": "Mg}Egp`ulOf[8wTG+|Fk"
-          }
-        },
-        "inputs": {
-          "VALUE": {
-            "block": {
-              "type": "math_number",
-              "id": ",!M;_M|cF%)pmwGBs1vB",
-              "fields": {
-                "NUM": 5
-              }
-            }
-          }
+          "LABEL": "Serial Number",
+          "DUT": "none"
         },
         "next": {
           "block": {
-            "type": "hw_psu_output",
-            "id": "uU:tD`0q[9NI+x`5(z+%",
+            "type": "variables_set",
+            "id": ",e9U8VbL9]?5X+L2e^`i",
             "fields": {
-              "POSITION": "Support Relays PSU|output1",
-              "STATE": "OFF"
+              "VAR": {
+                "id": "Mg}Egp`ulOf[8wTG+|Fk"
+              }
+            },
+            "inputs": {
+              "VALUE": {
+                "block": {
+                  "type": "math_number",
+                  "id": ",!M;_M|cF%)pmwGBs1vB",
+                  "fields": {
+                    "NUM": 5
+                  }
+                }
+              }
             },
             "next": {
               "block": {
                 "type": "hw_psu_output",
-                "id": "VRM`xC4975A7c8B`x[Nt",
+                "id": "uU:tD`0q[9NI+x`5(z+%",
                 "fields": {
-                  "POSITION": "Coil PSU 1|output1",
+                  "POSITION": "none|none",
                   "STATE": "OFF"
                 },
                 "next": {
                   "block": {
                     "type": "hw_psu_output",
-                    "id": "acOdPpM2bd!F_%H@C!]~",
+                    "id": "VRM`xC4975A7c8B`x[Nt",
                     "fields": {
-                      "POSITION": "Coil PSU 2|output1",
+                      "POSITION": "none|none",
                       "STATE": "OFF"
                     },
                     "next": {
                       "block": {
-                        "type": "hw_psu_set_voltage",
-                        "id": "a2d_I#y_8D),Da*R~NHw",
+                        "type": "hw_psu_output",
+                        "id": "acOdPpM2bd!F_%H@C!]~",
                         "fields": {
-                          "POSITION": "Support Relays PSU|v1"
-                        },
-                        "inputs": {
-                          "VALUE": {
-                            "block": {
-                              "type": "math_number",
-                              "id": "f[H_HR^yORwIN.2HL8T1",
-                              "fields": {
-                                "NUM": 12
-                              }
-                            }
-                          }
+                          "POSITION": "none|none",
+                          "STATE": "OFF"
                         },
                         "next": {
                           "block": {
                             "type": "hw_psu_set_voltage",
-                            "id": "QW^`ozJ[**!SWJ`wCC:]",
+                            "id": "a2d_I#y_8D),Da*R~NHw",
                             "fields": {
-                              "POSITION": "Coil PSU 1|v1"
+                              "POSITION": "none|none"
                             },
                             "inputs": {
                               "VALUE": {
                                 "block": {
                                   "type": "math_number",
-                                  "id": "y$h~@XbJf/{JF`2pmSxH",
+                                  "id": "f[H_HR^yORwIN.2HL8T1",
                                   "fields": {
                                     "NUM": 12
                                   }
@@ -86,15 +76,15 @@
                             "next": {
                               "block": {
                                 "type": "hw_psu_set_voltage",
-                                "id": "0/L:O:`q6pkSAlNE0*,t",
+                                "id": "QW^`ozJ[**!SWJ`wCC:]",
                                 "fields": {
-                                  "POSITION": "Coil PSU 2|v1"
+                                  "POSITION": "none|none"
                                 },
                                 "inputs": {
                                   "VALUE": {
                                     "block": {
                                       "type": "math_number",
-                                      "id": "^EXM8U01L3![}d#jT!v(",
+                                      "id": "y$h~@XbJf/{JF`2pmSxH",
                                       "fields": {
                                         "NUM": 12
                                       }
@@ -103,123 +93,143 @@
                                 },
                                 "next": {
                                   "block": {
-                                    "type": "hw_psu_output",
-                                    "id": "Fk^o^fpDfDP^1F9](wVj",
+                                    "type": "hw_psu_set_voltage",
+                                    "id": "0/L:O:`q6pkSAlNE0*,t",
                                     "fields": {
-                                      "POSITION": "Support Relays PSU|output1",
-                                      "STATE": "ON"
+                                      "POSITION": "none|none"
+                                    },
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "math_number",
+                                          "id": "^EXM8U01L3![}d#jT!v(",
+                                          "fields": {
+                                            "NUM": 12
+                                          }
+                                        }
+                                      }
                                     },
                                     "next": {
                                       "block": {
                                         "type": "hw_psu_output",
-                                        "id": "6X3$9!|qpjC`*EBQa%Q,",
+                                        "id": "Fk^o^fpDfDP^1F9](wVj",
                                         "fields": {
-                                          "POSITION": "Coil PSU 1|output1",
+                                          "POSITION": "none|none",
                                           "STATE": "ON"
                                         },
                                         "next": {
                                           "block": {
                                             "type": "hw_psu_output",
-                                            "id": "xy[m{7[!nj|=;-4Y@EJ0",
+                                            "id": "6X3$9!|qpjC`*EBQa%Q,",
                                             "fields": {
-                                              "POSITION": "Coil PSU 2|output1",
+                                              "POSITION": "none|none",
                                               "STATE": "ON"
                                             },
                                             "next": {
                                               "block": {
-                                                "type": "hw_wait",
-                                                "id": "dX8R7e5}jn2i(wSleMy1",
-                                                "inputs": {
-                                                  "SECONDS": {
-                                                    "block": {
-                                                      "type": "math_number",
-                                                      "id": ")@sTw:V4z/5T:F;bf={|",
-                                                      "fields": {
-                                                        "NUM": 5
-                                                      }
-                                                    }
-                                                  }
+                                                "type": "hw_psu_output",
+                                                "id": "xy[m{7[!nj|=;-4Y@EJ0",
+                                                "fields": {
+                                                  "POSITION": "none|none",
+                                                  "STATE": "ON"
                                                 },
                                                 "next": {
                                                   "block": {
-                                                    "type": "hw_relay_set",
-                                                    "id": "[!}Cc-j;?xBr7)?!9oCN",
-                                                    "fields": {
-                                                      "POSITION": "DUT set 1|relay1",
-                                                      "STATE": "ON"
+                                                    "type": "hw_wait",
+                                                    "id": "dX8R7e5}jn2i(wSleMy1",
+                                                    "inputs": {
+                                                      "SECONDS": {
+                                                        "block": {
+                                                          "type": "math_number",
+                                                          "id": ")@sTw:V4z/5T:F;bf={|",
+                                                          "fields": {
+                                                            "NUM": 5
+                                                          }
+                                                        }
+                                                      }
                                                     },
                                                     "next": {
                                                       "block": {
-                                                        "type": "hw_wait",
-                                                        "id": "^q|U!C8Xw]UC};[lgCL7",
-                                                        "inputs": {
-                                                          "SECONDS": {
-                                                            "block": {
-                                                              "type": "math_number",
-                                                              "id": "D4:hf.2^a%_/EuDOx9(P",
-                                                              "fields": {
-                                                                "NUM": 5
-                                                              }
-                                                            }
-                                                          }
+                                                        "type": "hw_relay_set",
+                                                        "id": "[!}Cc-j;?xBr7)?!9oCN",
+                                                        "fields": {
+                                                          "POSITION": "none|none",
+                                                          "STATE": "ON"
                                                         },
                                                         "next": {
                                                           "block": {
-                                                            "type": "hw_relay_set",
-                                                            "id": "F{CWzZWf(;wIvm8)9:98",
-                                                            "fields": {
-                                                              "POSITION": "DUT set 2|relay6",
-                                                              "STATE": "ON"
+                                                            "type": "hw_wait",
+                                                            "id": "^q|U!C8Xw]UC};[lgCL7",
+                                                            "inputs": {
+                                                              "SECONDS": {
+                                                                "block": {
+                                                                  "type": "math_number",
+                                                                  "id": "D4:hf.2^a%_/EuDOx9(P",
+                                                                  "fields": {
+                                                                    "NUM": 5
+                                                                  }
+                                                                }
+                                                              }
                                                             },
                                                             "next": {
                                                               "block": {
-                                                                "type": "hw_wait",
-                                                                "id": "fKBOu*.|cAi#o?![x_Vu",
-                                                                "inputs": {
-                                                                  "SECONDS": {
-                                                                    "block": {
-                                                                      "type": "variables_get",
-                                                                      "id": ";D)p@yuL}0enmV9LWPUI",
-                                                                      "fields": {
-                                                                        "VAR": {
-                                                                          "id": "Mg}Egp`ulOf[8wTG+|Fk"
-                                                                        }
-                                                                      }
-                                                                    }
-                                                                  }
+                                                                "type": "hw_relay_set",
+                                                                "id": "F{CWzZWf(;wIvm8)9:98",
+                                                                "fields": {
+                                                                  "POSITION": "none|none",
+                                                                  "STATE": "ON"
                                                                 },
                                                                 "next": {
                                                                   "block": {
-                                                                    "type": "hw_psu_output",
-                                                                    "id": "AV5+/h~Rm|ZH;-T}:H?/",
-                                                                    "fields": {
-                                                                      "POSITION": "Coil PSU 2|output1",
-                                                                      "STATE": "OFF"
+                                                                    "type": "hw_wait",
+                                                                    "id": "fKBOu*.|cAi#o?![x_Vu",
+                                                                    "inputs": {
+                                                                      "SECONDS": {
+                                                                        "block": {
+                                                                          "type": "variables_get",
+                                                                          "id": ";D)p@yuL}0enmV9LWPUI",
+                                                                          "fields": {
+                                                                            "VAR": {
+                                                                              "id": "Mg}Egp`ulOf[8wTG+|Fk"
+                                                                            }
+                                                                          }
+                                                                        }
+                                                                      }
                                                                     },
                                                                     "next": {
                                                                       "block": {
-                                                                        "type": "hw_psu_ramp_voltage",
-                                                                        "id": "J;2I)pNi9)tOX-3j!d.X",
+                                                                        "type": "hw_psu_output",
+                                                                        "id": "AV5+/h~Rm|ZH;-T}:H?/",
                                                                         "fields": {
-                                                                          "POSITION": "Coil PSU 1|v1",
-                                                                          "DWELL_UNIT": "S"
+                                                                          "POSITION": "none|none",
+                                                                          "STATE": "OFF"
                                                                         },
-                                                                        "inputs": {
-                                                                          "START": {
-                                                                            "block": {
-                                                                              "type": "math_number",
-                                                                              "id": "+4!0TA*]j;$cbEsfzP6/",
-                                                                              "fields": {
-                                                                                "NUM": 12
-                                                                              }
-                                                                            }
-                                                                          },
-                                                                          "END": {
-                                                                            "block": {
-                                                                              "type": "math_number",
-                                                                              "id": "gery6HRx7[2kV*LQ*?vk",
-                                                                              "fields": {
-                                                                                "NUM": 0
+                                                                        "next": {
+                                                                          "block": {
+                                                                            "type": "hw_psu_ramp_voltage",
+                                                                            "id": "J;2I)pNi9)tOX-3j!d.X",
+                                                                            "fields": {
+                                                                              "POSITION": "none|none",
+                                                                              "DWELL_UNIT": "S"
+                                                                            },
+                                                                            "inputs": {
+                                                                              "START": {
+                                                                                "block": {
+                                                                                  "type": "math_number",
+                                                                                  "id": "+4!0TA*]j;$cbEsfzP6/",
+                                                                                  "fields": {
+                                                                                    "NUM": 12
+                                                                                  }
+                                                                                }
+                                                                              },
+                                                                              "END": {
+                                                                                "block": {
+                                                                                  "type": "math_number",
+                                                                                  "id": "gery6HRx7[2kV*LQ*?vk",
+                                                                                  "fields": {
+                                                                                    "NUM": 0
+                                                                                  }
+                                                                                }
                                                                               }
                                                                             }
                                                                           }

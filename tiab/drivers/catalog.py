@@ -55,9 +55,9 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "fields": [
             {
                 "name": "serial_port",
-                "label": "COM Port",
+                "label": "Serial Port",
                 "type": "serial_port",
-                "default": "COM5",
+                "default": "",
             },
             {
                 "name": "num_channels",
@@ -69,7 +69,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "description": (
             "Aim-TTi bench power supplies using the manufacturer's serial remote "
             "command set. Intended for CPX, QL, PL, MX and related models over "
-            "USB virtual COM port or RS232, without requiring NI-VISA."
+            "USB virtual serial port or RS232, without requiring NI-VISA."
         ),
         "status": "bench_tested",
         "status_description": (
@@ -88,9 +88,9 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
     "fields": [
         {
             "name": "serial_port",
-            "label": "COM Port",
+            "label": "Serial Port",
             "type": "serial_port",
-            "default": "COM9",
+            "default": "",
         },
         {
             "name": "command_terminator",
@@ -113,7 +113,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
     ],
     "description": (
         "Native SCPI driver for the 2020 TFT generation of EA PS 2000 B "
-        "power supplies over the front USB virtual COM port."
+        "power supplies over the front USB virtual serial port."
     ),
     "status": "bench_tested",
     "status_description": (
@@ -134,9 +134,9 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "fields": [
             {
                 "name": "serial_port",
-                "label": "COM Port",
+                "label": "Serial Port",
                 "type": "serial_port",
-                "default": "COM5",
+                "default": "",
             },
             {
                 "name": "baudrate",
@@ -309,18 +309,18 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "fields": [
             {
                 "name": "serial_port",
-                "label": "COM Port",
+                "label": "Serial Port",
                 "type": "serial_port",
-                "default": "COM5",
+                "default": "",
             },
         ],
         "description": (
             "Eight-channel USB-RELAY08 controlled through a Prolific PL2303 "
-            "virtual serial COM port at 9600 baud."
+            "virtual serial port at 9600 baud."
         ),
         "setup_note": (
-            "Install the PL2303 driver if Windows does not create a COM port, "
-            "then select that COM port in Configure Devices."
+            "Install the PL2303 driver if the operating system does not "
+            "create a serial port, then select that port in Configure Devices."
         ),
         "product_url": (
             "https://seeit.fr/produits.php?produit_ref=USB-RELAY08"
@@ -359,7 +359,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "description": (
             "One, two, four or eight-channel USBB relay controlled directly "
             "through the vendor-supplied Windows usb_relay_device.dll. This "
-            "variant does not use a COM port."
+            "variant does not use a serial port."
         ),
         "setup_note": (
             "Place the vendor DLL in vendor/seeit, then use Scan for Devices "

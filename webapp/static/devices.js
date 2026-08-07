@@ -775,7 +775,7 @@ function renderSettings(card, typeInfo) {
             data-kwarg="${escapeHtml(field.name)}"
             data-serial-port-select="${escapeHtml(field.name)}">
             <option value="${escapeHtml(currentValue)}" selected>
-              ${escapeHtml(currentValue || 'Select a COM port')}
+              ${escapeHtml(currentValue || 'Select a serial port')}
             </option>
           </select>
         </label>
@@ -784,7 +784,7 @@ function renderSettings(card, typeInfo) {
             type="button"
             class="discover-btn"
             data-refresh-serial-field="${escapeHtml(field.name)}">
-            Refresh COM Ports
+            Refresh Serial Ports
           </button>
           <button
             type="button"
@@ -949,7 +949,7 @@ function populateSerialPortSelect(select, ports, currentValue = '') {
   if (!ports.length) {
     const option = document.createElement('option');
     option.value = '';
-    option.textContent = 'No COM ports found';
+    option.textContent = 'No serial ports found';
     select.appendChild(option);
     return;
   }
@@ -1062,7 +1062,7 @@ function wireCardEvents(element, card) {
         );
 
         button.disabled = true;
-        status.textContent = 'Reading Windows COM ports…';
+        status.textContent = 'Reading available serial ports…';
 
         try {
           const ports = await fetchSerialPorts();
@@ -1074,7 +1074,7 @@ function wireCardEvents(element, card) {
 
           if (!ports.length) {
             card.kwargs[fieldName] = '';
-            status.textContent = 'No COM ports are currently available.';
+            status.textContent = 'No serial ports are currently available.';
             return;
           }
 
@@ -1086,10 +1086,10 @@ function wireCardEvents(element, card) {
           }
 
           status.textContent =
-            `Found ${ports.length} COM port${ports.length === 1 ? '' : 's'}.`;
+            `Found ${ports.length} serial port${ports.length === 1 ? '' : 's'}.`;
         } catch (error) {
           status.textContent =
-            `COM port refresh failed: ${error.message || error}`;
+            `Serial-port refresh failed: ${error.message || error}`;
         } finally {
           button.disabled = false;
         }
@@ -1110,7 +1110,7 @@ function wireCardEvents(element, card) {
 
         button.disabled = true;
         status.textContent =
-          'Opening each COM port and requesting instrument identity…';
+          'Opening each serial port and requesting instrument identity…';
 
         try {
           const response = await fetch('/api/serial_ports/probe', {

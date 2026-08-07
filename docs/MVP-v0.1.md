@@ -18,9 +18,11 @@ capability is already complete.
 
 The current alpha has demonstrated Blockly control of a physical Thurlby
 Thandar QL355P, controls physical Seeit USBB relay hardware, records per-DUT
-CSV results and writes run metadata including instrument identity. Markdown
-run summaries, progress estimation and a complete multi-instrument validation
-procedure remain Version 0.1 work.
+CSV results and writes run metadata including instrument identity. It also
+writes a machine-readable run manifest and a human-readable Markdown summary.
+Validation and acceptance of the complete reporting workflow, progress
+estimation and a complete multi-instrument validation procedure remain Version
+0.1 work.
 
 # Success Criteria
 
@@ -84,7 +86,7 @@ without writing a custom Python application.
 - One result file per DUT.
 - Run metadata.
 - Instrument identity.
-- Markdown summary.
+- Markdown summary and run manifest.
 
 ---
 
@@ -170,7 +172,7 @@ Before Version 0.1 can be released, the following must be demonstrated:
 - [x] Test execution controls (Run, Pause, Resume, Step and Stop).
 - [ ] Progress display with estimated finish time.
 - [x] CSV result logging.
-- [ ] Markdown run summary.
+- [ ] Markdown run-summary workflow validated and accepted for v0.1.
 - [ ] Documentation reviewed and updated.
 
 Once all items have been completed, Version 0.1 may be tagged and released.

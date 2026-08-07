@@ -420,7 +420,7 @@ def _protocol_device_inventory() -> list[dict[str, Any]]:
 
 def _send_direct_serial(request: ProtocolSendRequest) -> str:
     if not request.serial_port:
-        raise ValueError("A COM port must be selected.")
+        raise ValueError("A serial port must be selected.")
 
     parity = request.parity.strip().upper()
     parity_map = {
@@ -499,7 +499,7 @@ def _send_direct_serial(request: ProtocolSendRequest) -> str:
 
 
 def _serial_port_inventory() -> list[dict[str, Any]]:
-    """Return currently enumerated serial ports with Windows metadata."""
+    """Return currently enumerated serial ports with available USB metadata."""
     result: list[dict[str, Any]] = []
 
     for port in sorted(list_ports.comports(), key=lambda item: item.device):
@@ -1587,7 +1587,15 @@ def api_prompt_response(req: PromptResponse) -> JSONResponse:
 
 @app.get("/api/sequences")
 def api_sequences_list() -> JSONResponse:
-    names = sorted(path.stem for path in SEQUENCES_DIR.glob("*.json"))
+    names = []
+    for path in SEQUENCES_DIR.glob("*.json"):
+        try:
+            names.append(_safe_sequence_name(path.stem))
+        except ValueError:
+            # Ignore files that cannot be addressed through the sequence API.
+            continue
+
+    names.sort(key=str.casefold)
     return JSONResponse(names)
 
 

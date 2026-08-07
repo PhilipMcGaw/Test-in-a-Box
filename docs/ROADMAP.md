@@ -13,11 +13,13 @@ The current alpha includes:
 - sequence save and load;
 - DUT-to-position mapping;
 - per-DUT CSV result logging;
+- machine-readable run manifests and human-readable Markdown summaries;
 - engineering examples;
 - bench-tested control of a physical Thurlby Thandar QL355P;
 - native Windows control of physical Seeit USBB relay hardware;
 - driver-level instrument discovery;
-- run metadata containing host, user, OS, Python and instrument identity.
+- run metadata containing host, user, OS, Python and instrument identity;
+- Protocol Explorer for connected instruments and direct serial ports.
 
 ## Remaining Version 0.1 work
 
@@ -97,7 +99,7 @@ commissioning. They should be available from a dedicated top-level
 test-builder workflow.
 
 #### Instrument Development
-- [ ] Protocol Explorer
+- [x] Protocol Explorer
 - [ ] Serial Terminal
 - [ ] Driver Tester
 - [ ] Instrument Identifier

@@ -2,8 +2,9 @@
 
 ## Introduction
 
-The Instrument Library provides the connection between an engineering test
-procedure and the physical laboratory equipment used to perform it.
+The Instrument Library work provides the foundation for connecting an
+engineering test procedure to the physical laboratory equipment used to
+perform it.
 
 A test procedure should describe **what** hardware is required rather than
 **which specific instrument** is connected.
@@ -17,8 +18,11 @@ For example, a procedure should request:
 
 rather than referencing a particular COM port or manufacturer.
 
-The Instrument Library maps those logical requirements to the instruments
-currently available in the laboratory.
+The intended Instrument Library workflow maps those logical requirements to
+the instruments currently available in the laboratory. The current alpha
+already provides reusable device configuration, discovery where supported and
+friendly device naming; completion of the logical-role workflow remains
+Version 0.1 work.
 
 ---
 
@@ -46,8 +50,10 @@ rewritten.
 
 A new instrument should normally only need to be configured once.
 
-After it has been added to the Instrument Library it can be reused by future
-projects.
+The intended Instrument Library workflow will allow a configured definition to
+be reused by future projects. The present alpha stores device configuration
+with the local application configuration; it does not yet provide the complete
+logical-role library workflow described here.
 
 This allows engineering procedures to remain independent of the physical test
 bench.
@@ -77,11 +83,11 @@ There are two common workflows.
 
 ## Existing Instrument Definition
 
-If the instrument already exists in the Instrument Library:
+If the instrument definition already exists in the current configuration:
 
 1. Select the required instrument.
 2. Configure the current communication settings.
-3. Assign the instrument to the required hardware role.
+3. Assign the instrument a clear engineering-facing name.
 4. Verify communication.
 5. Save the project configuration.
 
@@ -106,7 +112,7 @@ Future projects can then reuse the saved definition.
 
 # Hardware Roles
 
-The Blockly procedure should reference logical roles.
+The target architecture is for Blockly procedures to reference logical roles.
 
 Typical examples include:
 
@@ -117,8 +123,9 @@ Typical examples include:
 - Data Acquisition
 - Digital Multimeter
 
-The engineer assigns the available laboratory equipment to those roles before
-running the test.
+The engineer should currently configure the available laboratory equipment and
+use clear device names in the procedure. Mapping procedures directly to
+logical roles remains Version 0.1 work.
 
 ---
 
