@@ -92,8 +92,8 @@ For each instrument:
 - Confirm operation using the mimic controls.
 
 Where available, drivers may use identity queries such as `*IDN?` to verify
-communication. Automatic recording of instrument identity in run results is a
-planned Version 0.1 capability.
+communication. Instrument identity is recorded in run metadata and provenance
+reports when the driver exposes it.
 
 ---
 

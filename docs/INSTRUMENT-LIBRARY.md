@@ -242,8 +242,8 @@ Bench-tested operations currently include:
 - output disable;
 - Blockly-generated timed execution.
 
-The identity response is used by the driver during connection. Automatic
-recording of that identity in run results remains planned Version 0.1 work.
+The identity response is used by the driver during connection and is recorded
+in run metadata and provenance reports when available.
 
 ---
 

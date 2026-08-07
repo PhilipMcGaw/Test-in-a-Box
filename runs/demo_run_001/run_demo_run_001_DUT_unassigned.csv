@@ -1,0 +1,9 @@
+timestamp,device_id,position,channel,value,unit,event_type
+2026-08-07T10:39:48.522436+00:00,psu1,output,output,True,,state
+2026-08-07T10:39:48.574051+00:00,psu1,output,output,True,,state
+2026-08-07T10:39:48.625059+00:00,psu1,output,output,True,,state
+2026-08-07T10:39:48.675625+00:00,psu1,output,output,False,,state
+2026-08-07T10:39:48.676561+00:00,psu2,output,output,True,,state
+2026-08-07T10:39:48.726989+00:00,psu2,output,output,True,,state
+2026-08-07T10:39:48.777718+00:00,psu2,output,output,True,,state
+2026-08-07T10:39:48.828182+00:00,psu2,output,output,False,,state

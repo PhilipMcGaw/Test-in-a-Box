@@ -143,9 +143,8 @@ A typical execution flow is:
 
 # Results
 
-The current implementation records CSV data.
-
-Version 0.1 will additionally generate a Markdown summary describing:
+The current implementation records CSV data and generates a machine-readable
+run manifest plus a Markdown summary. The reports describe:
 
 - Project.
 - DUT.
@@ -153,6 +152,11 @@ Version 0.1 will additionally generate a Markdown summary describing:
 - Instrument identity.
 - Duration.
 - Result files.
+
+Run reports also include hashes for the configuration, DUT mapping and
+generated procedure, together with software and captured instrument identity
+where available. Completion of the full v0.1 reporting workflow remains a
+validation/release task, but the basic report mechanism is implemented.
 
 ---
 

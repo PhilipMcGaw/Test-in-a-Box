@@ -13,8 +13,9 @@ Turn mock output off
 ```
 
 It proves that Blockly generates a runnable procedure, the runner executes it
-and CSV output is written. The planned progress display and Markdown summary
-are not yet complete.
+and CSV output is written. Runs also produce a manifest and Markdown summary;
+the richer progress display and estimated-finish-time experience remain v0.1
+completion work.
 
 ## PSU-only real-hardware example
 
