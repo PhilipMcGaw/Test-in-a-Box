@@ -245,3 +245,52 @@ support.
 - ✅ Physical SB/MU verification after first enable
 - ✅ Second `SB,R` only used as fallback
 - ⬜ Re-run smoke and full validation on bench hardware
+
+
+
+
+
+## Next Development Task — LabJack Integration
+
+**Planned start:** Week commencing 10 August 2026
+
+Add LabJack hardware support to TiaB.
+
+### Hardware
+
+* LabJack T7
+* LabJack U3-HV
+
+### API / DLL dependencies
+
+**T7 — LJM API**
+
+* `LabJack.LJM.dll`
+* `LabJackM.dll`
+* `LabJackWUSB.dll`
+
+**U3-HV — UD API**
+
+* `LJUDDotNet.dll`
+* `LabJackUD.dll`
+
+### Approach
+
+Implement LabJack support using the existing TiaB driver/plugin architecture, following the same general DLL-based deployment approach already used for the SEEIT relay hardware.
+
+Initially, do **not** modify or implement anything. First collect and verify the required LabJack DLLs and dependencies.
+
+### Intended outcome
+
+Create a TiaB LabJack driver abstraction capable of supporting both the T7 and U3-HV while presenting a consistent interface to test sequences.
+
+Potential functionality:
+
+* Digital inputs/outputs
+* Analogue inputs
+* Analogue outputs where supported
+* Counters
+* PWM
+* Device identification/connection management
+
+**Status:** Planned — do not start implementation until next development session.
