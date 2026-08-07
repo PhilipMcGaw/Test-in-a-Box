@@ -16,6 +16,7 @@ work without a model-specific Blockly implementation.
 from __future__ import annotations
 
 import contextlib
+from pathlib import Path
 import re
 import threading
 import time
@@ -69,6 +70,8 @@ class LabDch30665Driver(Driver):
         output_verify_timeout: float = 4.0,
         output_verify_interval: float = 0.25,
         output_verify_ratio: float = 0.8,
+        enable_trace: bool = True,
+        enable_trace_path: str = "logs/labdch_trace.log",
     ) -> None:
         super().__init__(device_id, on_event)
 
@@ -107,6 +110,10 @@ class LabDch30665Driver(Driver):
             1.0,
             max(0.1, float(output_verify_ratio)),
         )
+        self._enable_trace = bool(enable_trace)
+        self._enable_trace_path = str(enable_trace_path)
+        self._enable_trace_started = 0.0
+        self._enable_trace_previous = 0.0
 
         self._port = None
         self._io_lock = threading.RLock()
@@ -432,61 +439,116 @@ class LabDch30665Driver(Driver):
 
     def _enable_output_stage(self) -> None:
         """
-        Energise the physical output and verify measured voltage over time.
-
-        Bench testing showed that SB can report SB,R before the power stage has
-        fully energised. After each SB,R the driver therefore polls MU until
-        the output reaches a configurable fraction of the programmed voltage.
+        Energise the physical output and emit a high-resolution diagnostic trace.
         """
-        self._ensure_ui_mode()
+        self._start_enable_trace()
 
-        target_voltage = _parse_numeric(
-            self._query_raw("UA"),
-            "UA",
-            "V",
-        )
+        try:
+            self._ensure_ui_mode()
 
-        self._write_raw("SB,S")
-        self._wait_seconds(self._output_standby_delay)
+            target_voltage = _parse_numeric(
+                self._query_raw("UA"),
+                "UA",
+                "V",
+            )
+            self._trace_enable_event(
+                "INFO",
+                f"target_voltage={target_voltage:g} V",
+            )
 
-        measured_voltage = 0.0
-        state_enabled = False
+            self._write_raw("SB,S")
+            self._trace_enable_event(
+                "WAIT",
+                f"standby dwell {self._output_standby_delay:.3f} s",
+            )
+            self._wait_seconds(self._output_standby_delay)
 
-        for _attempt in range(self._output_enable_attempts):
-            self._write_raw("SB,R")
-            self._wait_seconds(self._output_settle_delay)
+            measured_voltage = 0.0
+            state_enabled = False
 
-            deadline = time.monotonic() + self._output_verify_timeout
-
-            while True:
-                state_enabled = _parse_output_state(
-                    self._query_raw("SB")
+            for attempt in range(1, self._output_enable_attempts + 1):
+                self._trace_enable_event(
+                    "INFO",
+                    f"enable attempt {attempt}/{self._output_enable_attempts}",
                 )
-                measured_voltage = _parse_numeric(
-                    self._query_raw("MU"),
-                    "MU",
-                    "V",
+
+                self._write_raw("SB,R")
+                self._trace_enable_event(
+                    "WAIT",
+                    f"initial settle {self._output_settle_delay:.3f} s",
                 )
+                self._wait_seconds(self._output_settle_delay)
 
-                if self._output_is_energised(
-                    target_voltage,
-                    measured_voltage,
-                    state_enabled,
-                ):
-                    return
+                deadline = time.monotonic() + self._output_verify_timeout
+                poll_number = 0
 
-                if time.monotonic() >= deadline:
-                    break
+                while True:
+                    poll_number += 1
+                    state_enabled = _parse_output_state(
+                        self._query_raw("SB")
+                    )
+                    measured_voltage = _parse_numeric(
+                        self._query_raw("MU"),
+                        "MU",
+                        "V",
+                    )
 
-                self._wait_seconds(self._output_verify_interval)
+                    self._trace_enable_event(
+                        "STATE",
+                        (
+                            f"poll={poll_number} "
+                            f"SB={'R' if state_enabled else 'S'} "
+                            f"MU={measured_voltage:g} V"
+                        ),
+                    )
 
-        raise RuntimeError(
-            f"{self.device_id}: output-enable sequence completed but the "
-            f"power stage did not energise; target={target_voltage:g} V, "
-            f"measured={measured_voltage:g} V, SB="
-            f"{'R' if state_enabled else 'S'}"
-        )
+                    if self._output_is_energised(
+                        target_voltage,
+                        measured_voltage,
+                        state_enabled,
+                    ):
+                        self._stop_enable_trace(
+                            (
+                                f"success target={target_voltage:g} V "
+                                f"measured={measured_voltage:g} V "
+                                f"SB={'R' if state_enabled else 'S'}"
+                            )
+                        )
+                        return
 
+                    if time.monotonic() >= deadline:
+                        break
+
+                    self._trace_enable_event(
+                        "WAIT",
+                        (
+                            f"verify poll interval "
+                            f"{self._output_verify_interval:.3f} s"
+                        ),
+                    )
+                    self._wait_seconds(self._output_verify_interval)
+
+            message = (
+                f"{self.device_id}: output-enable sequence completed but the "
+                f"power stage did not energise; target={target_voltage:g} V, "
+                f"measured={measured_voltage:g} V, SB="
+                f"{'R' if state_enabled else 'S'}"
+            )
+            self._stop_enable_trace(
+                (
+                    f"failure target={target_voltage:g} V "
+                    f"measured={measured_voltage:g} V "
+                    f"SB={'R' if state_enabled else 'S'}"
+                )
+            )
+            raise RuntimeError(message)
+
+        except Exception as exc:
+            if self._enable_trace_started > 0:
+                self._stop_enable_trace(
+                    f"exception {type(exc).__name__}: {exc}"
+                )
+            raise
 
     def _output_is_energised(
         self,
@@ -571,6 +633,70 @@ class LabDch30665Driver(Driver):
             f"[LAB-DCH:{self.device_id}] {direction}: {payload}",
             flush=True,
         )
+
+        if self._enable_trace_started > 0:
+            self._trace_enable_event(direction, payload)
+
+    def _trace_enable_event(self, direction: str, payload: str) -> None:
+        if not self._enable_trace:
+            return
+
+        now = time.monotonic()
+        elapsed_ms = int((now - self._enable_trace_started) * 1000)
+        delta_ms = int((now - self._enable_trace_previous) * 1000)
+        self._enable_trace_previous = now
+
+        line = (
+            f"+{elapsed_ms:05d} ms "
+            f"(+{delta_ms:04d}) "
+            f"{direction}: {payload}"
+        )
+
+        print(
+            f"[LAB-DCH-ENABLE:{self.device_id}] {line}",
+            flush=True,
+        )
+
+        try:
+            path = Path(self._enable_trace_path)
+            if not path.is_absolute():
+                path = Path.cwd() / path
+            path.parent.mkdir(parents=True, exist_ok=True)
+
+            with path.open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(
+                    f"{time.strftime('%Y-%m-%d %H:%M:%S')} "
+                    f"{self.device_id} {line}\n"
+                )
+        except Exception as exc:
+            print(
+                f"[LAB-DCH-ENABLE:{self.device_id}] "
+                f"trace-file write failed: {exc}",
+                flush=True,
+            )
+
+    def _start_enable_trace(self) -> None:
+        if not self._enable_trace:
+            self._enable_trace_started = 0.0
+            self._enable_trace_previous = 0.0
+            return
+
+        now = time.monotonic()
+        self._enable_trace_started = now
+        self._enable_trace_previous = now
+
+        self._trace_enable_event(
+            "BEGIN",
+            "output enable sequence",
+        )
+
+    def _stop_enable_trace(self, outcome: str) -> None:
+        if self._enable_trace_started <= 0:
+            return
+
+        self._trace_enable_event("END", outcome)
+        self._enable_trace_started = 0.0
+        self._enable_trace_previous = 0.0
 
     def _write_raw(self, command: str) -> None:
         with self._io_lock:

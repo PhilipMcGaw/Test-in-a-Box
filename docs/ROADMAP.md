@@ -229,3 +229,10 @@ support.
 - ✅ 5 second discharge timeout
 - ✅ 0.3 V pass threshold
 - ⬜ Re-run LAB-DCH smoke and full validation procedures
+
+## LAB-DCH trace diagnostics
+
+- ✅ High-resolution output-enable timing trace
+- ✅ Persistent `logs/labdch_trace.log`
+- ✅ TX/RX, waits, polling and measured-state capture
+- ⬜ Compare smoke-test trace against manual Protocol Explorer sequence
