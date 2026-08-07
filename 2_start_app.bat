@@ -34,8 +34,18 @@ echo Keep this window open while you're using the app.
 echo Close this window to stop the app.
 echo.
 
-start "" http://127.0.0.1:8765
+REM browser launch deferred
 
+start "" "%PYTHON%" -m webapp.server
+
+echo Waiting for server...
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "$d=(Get-Date).AddSeconds(30);while((Get-Date)-lt $d){try{$r=Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/api/version -TimeoutSec 2;if($r.StatusCode -eq 200){exit 0}}catch{};Start-Sleep -Milliseconds 250};exit 1"
+if errorlevel 1 (
+ echo ERROR: Server did not become ready.
+) else (
+ start "" http://127.0.0.1:8765
+)
+
 "%PYTHON%" -m webapp.server
 
 
