@@ -235,6 +235,12 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
                 "default": 0.8,
             },
             {
+                "name": "output_second_enable_delay",
+                "label": "Delay Between Enable Commands (s)",
+                "type": "number",
+                "default": 1.0,
+            },
+            {
                 "name": "enable_trace",
                 "label": "Trace Output Enable Sequence",
                 "type": "boolean",
