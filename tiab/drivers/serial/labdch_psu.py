@@ -30,6 +30,7 @@ from ..base import (
     PositionKind,
 )
 from ..registry import register_driver
+from .common import decode_terminator
 
 try:
     import serial
@@ -827,7 +828,7 @@ def _decode_terminator(value: str) -> bytes:
             "command_terminator must be CR, LF, CRLF, \\\\r, \\\\n or \\\\r\\\\n"
         )
 
-    return decoded.encode("ascii")
+    return decode_terminator(decoded)
 
 
 def _non_negative(value: Any, name: str) -> float:

@@ -35,3 +35,15 @@ timestamp,device_id,position,channel,value,unit,event_type
 2026-08-07T10:54:11.045307+00:00,psu1,voltage,voltage,11.01442183034452,V,measurement
 2026-08-07T10:54:11.045449+00:00,psu1,voltage,voltage,PASS: psu1 voltage within tolerance at 11.0V (measured 11.014V),,assert
 2026-08-07T10:54:11.045512+00:00,relay1,relay1,relay1,False,,state
+2026-08-07T10:56:19.827158+00:00,relay1,relay1,relay1,True,,state
+2026-08-07T10:56:19.827572+00:00,relay1,relay1,relay1,load switched on for psu1,,log
+2026-08-07T10:56:19.827959+00:00,psu1,voltage,voltage,5.0,V,state
+2026-08-07T10:56:19.878365+00:00,psu1,voltage,voltage,5.004392205522269,V,measurement
+2026-08-07T10:56:19.878506+00:00,psu1,voltage,voltage,PASS: psu1 voltage within tolerance at 5.0V (measured 5.004V),,assert
+2026-08-07T10:56:19.878574+00:00,psu1,voltage,voltage,8.0,V,state
+2026-08-07T10:56:19.929099+00:00,psu1,voltage,voltage,8.017193145666505,V,measurement
+2026-08-07T10:56:19.929248+00:00,psu1,voltage,voltage,PASS: psu1 voltage within tolerance at 8.0V (measured 8.017V),,assert
+2026-08-07T10:56:19.929309+00:00,psu1,voltage,voltage,11.0,V,state
+2026-08-07T10:56:19.979936+00:00,psu1,voltage,voltage,10.998458788308104,V,measurement
+2026-08-07T10:56:19.980120+00:00,psu1,voltage,voltage,PASS: psu1 voltage within tolerance at 11.0V (measured 10.998V),,assert
+2026-08-07T10:56:19.980194+00:00,relay1,relay1,relay1,False,,state

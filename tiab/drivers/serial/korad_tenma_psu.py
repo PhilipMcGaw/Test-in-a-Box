@@ -37,16 +37,12 @@ from typing import Any
 
 from ..base import CapabilityDescriptor, Driver, Position, PositionKind
 from ..registry import register_driver
+from .common import decode_terminator
 
 try:
     import serial
 except ImportError:  # pragma: no cover
     serial = None
-
-
-def _decode_terminator(value: str) -> bytes:
-    """Convert configuration text such as ``\\r\\n`` into bytes."""
-    return value.encode("utf-8").decode("unicode_escape").encode("ascii")
 
 
 def _parse_idn(response: str) -> dict[str, str]:
@@ -92,8 +88,8 @@ class KoradTenmaPsuDriver(Driver):
         self._port_name = serial_port
         self._baudrate = int(baudrate)
         self._timeout = float(timeout)
-        self._command_terminator = _decode_terminator(command_terminator)
-        self._reply_terminator = _decode_terminator(reply_terminator)
+        self._command_terminator = decode_terminator(command_terminator)
+        self._reply_terminator = decode_terminator(reply_terminator)
         self._model_hint = model_hint.strip()
         self._max_voltage = (
             float(max_voltage) if max_voltage is not None else None

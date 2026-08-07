@@ -29,6 +29,7 @@ from typing import Any
 
 from ..base import CapabilityDescriptor, Driver, Position, PositionKind
 from ..registry import register_driver
+from .common import decode_terminator
 
 try:
     import serial
@@ -89,12 +90,8 @@ class EaPs2000bDriver(Driver):
 
         self._port_name = serial_port
         self._timeout = float(timeout)
-        self._command_terminator = command_terminator.encode(
-            "utf-8"
-        ).decode("unicode_escape").encode("ascii")
-        self._reply_terminator = reply_terminator.encode(
-            "utf-8"
-        ).decode("unicode_escape").encode("ascii")
+        self._command_terminator = decode_terminator(command_terminator)
+        self._reply_terminator = decode_terminator(reply_terminator)
         self._minimum_interval = max(0.05, float(minimum_interval))
         self._leave_remote_on_close = bool(leave_remote_on_close)
 
