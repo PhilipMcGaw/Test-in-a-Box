@@ -1,0 +1,5 @@
+LabJackUD.dll is UD library for U3, U6 and UE9
+Labjack.LJM.dll is LabJack's .NET wrapper around the LJM library.
+LabJackM.dll is LJM native library T4, T7, T8, Digit
+LabJackWUSB.dll is USB support Depends on library/device
+LJUDDotNet.dll is UD library for U3, U6 and UE9
