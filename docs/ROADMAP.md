@@ -214,10 +214,10 @@ support.
 - ✅ Voltage sweep and repeated output-cycle regression checks
 - ⬜ LAB-DCH current-limit validation with a suitable electronic load
 
-## LAB-DCH output-enable v2
+## LAB-DCH output-enable v3
 
-- ✅ Physical `MU` verification for LAB-DCH output enable
-- ✅ Adaptive repeated `SB,R` attempts
-- ✅ UI mode changed only when required
-- ✅ Correct OVP/current logging in validation workspace
-- ⬜ Re-run smoke and full validation procedures on physical hardware
+- ✅ Poll physical `MU` after `SB,R`
+- ✅ Configurable verification timeout and interval
+- ✅ Configurable target-voltage ratio
+- ✅ Retry enable only after polling window expires
+- ⬜ Re-run LAB-DCH smoke and full validation procedures

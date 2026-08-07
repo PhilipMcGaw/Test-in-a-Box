@@ -216,6 +216,24 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
                 "type": "boolean",
                 "default": True,
             },
+            {
+                "name": "output_verify_timeout",
+                "label": "Output Verify Timeout (s)",
+                "type": "number",
+                "default": 4.0,
+            },
+            {
+                "name": "output_verify_interval",
+                "label": "Output Verify Poll Interval (s)",
+                "type": "number",
+                "default": 0.25,
+            },
+            {
+                "name": "output_verify_ratio",
+                "label": "Output Verify Target Ratio",
+                "type": "number",
+                "default": 0.8,
+            },
         ],
         "description": (
             "LAB-DCH 30-665 programmable DC power supply over RS232. "

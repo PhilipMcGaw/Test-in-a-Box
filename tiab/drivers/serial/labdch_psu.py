@@ -66,6 +66,9 @@ class LabDch30665Driver(Driver):
         output_settle_delay: float = 1.0,
         output_enable_attempts: int = 2,
         verify_output_voltage: bool = True,
+        output_verify_timeout: float = 4.0,
+        output_verify_interval: float = 0.25,
+        output_verify_ratio: float = 0.8,
     ) -> None:
         super().__init__(device_id, on_event)
 
@@ -92,6 +95,18 @@ class LabDch30665Driver(Driver):
             int(output_enable_attempts),
         )
         self._verify_output_voltage = bool(verify_output_voltage)
+        self._output_verify_timeout = max(
+            0.1,
+            float(output_verify_timeout),
+        )
+        self._output_verify_interval = max(
+            0.05,
+            float(output_verify_interval),
+        )
+        self._output_verify_ratio = min(
+            1.0,
+            max(0.1, float(output_verify_ratio)),
+        )
 
         self._port = None
         self._io_lock = threading.RLock()
@@ -417,11 +432,11 @@ class LabDch30665Driver(Driver):
 
     def _enable_output_stage(self) -> None:
         """
-        Energise the physical output and verify measured voltage.
+        Energise the physical output and verify measured voltage over time.
 
-        On the bench-tested firmware, SB can report SB,R before the power stage
-        has energised. A standby dwell followed by one or more SB,R commands is
-        therefore verified against both SB and MU.
+        Bench testing showed that SB can report SB,R before the power stage has
+        fully energised. After each SB,R the driver therefore polls MU until
+        the output reaches a configurable fraction of the programmed voltage.
         """
         self._ensure_ui_mode()
 
@@ -441,19 +456,29 @@ class LabDch30665Driver(Driver):
             self._write_raw("SB,R")
             self._wait_seconds(self._output_settle_delay)
 
-            state_enabled = _parse_output_state(self._query_raw("SB"))
-            measured_voltage = _parse_numeric(
-                self._query_raw("MU"),
-                "MU",
-                "V",
-            )
+            deadline = time.monotonic() + self._output_verify_timeout
 
-            if self._output_is_energised(
-                target_voltage,
-                measured_voltage,
-                state_enabled,
-            ):
-                return
+            while True:
+                state_enabled = _parse_output_state(
+                    self._query_raw("SB")
+                )
+                measured_voltage = _parse_numeric(
+                    self._query_raw("MU"),
+                    "MU",
+                    "V",
+                )
+
+                if self._output_is_energised(
+                    target_voltage,
+                    measured_voltage,
+                    state_enabled,
+                ):
+                    return
+
+                if time.monotonic() >= deadline:
+                    break
+
+                self._wait_seconds(self._output_verify_interval)
 
         raise RuntimeError(
             f"{self.device_id}: output-enable sequence completed but the "
@@ -461,6 +486,7 @@ class LabDch30665Driver(Driver):
             f"measured={measured_voltage:g} V, SB="
             f"{'R' if state_enabled else 'S'}"
         )
+
 
     def _output_is_energised(
         self,
@@ -479,7 +505,10 @@ class LabDch30665Driver(Driver):
         if abs(target_voltage) < 0.05:
             return state_enabled
 
-        minimum_expected = max(0.05, abs(target_voltage) * 0.5)
+        minimum_expected = max(
+            0.05,
+            abs(target_voltage) * self._output_verify_ratio,
+        )
         return abs(measured_voltage) >= minimum_expected
 
     # ------------------------------------------------------------------
