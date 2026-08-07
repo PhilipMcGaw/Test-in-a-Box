@@ -22,7 +22,12 @@ from ..drivers.base import Driver, LogEvent
 from ..drivers.registry import create_driver
 from .csv_logger import CsvRunLogger
 from .mapping import DutMapping
-from .provenance import collect_software_identity, write_run_reports
+from .provenance import (
+    collect_software_identity,
+    sha256_json,
+    sha256_text,
+    write_run_reports,
+)
 
 
 class AssertionFailure(Exception):
@@ -195,18 +200,9 @@ class TestRunner:
             "tiab.commit": software["commit"],
             "tiab.archive_sha256": software["archive_sha256"],
             "tiab.updater_version": software["updater_version"],
-            "configuration.sha256": __import__(
-                "tiab.run.provenance",
-                fromlist=["sha256_json"],
-            ).sha256_json(configuration),
-            "dut_mapping.sha256": __import__(
-                "tiab.run.provenance",
-                fromlist=["sha256_json"],
-            ).sha256_json(mapping_snapshot),
-            "procedure.sha256": __import__(
-                "tiab.run.provenance",
-                fromlist=["sha256_text"],
-            ).sha256_text(generated_code),
+            "configuration.sha256": sha256_json(configuration),
+            "dut_mapping.sha256": sha256_json(mapping_snapshot),
+            "procedure.sha256": sha256_text(generated_code),
         }
         self.logger.record_run_metadata_many(metadata)
 
