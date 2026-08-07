@@ -413,22 +413,7 @@ INSTRUMENT_LIBRARY: Final[dict[str, dict]] = {
         "instrument_category": "Data Acquisition",
         "category": "daq",
         "default_role": "Data Acquisition",
-        "fields": [
-            {
-                "name": "model",
-                "label": "Pico model",
-                "type": "select",
-                "options": ["auto", "adc20", "adc24"],
-                "default": "auto",
-            },
-            {
-                "name": "num_channels",
-                "label": "Channels",
-                "type": "number",
-                "default": 8,
-                "help": "Use 8 for ADC-20 or 16 for ADC-24.",
-            },
-        ],
+        "fields": [],
         "description": (
             "Pico Technology ADC-20 and ADC-24 high-resolution data loggers "
             "using the official PicoSDK PicoHRDL wrapper. ADC-24 exposes four "

@@ -8,7 +8,9 @@ The driver type is:
 pico_adc
 ```
 
-Select the model explicitly with `adc20` or `adc24`.
+The driver automatically identifies the connected unit as an ADC-20 or
+ADC-24 and selects the appropriate channel layout. Existing configurations
+may still provide `model` and `num_channels` explicitly for compatibility.
 
 When a unit is connected, the driver captures the Pico batch/serial identity.
 That identity is written to run metadata and the run manifest, allowing
