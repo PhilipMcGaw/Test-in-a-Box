@@ -574,17 +574,11 @@ async function saveSequence(saveAs = false) {
   }
   nameInput.value = name;
   const state = Blockly.serialization.workspaces.save(workspace);
-  let previewPng = null;
-  try {
-    previewPng = await workspacePreviewPng();
-  } catch (error) {
-    console.warn('Could not generate sequence preview:', error);
-  }
   try {
     const res = await fetch(`/api/sequences/${encodeURIComponent(name)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ workspace: state, preview_png: previewPng }),
+      body: JSON.stringify({ workspace: state }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -598,50 +592,6 @@ async function saveSequence(saveAs = false) {
   } catch (e) {
     alert(`Could not save: ${e}`);
   }
-}
-
-function workspacePreviewPng() {
-  return new Promise((resolve) => {
-    let settled = false;
-    const finish = (value) => {
-      if (settled) return;
-      settled = true;
-      resolve(value);
-    };
-    const timeout = setTimeout(() => finish(null), 1000);
-    if (!workspace || !workspace.getCanvas) {
-      clearTimeout(timeout);
-      finish(null);
-      return;
-    }
-    const canvas = workspace.getCanvas();
-    const box = canvas.getBBox();
-    const padding = 24;
-    const width = Math.max(320, Math.ceil(box.width + padding * 2));
-    const height = Math.max(180, Math.ceil(box.height + padding * 2));
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    svg.setAttribute('width', width);
-    svg.setAttribute('height', height);
-    svg.setAttribute('viewBox', `${box.x - padding} ${box.y - padding} ${width} ${height}`);
-    svg.style.background = '#1f2933';
-    svg.appendChild(canvas.cloneNode(true));
-    const image = new Image();
-    image.onload = () => {
-      const output = document.createElement('canvas');
-      output.width = width;
-      output.height = height;
-      const context = output.getContext('2d');
-      context.drawImage(image, 0, 0);
-      clearTimeout(timeout);
-      finish(output.toDataURL('image/png'));
-    };
-    image.onerror = () => {
-      clearTimeout(timeout);
-      finish(null);
-    };
-    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`;
-  });
 }
 
 async function loadSequence() {
